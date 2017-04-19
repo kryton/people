@@ -1,0 +1,35 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import offline.Tables.EmprelationsRow
+@import people.EmpRelationsRowUtils._
+@(emp:EmprelationsRow)(implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: RequestHeader,  ldap: util.LDAP )
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>
+            <a href="@routes.PersonController.id(emp.login)"><img class=" profile_listing_pic img-circle" src="@routes.HeadshotController.headShot(emp.login)"></a>
+            <a href="@routes.PersonController.id(emp.login)">@emp.fullName</a></h4>
+    </div>
+    <div class="panel-body">
+        <h5>@emp.position</h5>
+        @emp.getLDAPPerson().map { LDAPPerson =>
+            Phone: @emp.deskPhone(Some(LDAPPerson)) <br/>
+            Cell: @emp.cellPhone(Some(LDAPPerson))
+        }
+    </div>
+</div>

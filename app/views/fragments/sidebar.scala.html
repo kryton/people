@@ -1,0 +1,114 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@()(implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: RequestHeader)
+
+<div class="navbar nav_title" style="border: 0;">
+    <a href="@routes.HomeController.index()" class="site_title"><i class="fa fa-binoculars"></i> <span>People!</span></a>
+</div>
+
+
+<div class="clearfix"></div>
+<!-- menu profile quick info -->
+<div class="profile clearfix">
+    @request.session.get("name").map{ name =>
+        @request.session.get("userId").map{ userId =>
+            <div class="profile_pic">
+                <img src="@routes.HeadshotController.headShot(userId)" alt="Head Shot for @name" class="img-circle profile_img">
+            </div>
+            <div class="profile_info">
+
+                <span>Welcome,</span>
+                <h2>
+                @name
+                </h2>
+            </div>
+        }
+    }.getOrElse {
+        <div class="menu_section">
+            <h3></h3>
+            <ul class="nav side-menu">
+                <li><a href="@routes.HomeController.login()"><i class="fa fa-sign-in"></i> Please Log in</a>
+                </li>
+            </ul>
+        </div>
+    }
+    <div class="clearfix"></div>
+</div>
+<!-- /menu profile quick info -->
+
+<br />
+    <!-- sidebar menu -->
+<div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+    <div class="menu_section">
+        <h3>General</h3>
+        <ul class="nav side-menu">
+            <li><a href="@routes.HomeController.index()"><i class="fa fa-home"></i> Home </a>
+
+            </li>
+            <li><a href="@routes.MatrixTeamController.search(0,None)"><i class="fa fa-table"></i> Matrix</a></li>
+            <li><a href="@routes.KudosController.search(0,None)"><i class="fa fa-bullhorn"></i> Shoutouts</a></li>
+            <li><a href="@routes.TeamDescriptionController.search(0,None)"><i class="fa fa-users "></i> Teams</a></li>
+@*
+            <li><a><i class="fa fa-clone"></i>Layouts <span class="fa fa-chevron-down"></span></a>
+                <ul class="nav child_menu">
+                    <li><a href="fixed_sidebar.html">Fixed Sidebar</a></li>
+                    <li><a href="fixed_footer.html">Fixed Footer</a></li>
+                </ul>
+            </li>
+*@
+        </ul>
+    </div>
+    <div class="menu_section">
+        <h3>Product</h3>
+        <ul class="nav side-menu">
+            <li><a href="@routes.ProductTrackController.search(0,None)"><i class="fa fa-train"></i> Tracks</a></li>
+            <li><a href="@routes.ProductFeatureController.search(0,None)"><i class="fa fa-paper-plane-o"></i> Features</a></li>
+            <li><a href="@routes.StageController.search(0,None)"><i class="fa fa-cog"></i> Stages</a></li>
+            <li><a href="@routes.ResourceTeamController.search(0,None)"><i class="fa fa-cubes"></i> Resources</a></li>
+            <li><a href="@routes.ManagedClientController.search(0,None)"><i class="fa fa-bus"></i> Managed Clients</a></li>
+
+           @*
+            <li><a href="javascript:void(0)"><i class="fa fa-laptop"></i> Landing Page <span class="label label-success pull-right">Coming Soon</span></a></li>
+            *@
+        </ul>
+    </div>
+</div>
+<!-- /sidebar menu -->
+    <!-- /menu footer buttons -->
+<div class="sidebar-footer hidden-small">
+
+    <a data-toggle="tooltip" data-placement="top" title="Settings">
+        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+    </a>
+    <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+        <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+    </a>
+    <a data-toggle="tooltip" data-placement="top" title="Lock">
+        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+    </a>
+    @request.session.get("userId").map { userId =>
+    <a data-toggle="tooltip" data-placement="top" title="Logout" href="@routes.HomeController.logout()">
+        <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+    </a>
+    }.getOrElse {
+        <a data-toggle="tooltip" data-placement="top" title="Login" href="@routes.HomeController.login()">
+            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+        </a>
+    }
+</div>
+<!-- /menu footer buttons -->

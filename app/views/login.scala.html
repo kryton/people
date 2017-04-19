@@ -1,0 +1,76 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@(title: String, form:Form[forms.LoginForm.Data], tab: String = "", styles: Html = Html(""), scripts: Html = Html(""), modals: Html = Html("") )(
+        implicit request:Request[AnyRef], webJarAssets: WebJarAssets, assets: AssetsFinder,  messages:Messages)
+<!DOCTYPE html>
+<html lang="en">
+@fragments.header(title)
+<body class="login">
+    <div>
+      <a class="hiddenanchor" id="signup"></a>
+      <a class="hiddenanchor" id="signin"></a>
+
+      <div class="login_wrapper">
+        <div class="animate form login_form">
+          <section class="login_content">
+            @helper.form( action = routes.HomeController.loginInSubmit ) {
+              @helper.CSRF.formField
+              <h1>Login Form</h1>
+
+              @helper.inputText(form("username"), '_label -> "User name", 'placeholder -> "User name", 'class -> "form-control" )
+              @helper.inputPassword(form("password"), '_label -> "Password",  '_placeholder -> "Password", 'class -> "form-control")
+              @helper.checkbox(form("rememberMe"), '_text -> "remember me", '_label ->"", '_help ->"", 'checked -> true)
+@*
+              <div>
+                <input type="password" id="password" class="form-control" placeholder="Password" required="" />
+              </div>
+*@
+              <div>
+                <button class="btn btn-default submit">Log in</button>
+                @* <a class="reset_pass" href="#">Lost your password?</a> *@
+              </div>
+
+              <div class="clearfix"></div>
+
+              <div class="separator">
+                @* <p class="change_link">New to site?
+                <a href="#signup" class="to_register"> Create Account </a>
+                </p>
+                *@
+
+                <div class="clearfix"></div>
+                <br />
+
+                <div>
+                  <h1><i class="fa fa-fa-binoculars"></i> People!</h1>
+                  <p>Ã‚Â©2017 All Rights Reserved. by <a href="mailto:ian@@zilbo.com">ian</a></p>
+                </div>
+              </div>
+              @form.errors.map { f=>
+                 @f   @f.message<br />
+              }
+            }
+          </section>
+        </div>
+
+
+      </div>
+    </div>
+    @fragments.fin(scripts)
+  </body>
+</html>

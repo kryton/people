@@ -1,0 +1,65 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import forms.headShotUpload
+@(login:String, theForm: Form[headShotUpload])(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+
+@import helper._
+
+    @implicitFieldConstructor = {
+        FieldConstructor(twitterBootstrapInput.f)
+    }
+
+@main("HeadShot Self Service") {
+
+    <!-- Begin page content -->
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Edit headshot for @login</h2>
+
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    Please ensure your profile picture is a head shot and a minimum 300x300 size.<br>
+                    Current Photo - <img class="img-responsive" src='@routes.HeadshotController.headShot(login)' >
+
+                    @form(action = routes.HeadshotController.headShotUpdate(login),  'enctype -> "multipart/form-data") {
+                        <div class="col-xs-12 col-md-8">
+
+                            @CSRF.formField
+                            <fieldset>
+                                <input type="file" name='file' >
+                            </fieldset>
+
+                            <div class="col-xs-12 col-md-4">
+                                <div class="actions">
+                                    <input type="submit" value="Update" class="btn btn-primary">
+                                    <a href="#" class="btn btn-default">Cancel</a>
+                                </div>
+                            </div>
+                        }
+                    @theForm.errors
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+}

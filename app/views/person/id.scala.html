@@ -1,0 +1,345 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import offline.Tables.EmprelationsRow
+@import people.EmpRelationsRowUtils._
+@import offline.Tables.TeamdescriptionRow
+@import offline.Tables.EmpbioRow
+@import offline.Tables.KudostoRow
+@import offline.Tables.OfficeRow
+@import offline.Tables.EmptagRow
+@import offline.Tables.MatrixteamRow
+@(      login:String,
+        emp:EmprelationsRow,
+        manager:Option[EmprelationsRow],
+        directs: Set[(EmprelationsRow, Seq[MatrixteamRow])],
+        team: Option[TeamdescriptionRow],
+        bio:Option[EmpbioRow],
+        kudosTo:Seq[(KudostoRow,Option[EmprelationsRow])],
+        kudosFrom:Seq[(KudostoRow,Option[EmprelationsRow])],
+        tags: Seq[EmptagRow],
+        office:Option[OfficeRow],
+        matrix:Seq[MatrixteamRow],
+        canEdit:Boolean
+)(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP)
+
+
+@main(s"${emp.firstname} ${emp.nickname.map(x => s"($x)").getOrElse("")} ${emp.lastname}") {
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Details</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="col-md-5">
+                    <img class="img-responsive" src="@routes.HeadshotController.headShot(login)" />
+                </div>
+                <div class="col-md-7">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h3>@emp.fullName @if(emp.isContractor) {
+                                <i class="fa fa-id-card-o" aria-hidden="true"></i>
+                            } else {
+                                <i class="fa fa-id-card" aria-hidden="true"></i>
+                            }</h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                        @emp.position (<a href="@routes.PersonController.personNumber(emp.personnumber)">@emp.personnumber</a>)<br/>
+                        <table class="table-responsive">
+
+                        @manager.map{ m => <tr><td>Manager:</td><td><a href="@routes.PersonController.id(m.login)">@m.fullName</a></td></tr>}
+
+                        @team.map{ t:TeamdescriptionRow =>
+                                <tr><td >Team:</td>
+                                <td>
+
+                                    <a href="@routes.TeamDescriptionController.id(t.tagtext)"><span class="TEAMNAME2">@t.tagtext</span></a>
+                                @if( canEdit ) {
+                                    <span class="TEAMNAME" data-type="text" data-pk="@emp.login" data-name="team"
+                                    data-url='@routes.TeamDescriptionController.setTeam(emp.login)' data-title="Team Name">
+                                    <i class="fa fa-pencil" aria-hidden="true"><span style="display:none">@t.tagtext</span></i>
+                                    </span>
+                                }
+                                </td>
+                                </tr>
+                        }.getOrElse{
+                            @if( canEdit ) {
+                                    <tr>
+                                    <td>Team:</td>
+                                    <td>
+                                    <span class="TEAMNAME2"></span>
+                                    <span class="TEAMNAME" data-type="text" data-pk="@emp.login" data-name="team"
+                                    data-url='@routes.TeamDescriptionController.setTeam(emp.login)' data-title="Team Name">
+                                    Set Team
+                                    </span>
+                                    <i class="fa fa-pencil" aria-hidden="true"></i></td>
+                                    </tr>
+                            }
+                        }
+
+                        @if( matrix.nonEmpty ) {
+                            <tr><td>Matrixed:</td><td>
+                                    @matrix.map { matrix2 =>
+                                        <a href="@routes.MatrixTeamController.id(matrix2.id)">@matrix2.name</a>
+                                     }.reduceLeftOption((e1: Html, e2: Html) => Html(e1 + "," + e2))
+
+                                    </td></tr>
+                        }
+
+
+                        @if(directs.nonEmpty) {
+                            <tr><td>Directs:</td><td>@emp.directs </td></tr>
+                            @if( emp.directs != emp.reports) {
+
+                                <tr><td >Reports:</td><td>@{ (emp.reports - emp.reportscontractor).formatted("%d")}
+                                @if(emp.reportscontractor > 0) {
+                                 + @emp.reportscontractor contractors
+                                }
+                                </td></tr>
+
+                            }
+                        }
+
+                        @if( tags.nonEmpty) {
+                            <tr><td valign="top">Tags:</td><td>@tags.map{tag =>
+                                <a href="@routes.TagController.id(tag.tagtext)">@tag.tagtext</a>
+                            }.reduceLeftOption((e1: Html, e2: Html) => Html(e1 + "," + e2))
+                            </td></tr>
+                        }
+                        </table>
+                        </div>
+                        <div class="col-sm-6">
+                            <table class=" table-responsive">
+                        @emp.getLDAPPerson().map{ LDAPPerson =>
+                                    <tr><td>Workstation:</td><td>@emp.officelocation</td></tr>
+                                    <tr><td>InterOffice:</td><td>@emp.interOfficePhone(Some(LDAPPerson)).map {phone:String =>
+                                     x@phone
+                                    }</td></tr>
+                                    <tr><td>Phone:</td><td>@emp.deskPhone(Some(LDAPPerson))</td></tr>
+                                    <tr><td>Cell:</td><td>@emp.cellPhone(Some(LDAPPerson))</td></tr>
+                                    <tr><td>eMail:</td><td>@emp.eMail(Some(LDAPPerson)) </td></tr>
+                        }
+                        @office.map { off =>
+                                <tr><td>Office:</td><td>@off.city @off.country </td></tr>
+                        }
+                        </table>
+                        </div>
+                    </div>
+                    <div class="row">
+
+                    </div>
+                    @bio.map {b =>
+                        <br/>
+                        <div class="row">
+                            <div class="col-sm-12">
+                            <p>@b.bio</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+        @if( directs.nonEmpty) {
+        <div class="x_panel">
+            <div class="x_title">
+            <h2>Directs</h2>
+            <ul class="nav navbar-right panel_toolbox">
+            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+            <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+            </ul>
+            <div class="clearfix"></div>
+            </div>
+        <div class="x_content">
+            <div class="row">
+            <div class="col-sm-12 ">
+
+            <table width="100%" class="table table-responsive table-striped">
+            <thead>
+                <tr>
+                    <th colspan="2" >Name</th>
+                    <th class="hidden-xs hidden-sm">Title</th>
+                    <th class="hidden-xs hidden-sm">Reports</th>
+                    <th class="hidden-xs hidden-sm">Vertical</th>
+                </tr>
+            </thead>
+            @directs.toList.sortBy( x=> (x._1.lastname,x._1.firstname )).map { direct =>
+            <tr>
+                <td width="7%">
+                <a href="@routes.PersonController.id(direct._1.login)"><img class="img-circle img-responsive" src="@routes.HeadshotController.headShot(direct._1.login)" /></a>
+                </td>
+                <td><a href="@routes.PersonController.id(direct._1.login)">@direct._1.fullName
+                @if(direct._1.isContractor) {
+                    <i class="fa fa-id-card-o" aria-hidden="true"></i>
+                } else {
+                    <i class="fa fa-id-card" aria-hidden="true"></i>
+                }
+                </a></td>
+                <td>@direct._1.position</td>
+                <td>@if(direct._1.reports >0 ) {
+                @{direct._1.reports - direct._1.reportscontractor}
+                    @if(direct._1.reportscontractor>0) {
+                        (@direct._1.reportscontractor)
+                    }
+                }
+                </td>
+                <td>@direct._2.map { matrix2 =>
+                        <a href='@routes.MatrixTeamController.id(matrix2.id)'>@matrix2.name</a>
+                    }.reduceLeftOption((e1: Html, e2: Html) => Html(e1 + "," + e2))</td>
+            </tr>
+            }
+            </table>
+            </div>
+            </div>
+
+            </div>
+        </div>
+        }
+@if( kudosTo.nonEmpty) {
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Shoutouts Received</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-sm-12 table-responsive">
+
+                        <table width="100%" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th width="15%" colspan="2">From</th>
+                                    <th width="15%">Date</th>
+                                    <th>Shoutout</th>
+                                </tr>
+                            </thead>
+
+                        @kudosTo.sortBy(- _._1.dateadded.getTime).map{k =>
+                            <tr>
+                            <td width="5%"><img class="img-responsive img-circle" src='@routes.HeadshotController.headShot(k._1.fromperson,Some("Y"))' /></td>
+                            <td>
+                            @k._2.map{e =>
+                                <a href="@routes.PersonController.id(e.login)">@e.fullName</a>
+                            }.getOrElse {
+                                @k._1.fromperson
+                            }
+                            </td>
+                            <td>@k._1.dateadded</td>
+                            <td>@k._1.feedback</td>
+                            </tr>
+                        }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    }
+
+    @if( kudosFrom.nonEmpty) {
+    <div class="x_panel">
+            <div class="x_title">
+                <h2>Shoutouts Given</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-sm-12 table-responsive">
+
+                        <table width="100%" class="table table-striped">
+                            <thead>
+                                <tr>
+                                <th colspan="2" width="15%">To</th>
+                                <th widtth="15%">Date</th>
+                                <th>Shoutout</th>
+                                </tr>
+                            </thead>
+
+                        @kudosFrom.sortBy(- _._1.dateadded.getTime).map{k =>
+                            <tr>
+                            <td width="5%"><img class="img-responsive img-circle" src='@routes.HeadshotController.headShot(k._1.toperson,Some("Y"))' /></td>
+                            <td>
+                                @k._2.map{e =>
+                                    <a href="@routes.PersonController.id(e.login)">@e.fullName</a>
+                                }.getOrElse {
+                                 @k._1.toperson
+                                }
+                            </td>
+                            <td>@k._1.dateadded</td>
+                            <td>@k._1.feedback</td>
+                            </tr>
+
+                        }
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+    }
+
+
+    </div ><!-- col -->
+</div> <!-- row -->
+
+        <script nonce='PMAN'>
+
+        window.onload = function () {
+        //turn to inline mode
+        //$.fn.editable.defaults.mode = 'inline';
+    $(document).ready(function() {
+        $('.TEAMNAME').editable({
+            params: function(params) {
+                //originally params contain pk, name and value
+                params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                return params;
+            },
+            success: function(response, newValue) {
+                $('.TEAMNAME2').text(newValue);
+                $('.TEAMNAME').hide()
+
+            }
+        });
+    });
+    }
+    </script>
+}
+

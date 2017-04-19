@@ -1,0 +1,127 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import projectdb.Tables.ProducttrackRow
+@import projectdb.Tables.ProducttrackfeatureRow
+@import projectdb.Tables.ProductfeatureRow
+@import util.Page
+@import projectdb.Tables.StageRow
+@(      id:Int,
+        stage:StageRow,
+        features:Page[(ProductfeatureRow, Seq[(ProducttrackRow,ProducttrackfeatureRow)])])(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP)
+
+
+@main(s"Stage ${stage.name}!") {
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Details</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                    @stage.name
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Features</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                <div class="row">
+
+                @Option(features.items).filterNot(_.isEmpty).map { results =>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="table table-responsive">
+                                    <thead>
+                                        <tr><th>Priority</th>
+                                            <th>Feature</th>
+                                            <th>Anchor</th>
+                                            <th>CID</th>
+                                            <th>Track(s)</th>
+                                        </tr>
+                                    </thead>
+
+                        @results.map { item =>
+                            <tr><td align="right">@item._1.ordering</td>
+                                <td><a href="@routes.ProductFeatureController.id(item._1.id)">@item._1.name</a></td>
+                                <td>@if(item._1.isanchor.getOrElse(false)) {
+                                    <i class="fa fa-anchor" aria-hidden="true"></i>
+                                }</td>
+                                <td>@if(item._1.iscid.getOrElse(false)) {
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                }</td>
+                                <td> @if( item._2.size == 1 ) {
+                                    <a href="@routes.ProductTrackController.id(item._2.head._1.id)">@item._2.head._1.name</a>
+                                    } else { (
+                                        @item._2.sortBy(_._2.allocation).map { ptf =>
+                                            <a href="@routes.ProductTrackController.id(ptf._1.id)">@ptf._1.name</a>
+                                        }
+                                        )
+                                    }
+
+
+                                </td>
+                            </tr>
+                        }
+
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+                </div>
+                <div class="row">
+                    @features.prev.map { x =>
+                        <a href="@routes.StageController.id(id,x)">... prev ...</a>
+                    }
+                    @features.next.map { x =>
+                        <a href="@routes.StageController.id(id,x)">... next ...</a>
+                    }
+
+                </div>
+            </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+
+
+    </div ><!-- col -->
+</div> <!-- row -->
+
+}
+

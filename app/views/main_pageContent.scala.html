@@ -1,0 +1,51 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@(title: String, tab: String = "", styles: Html = Html(""), scripts: Html = Html(""), modals: Html = Html(""))(content: Html)(
+        implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: RequestHeader )
+
+<!DOCTYPE html>
+<html lang="en">
+    @fragments.header(title, styles)
+
+<body class="nav-sm">
+    <div class="container body">
+        <div class="main_container">
+            <div class="col-md-3 left_col">
+                <div class="left_col scroll-view">
+                    @fragments.sidebar()
+                </div>
+            </div>
+                <!-- top navigation -->
+            <div class="top_nav">
+                @fragments.topSidebar()
+            </div>
+                <!-- /top navigation -->
+          @content
+                <!-- footer content -->
+            <footer>
+                <div class="pull-right">
+                    People Tool by <a href="mailto:ian@@zilbo.com">ian</a> Templates by <a href="https://github.com/puikinsh/gentelella">Gentelella</a>
+                </div>
+                <div class="clearfix"></div>
+            </footer>
+                <!-- /footer content -->
+        </div>
+    </div>
+    @fragments.fin(scripts)
+</body>
+</html>

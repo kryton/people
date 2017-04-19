@@ -1,0 +1,2 @@
+ALTER TABLE `MatrixTeam`
+	ADD COLUMN `isPE` BIT NOT NULL DEFAULT b'0' AFTER `Name`;

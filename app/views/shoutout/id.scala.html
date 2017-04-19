@@ -1,0 +1,64 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import offline.Tables.EmprelationsRow
+@import people.EmpRelationsRowUtils._
+@import offline.Tables.TeamdescriptionRow
+@import offline.Tables.EmpbioRow
+@import offline.Tables.KudostoRow
+@import offline.Tables.OfficeRow
+@import offline.Tables.EmptagRow
+@import offline.Tables.MatrixteamRow
+@(      id:Long,
+        kudos:KudostoRow,
+        from:Option[EmprelationsRow],
+        to:Option[EmprelationsRow])(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP)
+
+
+@main(s"Shoutout!") {
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Details</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+               From: @from.map{ f => @f.fullName }.getOrElse { @kudos.fromperson }<br/>
+               To: @to.map{ f => @f.fullName }.getOrElse { @kudos.toperson }
+                    @kudos.feedback
+
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+
+
+    </div ><!-- col -->
+</div> <!-- row -->
+
+}
+

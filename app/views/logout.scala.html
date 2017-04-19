@@ -1,0 +1,46 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@(title: String,  tab: String = "", styles: Html = Html(""), scripts: Html = Html(""), modals: Html = Html("" ) )(
+        implicit request:Request[AnyRef], webJarAssets: WebJarAssets, assets: AssetsFinder,  messages:Messages)
+<!DOCTYPE html>
+<html lang="en">
+@fragments.header(title, styles= Html("<meta http-equiv='refresh' content='3;url="+ routes.HomeController.index() + "'>" ))
+<body class="login">
+    <div>
+      <a class="hiddenanchor" id="signup"></a>
+      <a class="hiddenanchor" id="signin"></a>
+
+      <div class="login_wrapper">
+        <div class="animate form login_form">
+          <section class="login_content">
+            you have been logged out.
+                <!--
+              userId - @request.session.get("userId")
+              name - @request.session.get("name")
+              -->
+
+          </section>
+            <section class="login_content">Redirecting to <a href="@routes.HomeController.index()">Home</a> in 3 seconds...</section>
+        </div>
+
+
+      </div>
+    </div>
+    @fragments.fin(scripts)
+  </body>
+</html>

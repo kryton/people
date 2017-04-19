@@ -1,0 +1,15 @@
+*.un~
+*~
+*.cmd
+logs
+target
+/.idea
+/.idea_modules
+/.classpath
+/.project
+/.settings
+/conf/db.secret
+/conf/db.secret.prod
+/conf/application.conf.docker
+/conf/secret.conf
+/RUNNING_PID

@@ -1,0 +1,49 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@(message:String)
+
+@error_main(s"Error $message") {
+
+<!-- page content -->
+<div class="col-md-12">
+  <div class="col-middle">
+    <div class="text-center text-center">
+      <h1 class="error-number">404</h1>
+        <h2>@message</h2>
+        <h3>Sorry but we couldn't find this page</h3>
+
+      <p>This page you are looking for does not exist <a href="#">Report this?</a>
+      </p>
+      <div class="mid_center">
+        <h3>Search</h3>
+          <div class="col-xs-12 form-group pull-right top_search">
+              @helper.form( action = routes.HomeController.search(None))  {
+                <div class="input-group">
+                  <input type="text" name="q" class="form-control" placeholder="Search for...">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button">Go!</button>
+                  </span>
+                </div>
+              }
+
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+}

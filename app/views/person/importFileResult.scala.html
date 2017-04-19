@@ -1,0 +1,69 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import people.EmpRelationsRowUtils._
+@import offline.Tables.EmprelationsRow
+@(  inserts:List[EmprelationsRow],
+    updates:Long,
+    deletes:List[String] )(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+
+@import helper._
+
+    @implicitFieldConstructor = {
+        FieldConstructor(twitterBootstrapInput.f)
+    }
+
+@main("Import SAP Extract file") {
+
+    <!-- Begin page content -->
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Import SAP Extract file results</h2>
+
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h1>+@inserts.size new hires  -@deletes.size terms  @updates existing/updated </h1>
+                        <a href="@routes.PersonController.importFile()">Re-Import</a>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+
+                <h2>Inserts</h2>
+                @inserts.map { emp =>
+                  <li>@emp.login - @emp.fullName</li>
+                }
+
+                </div>
+                <div class="col-xs-6">
+
+                <h2>Terms</h2>
+                @deletes.map { x =>
+                    <li>@x</li>
+                }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+}

@@ -1,0 +1,197 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import projectdb.Tables.ProducttrackRow
+@import projectdb.Tables.ProducttrackfeatureRow
+@import projectdb.Tables.ProductfeatureRow
+@import util.Page
+@import projectdb.Tables.FeatureflagRow
+@import projectdb.Tables.ProductfeatureflagRow
+@import projectdb.Tables.ResourceteamRow
+@import projectdb.Tables.ResourceteamproductfeatureRow
+@import projectdb.Tables.ManagedclientRow
+@import projectdb.Tables.ManagedclientproductfeatureRow
+@import projectdb.Tables.StageRow
+@(      id:Int,
+        productFeature:ProductfeatureRow,
+        tracks:Seq[(ProducttrackRow, ProducttrackfeatureRow)],
+        flags:Seq[(FeatureflagRow, ProductfeatureflagRow)],
+        stage: Option[StageRow],
+        rteams:Seq[( ResourceteamproductfeatureRow, ResourceteamRow)],
+        managedClients:Seq[(ManagedclientRow,ManagedclientproductfeatureRow)]
+
+)(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP)
+
+
+@main(s"Product Feature ${productFeature.name}!") {
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Details</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xs-8">
+                            @stage.map{ x =>
+                                Stage: <a href="@routes.StageController.id(x.id)">@x.name</a><br/>
+                            }
+                            @productFeature.name
+                        </div>
+                        <div class="col-xs-4">
+                            <div class="list-group">
+                                <h4 class="list-group-item-heading">Track</h4>
+                                <li class="list-group-item">
+                                <table class="table-responsive table table-striped">
+                                    <thead>
+                                        <tr><th>Track</th><th align="right">Allocation</th>
+                                            @*<th align="right">Priority</th>*@
+                                        </tr>
+                                    </thead>
+                                    @tracks.map { track =>
+                                      <tr>
+                                          <td><a href="@routes.ProductTrackController.id(track._1.id)">@track._1.name</a></td>
+                                          <td align="right">@track._2.allocation</td>
+                                         @* <td align="right">@track._2.priority</td> *@
+                                      </tr>
+                                    }
+                                </table>
+                                </li>
+                            </div><!-- list-group -->
+                            <div class="list-group">
+                                <h4 class="list-group-item-heading">Feature Type</h4>
+                                <li class="list-group-item">
+                                <table class="table-responsive table table-striped">
+                                    <thead>
+                                        <tr><th>Type</th>
+                                            @*<th align="right">Priority</th>*@
+                                        </tr>
+                                    </thead>
+                                    @flags.map { flag =>
+                                      <tr>
+                                          <td><a href="">@flag._1.name</a></td>
+
+                                         @* <td align="right">@track._2.priority</td> *@
+                                      </tr>
+                                    }
+                                </table>
+                                </li>
+                            </div><!-- list-group -->
+                            <div class="list-group">
+                                <h4 class="list-group-item-heading">Managed Clients</h4>
+                                <li class="list-group-item">
+                                <table class="table-responsive table table-striped">
+                                    <thead>
+                                        <tr><th>Client</th>
+                                            <th align="right">Allocation</th>
+                                        </tr>
+                                    </thead>
+                                    @managedClients.map { mc =>
+                                      <tr>
+                                          <td><a href="@routes.ManagedClientController.id(mc._1.id)">@mc._1.name</a></td>
+                                          <td align="right">@mc._2.allocation</td>
+
+                                         @* <td align="right">@track._2.priority</td> *@
+                                      </tr>
+                                    }
+                                </table>
+                                </li>
+                            </div><!-- list-group -->
+
+                            <div class="list-group">
+                                <h4 class="list-group-item-heading">Teams</h4>
+                                <li class="list-group-item">
+                                <table class="table-responsive table table-striped">
+                                    <thead>
+                                        <tr><th>Name</th>
+                                            <th align="right">Dev Estimate</th>
+                                            <th align="right">#Devs</th>
+                                        </tr>
+                                    </thead>
+                                    @rteams.sortBy(_._2.name).map { rteam =>
+                                      <tr>
+                                          <td><a href="@routes.ResourceTeamController.id(rteam._2.id)">@rteam._2.name</a></td>
+                                          <td align="right">@rteam._1.featuresize</td>
+                                          <td  align="right">@rteam._1.maxdevs</td>
+                                      </tr>
+                                    }
+                                </table>
+                                </li>
+                            </div><!-- list-group -->
+                        </div>
+
+                    </div>
+
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Projects</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                <div class="row">
+
+                @Option(tracks).filterNot(_.isEmpty).map { results =>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="table table-responsive">
+                                    <thead>
+                                        <tr><th>Project</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+<tr><td>XXX</td><td>TBD</td></tr>
+
+
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+                </div>
+
+            </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+
+
+    </div ><!-- col -->
+</div> <!-- row -->
+
+}
+

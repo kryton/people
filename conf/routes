@@ -1,0 +1,72 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# https://www.playframework.com/documentation/latest/ScalaRouting
+# ~~~~
+
+# An example controller showing a sample home page
+GET         /                             controllers.HomeController.index
+GET         /search                       controllers.HomeController.search( q:Option[String] ?= None )
+GET         /login                        controllers.HomeController.login
+POST        /login                        controllers.HomeController.loginInSubmit
+GET         /logout                       controllers.HomeController.logout
+GET         /logout2                      controllers.HomeController.logout2
+
+GET         /headshot/:login              controllers.HeadshotController.headShot(login, notCurrent:Option[String] ?= None)
+GET         /headshot/:login/edit         controllers.HeadshotController.headShotEdit(login)
+POST        /headshot/:login/edit         controllers.HeadshotController.headShotUpdate(login)
+
+GET         /person/                      controllers.PersonController.search(p: Int ?= 0, search: Option[String] ?= None )
+GET         /person/:login                controllers.PersonController.id(login:String )
+POST        /person/:login/team           controllers.TeamDescriptionController.setTeam(login:String )
+GET         /person/id/:id                controllers.PersonController.personNumber(id:Long)
+GET         /person/admin/import          controllers.PersonController.importFile
+POST        /person/admin/import          controllers.PersonController.doImport
+
+GET         /matrix/                      controllers.MatrixTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /matrix/:id                   controllers.MatrixTeamController.id( id:Long, p:Int ?= 0 )
+
+GET         /tag/                         controllers.TagController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /tag/:tag                     controllers.TagController.id( tag:String, p:Int ?= 0 )
+
+GET         /team/                        controllers.TeamDescriptionController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /team/:tag                    controllers.TeamDescriptionController.id( tag:String, p:Int ?= 0 )
+
+GET         /shoutout/                    controllers.KudosController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /shoutout/:id                 controllers.KudosController.id( id:Long, p:Int ?= 0 )
+###
+#
+# Product URLs
+#
+GET         /track/                       controllers.ProductTrackController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /track/:id                    controllers.ProductTrackController.id( id:Int, p:Int ?= 0)
+
+GET         /feature/                     controllers.ProductFeatureController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /feature/:id                  controllers.ProductFeatureController.id( id:Int, p:Int ?= 0)
+GET         /feature/admin/import          controllers.ProductFeatureController.importFile
+POST        /feature/admin/import          controllers.ProductFeatureController.doImport
+
+
+GET         /stage/                     controllers.StageController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /stage/:id                  controllers.StageController.id( id:Int, p:Int ?= 0)
+
+
+GET         /rteam/                     controllers.ResourceTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /rteam/:id                  controllers.ResourceTeamController.id( id:Int, p:Int ?= 0)
+
+GET         /rpool/                     controllers.ResourcePoolController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /rpool/:id                  controllers.ResourcePoolController.id( id:Int, p:Int ?= 0)
+
+GET         /mclient/                     controllers.ManagedClientController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /mclient/:id                  controllers.ManagedClientController.id( id:Int, p:Int ?= 0)
+
+
+## Test URLS. ignore em
+GET         /td                           controllers.HomeController.todo
+GET         /test/empUpDown/:login        controllers.HomeController.mgrUpDown(login:String)
+
+
+# Map static resources from the /public folder to the /assets URL path
+
+GET         /assets/*file                 controllers.Assets.at(file)
+GET         /versionedAssets/*file        controllers.Assets.versioned(file)
+GET         /webjars/*file                controllers.WebJarAssets.at(file)

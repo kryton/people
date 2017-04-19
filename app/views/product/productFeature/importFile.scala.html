@@ -1,0 +1,54 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@()(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+
+@import helper._
+
+    @implicitFieldConstructor = {
+        FieldConstructor(twitterBootstrapInput.f)
+    }
+
+@main("Import MS-Project XLS Export file") {
+
+    <!-- Begin page content -->
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Import MS Project XLS-export file</h2>
+
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+            @form(action = routes.ProductFeatureController.doImport(), 'enctype -> "multipart/form-data") {
+                @CSRF.formField
+                <label for="importFile">The XLS file from MS-Project:</label>
+                <input id="importFile" type="file" name="importFile">
+
+                <p>
+                    Do Import <input type="submit">
+                </p>
+            }
+            </div>
+        </div>
+    </div>
+</div>
+
+}

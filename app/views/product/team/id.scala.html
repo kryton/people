@@ -1,0 +1,261 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import projectdb.Tables.ProducttrackRow
+@import projectdb.Tables.ProducttrackfeatureRow
+@import projectdb.Tables.ProductfeatureRow
+@import util.Page
+@import projectdb.Tables.ResourceteamRow
+@import projectdb.Tables.ResourcepoolRow
+@import projectdb.Tables.ResourceteamproductfeatureRow
+@import offline.Tables.EmprelationsRow
+@import people.EmpRelationsRowUtils._
+@(      id:Int,
+        resourceTeam:(ResourceteamRow,Option[ResourcepoolRow]),
+        features:Page[(ProductfeatureRow, ResourceteamproductfeatureRow, Seq[(ProducttrackRow, ProducttrackfeatureRow)])],
+        members:Set[(EmprelationsRow,Boolean )],
+        stats: (Int, models.product.EfficencyMonth),
+        teamDetails: Seq[(offline.Tables.EmprelationsRow, String, Option[java.sql.Date])],
+        isAdmin:Boolean
+)(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP)
+
+@poolLink( poolO: Option[ResourcepoolRow]) = @{
+    poolO.map { pool:ResourcepoolRow =>
+      Html(s"(<a href='${routes.ResourcePoolController.id(pool.id)}'>${pool.name}</a>)")
+    }.getOrElse{
+        Html("")
+    }
+}
+
+@main(s"Resource Team ${resourceTeam._1.name}!") {
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Stats for @resourceTeam._1.name @poolLink( resourceTeam._2) </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <table class="table table-responsive">
+                                <thead>
+                                <tr>
+                                    <th class="col-xs-6">Team</th>
+                                    <th align="right" class="col-xs-1">Available</th>
+                                    <th align="right" class="col-xs-1">Effective</th>
+                                    <th align="right" class="col-xs-1">+3</th>
+                                    <th align="right" class="col-xs-1">+6</th>
+                                    <th align="right" class="col-xs-1">+9</th>
+                                    <th align="right" class="col-xs-1">+12</th>
+                                </tr></thead>
+                                <tr>
+                                    <td>@resourceTeam._1.name</td>
+                                    <td align="right">@stats._1</td>
+                                    <td align="right">@stats._2.t0</td>
+                                    <td align="right">@stats._2.t3</td>
+                                    <td align="right">@stats._2.t6</td>
+                                    <td align="right">@stats._2.t9</td>
+                                    <td align="right">@stats._2.t12</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- x_panel -->
+
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Members</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                   <div class="col-xs-6">
+                       <div class="row">
+                           <div class="col-xs-12">
+                               <h3>Prod</h3>
+                           </div>
+                        @members.filter( !_._2).toSeq.sortBy(_._1.lastname).map { member =>
+                                <div class="col-xs-6 col-md-4">
+                                  <a href="@routes.PersonController.id(member._1.login)">@member._1.fullName
+                                  </a>
+                                </div>
+                        }
+
+                       </div>
+                   </div>
+                    <div class="col-xs-6">
+                       <div class="row">
+                           <div class="col-xs-12">
+                               <h3>PE</h3>
+                           </div>
+                           @members.filter( _._2).toSeq.sortBy(_._1.lastname).map { member =>
+                                <div class="col-xs-6 col-md-4">
+                                  <a href="@routes.PersonController.id(member._1.login)">@member._1.fullName
+                                  </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+@if( isAdmin ) {
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Debug - Position+ hire date</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+            <!-- x_title -->
+        <div class="x_content">
+            <div class="container">
+                <div class="col-xs-12">
+                    <div class="row">
+                        <table class="table table-responsive table-striped">
+                            <thead>
+                                <th>Person</th>
+                                <th>Type</th>
+                                <th>Hire Date</th>
+                            </thead>
+                            @teamDetails.toSeq.sortBy(x => (x._2, x._1.lastname)).map { member =>
+                                <tr>
+                                    <td><a href="@routes.PersonController.id(member._1.login)">@member._1.fullName</a></td>
+                                    <td>@member._2</td>
+                                    <td>@member._3.map { d =>
+                                        @d
+                                    }</td>
+                                </tr>
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+        </div> <!-- x_content -->
+    </div >
+        <!-- x_panel -->
+}
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Features</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                <div class="row">
+
+                @Option(features.items).filterNot(_.isEmpty).map { results =>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="table table-responsive table-striped">
+                                    <thead>
+                                        <tr><th>Priority</th>
+                                            <th>Feature</th>
+                                            <th>Anchor</th>
+                                            <th>CID</th>
+                                            <th align="right">Estimate</th>
+                                            <th align="right">Remaining</th>
+                                            <th align="right">Devs</th>
+                                            <th>Track(s)</th>
+                                        </tr>
+                                    </thead>
+
+                        @results.map { item =>
+                            <tr><td align="right">@item._1.ordering</td>
+                                <td><a href="@routes.ProductFeatureController.id(item._1.id)">@item._1.name</a></td>
+                                <td>@if(item._1.isanchor.getOrElse(false)) {
+                                    <i class="fa fa-anchor" aria-hidden="true"></i>
+                                }</td>
+                                <td>@if(item._1.iscid.getOrElse(false)) {
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                }</td>
+                                <td align="right">@item._2.featuresize</td>
+                                <td align="right">@item._2.featuresizeremaining.map{ x =>
+                                    @x
+                                }.getOrElse("-")</td>
+                                <td align="right">@item._2.maxdevs</td>
+                                <td> @if( item._3.size == 1 ) {
+                                    <a href="@routes.ProductTrackController.id(item._3.head._1.id)">@item._3.head._1.name</a>
+                                    } else { (
+                                        @item._3.sortBy(_._2.allocation).map { ptf =>
+                                            <a href="@routes.ProductTrackController.id(ptf._1.id)">@ptf._1.name</a>
+                                        }
+                                        )
+                                    }
+
+
+                                </td>
+                            </tr>
+                        }
+
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+                </div>
+                <div class="row">
+                    @features.prev.map { x =>
+                        <a href="@routes.ResourceTeamController.id(id,x)">... prev ...</a>
+                    }
+                    @features.next.map { x =>
+                        <a href="@routes.ResourceTeamController.id(id,x)">... next ...</a>
+                    }
+
+                </div>
+            </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+
+
+    </div ><!-- col -->
+</div> <!-- row -->
+
+}
+
