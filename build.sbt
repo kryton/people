@@ -31,11 +31,13 @@ libraryDependencies ++= Seq(
  // "com.typesafe.slick" %% "slick-hikaricp" %  slickVersion
   "mysql" % "mysql-connector-java" % "5.1.41",
   "org.webjars" %% "webjars-play" % "2.6.0-M1",
+  "com.github.nscala-time" %% "nscala-time" % "2.16.0",
   //"org.webjars" % "html5shiv" % "3.7.2",
   //"org.webjars" % "requirejs" % "2.1.16",
   //"org.webjars" % "respond" % "1.4.2",
   //"org.webjars" % "bootstrap" % "3.3.7-1",
   //"org.webjars" % "Bootstrap-3-Typeahead" % "3.1.1",
+  "org.abstractj.kalium" % "kalium" % "0.4.0",
   "org.webjars" % "x-editable-bootstrap3" % "1.5.1-1",
   //"org.webjars.bower" % "bootstrap-3-datepicker" % "1.5.0",
   "org.webjars.bower" % "gentelella" % "1.4.0",

@@ -37,8 +37,8 @@
             </div>
             <div class="x_content">
 
-            @form(action = routes.PersonController.doImport(), 'enctype -> "multipart/form-data") {
-                @CSRF.formField
+            @form(action = CSRF(routes.PersonController.doImport()), 'enctype -> "multipart/form-data") {
+               @* @CSRF.formField *@
                 <label for="importFile">The export file from SAP:</label>
                 <input id="importFile" type="file" name="importFile">
 

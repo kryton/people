@@ -17,6 +17,9 @@
 
 package util
 
+import java.sql.Date
+import java.util.Calendar
+
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.Logger
@@ -159,4 +162,55 @@ object Conversions {
       workInDays
     }
   }
+
+  def quarterS(quarterDate: Option[Date]): String = {
+    quarterDate match {
+      case Some(date) =>
+        val cal = Calendar.getInstance()
+        cal.setTime(date)
+        val q: Int = (cal.get(Calendar.MONTH) / 3) + 1
+        val y: Int = cal.get(Calendar.YEAR) % 100
+
+        s"Q$q/$y"
+      case None => ""
+    }
+  }
+
+  def quarterD(s: Option[String]): Option[Date] = {
+    var cal = Calendar.getInstance()
+    cal.set(Calendar.HOUR_OF_DAY, 0)
+    cal.set(Calendar.MINUTE, 0)
+    cal.set(Calendar.SECOND, 0)
+    cal.set(Calendar.MILLISECOND, 0)
+    cal.set(Calendar.DAY_OF_MONTH, 1)
+
+    s match {
+      case None =>
+        val q: Int = (cal.get(Calendar.MONTH) + 1) / 3
+        //    println( s"q$q")
+        cal.set(Calendar.MONTH, q * 3)
+        Some(new java.sql.Date(cal.getTime.getTime))
+      case Some(dQ) =>
+        val parts: Array[String] = dQ.split("/")
+        if (parts.length != 2) {
+          None
+        } else {
+          try {
+            val q = parts(0).substring(1).toInt
+            val y = parts(1).toInt + 2000
+            if (q < 1 && q > 4) {
+              None
+            } else {
+              cal.set(Calendar.MONTH, (q - 1) * 3)
+              cal.set(Calendar.YEAR, y)
+              Some(new java.sql.Date(cal.getTime.getTime))
+            }
+          } catch {
+            case e: Exception => None
+          }
+
+        }
+    }
+  }
+
 }

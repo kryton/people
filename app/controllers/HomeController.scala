@@ -95,7 +95,7 @@ class HomeController @Inject()
     val cal: Calendar = Calendar.getInstance()
     cal.setTime(now)
     val week  = cal.get( Calendar.WEEK_OF_YEAR )
-    Logger.info(s"Week = $week")
+   // Logger.info(s"Week = $week")
     (for {
       s <- shoutouts
       nh <- newHires

@@ -1,0 +1,127 @@
+@*
+* Copyright (C) 2014  Ian Holsman
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*@
+
+@import offline.Tables.{ EmprelationsRow, OkrkeyresultRow, OkrobjectiveRow}
+@import people.EmpRelationsRowUtils._
+@(login:String, emp: EmprelationsRow, quarter:String,
+        objective:OkrobjectiveRow,
+        keyResults: Seq[OkrkeyresultRow],
+        otherObjectives:Seq[OkrobjectiveRow],
+        pastObjectives:Seq[OkrobjectiveRow],
+        futureObjectives:Seq[OkrobjectiveRow])(implicit
+        webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP )
+
+@main(s"${emp.fullName} - $quarter ${objective.objective}!") {
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2><a href="@routes.OKRController.login(login,Some(quarter))">@emp.fullName @quarter</a> - @objective.objective - Score (XX) - Calculated (YY) BUTTON(SAVE Score) BUTTON(NEW KR)</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+
+                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="content">
+                        @keyResults.map{ kr =>
+                        <div class="row">
+                            <div class="col-xs-1">
+                                @if(kr.completed) {
+                                    <i class="fa fa-check-square-o" title="completed"></i>
+                                    @if( kr.score.isDefined) {
+                                        @kr.score
+                                    }
+                                } else {
+                                    <i class="fa fa-square-o" title="underway"></i>
+                                }
+                            </div>
+
+                            <div class="col-xs-10">
+                                @kr.objective @if(kr.completed) {
+                                BUTTON(revise)
+                                } else {
+                                BUTTON(complete)
+                                }
+                                <pre>@kr.description</pre>
+                            </div>
+
+
+
+                        </div>
+
+                        }
+                    </div>
+
+                </div>
+            </div> <!-- x_panel -->
+
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Past Objectives</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+
+                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div> <!-- title -->
+                <div class="x_content">
+                    <div class="content">
+                        <div class="row">
+                            <div class="col-xs-12">
+                         TBD
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- x_panel -->
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Future Objectives</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+
+                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div> <!-- title -->
+                <div class="x_content">
+                    <div class="content">
+                        <div class="row">
+                            <div class="col-xs-12">
+                         TBD
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- x_panel -->
+        </div>
+    </div>
+}
