@@ -95,27 +95,32 @@ class TeamDescriptionController @Inject()
       }
     }
   }
+
   def setTeam( login:String): Action[AnyContent] = Action.async { implicit request =>
     request.body.asFormUrlEncoded match {
-      case None =>Future.successful( NotFound("No Team"))
+      case None => Future.successful(NotFound("No Team"))
       case Some((keys: Map[String, Seq[String]])) =>
-        if ( keys.getOrElse("name",Seq("x")).head.equalsIgnoreCase("team") ) {
-          keys.get("value") match {
-            case None => Future.successful( NotFound("No Value"))
-            case Some(valueS) => valueS.headOption match {
-              case None => Future.successful(NotFound("missing value for Value"))
-              case Some(value: String) =>
-                teamDescriptionRepo.upsert( login, value).map { x =>
-                  Ok("value updated")
+        user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map { canEdit =>
+          if (canEdit) {
+            if (keys.getOrElse("name", Seq("x")).head.equalsIgnoreCase("team")) {
+              keys.get("value") match {
+                case None => Future.successful(NotFound("No Value"))
+                case Some(valueS) => valueS.headOption match {
+                  case None => Future.successful(NotFound("missing value for Value"))
+                  case Some(value: String) =>
+                    teamDescriptionRepo.upsert(login, value).map { x =>
+                      Ok("value updated")
+                    }
                 }
-              //  Future.successful()
+              }
+            } else {
+              Future.successful(NotFound("Missing team field"))
             }
+          } else {
+            Future.successful(Unauthorized(views.html.page_403("No Access")))
           }
-        } else {
-          Future.successful(NotFound("Missing team field"))
-        }
+        }.flatMap(identity)
     }
-   // Future.successful(Ok(""))
   }
 }
 

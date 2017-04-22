@@ -189,7 +189,7 @@
                     <th class="hidden-xs hidden-sm">Vertical</th>
                 </tr>
             </thead>
-            @directs.toList.sortBy( x=> (x._1.lastname,x._1.firstname )).map { direct =>
+            @directs.toList.sortBy( x=> (x._1.lastname,x._1.firstname )).map{ direct =>
             <tr>
                 <td width="7%">
                 <a href="@routes.PersonController.id(direct._1.login)"><img class="img-circle img-responsive" src="@routes.HeadshotController.headShot(direct._1.login)" /></a>

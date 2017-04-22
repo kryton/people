@@ -177,7 +177,8 @@ class OKRController @Inject()
     (for {
       e<-  employeeRepo.findByLogin(login)
       o <-  okrObjectiveRepo.findEx(login, id)
-    } yield( e,o)).map{ x =>
+      u <- user.isOwnerManagerOrAdmin(login,LDAPAuth.getUser())
+    } yield( e,o,u )).map{ x =>
       x._1 match {
         case Some(emp) => x._2 match {
           case Some(okrKR) => Ok(views.html.okr.objective(login,
@@ -185,23 +186,53 @@ class OKRController @Inject()
             Conversions.quarterS(okrKR._1.quarterdate),
             okrKR._1,
             okrKR._2,
-            Seq.empty, Seq.empty, Seq.empty
+            Seq.empty, Seq.empty, Seq.empty,
+            canEdit = x._3
           ))
           case None => NotFound(views.html.page_404("Objective not found"))
         }
         case None => NotFound(views.html.page_404("Person not found"))
       }
-
-      /*
-      @(login:String, emp: EmprelationsRow, quarter:String,
-        objective:OkrobjectiveRow,
-        keyResults: Seq[OkrkeyresultRow],
-        otherObjectives:Seq[OkrobjectiveRow],
-        pastObjectives:Seq[OkrobjectiveRow],
-        futureObjectives:Seq[OkrobjectiveRow])
-       */
     }
+  }
 
+
+  def byObjectiveUPD(login:String, id:Long) = Action.async { implicit request =>
+    request.body.asFormUrlEncoded match {
+      case None =>Future.successful( NotFound("No Fields"))
+      case Some((keys: Map[String, Seq[String]])) =>
+        user.isOwnerManagerOrAdmin(login,LDAPAuth.getUser()).map { canEdit =>
+          if (canEdit) {
+            okrObjectiveRepo.find(login, id).map {
+              case Some(objective) =>
+                val fieldName: String = keys.getOrElse("name", Seq("x")).head.toLowerCase
+                val valueSeq: Seq[String] = keys.getOrElse("value", Seq.empty)
+                val res: Future[Result] = valueSeq.headOption match {
+                  case None => Future.successful(NotAcceptable("Missing value"))
+                  case Some(value) =>
+                    val upd: Future[Boolean] = if (fieldName.equals("objective")) {
+                      okrObjectiveRepo.update(id, objective.copy(objective = value))
+                    } else if (fieldName.equals("score")) {
+                      okrObjectiveRepo.update(id, objective.copy(score = Some(value.toInt)))
+                    } else {
+                      Future.successful(false)
+                    }
+                    upd.map { r =>
+                      if (r) {
+                        Ok("Updated")
+                      } else {
+                        NotFound("Invalid Value/Not Updated")
+                      }
+                    }
+                }
+                res
+              case None => Future.successful(NotFound(views.html.page_404("Objective not found")))
+            }.flatMap(identity)
+          } else {
+            Future.successful(Unauthorized(views.html.page_403("No Permission")))
+          }
+        }.flatMap(identity)
+    }
   }
 
 

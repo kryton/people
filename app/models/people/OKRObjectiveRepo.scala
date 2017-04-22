@@ -43,7 +43,7 @@ class OKRObjectiveRepo @Inject()(@NamedDatabase("default")  protected val dbConf
   import offline.Tables._
   import offline.Tables.profile.api._
 
-  def find(id:Long):Future[Option[OkrobjectiveRow]] = db.run(Okrobjective.filter(_.id === id).result.headOption)
+  def find(login:String, id:Long):Future[Option[OkrobjectiveRow]] = db.run(Okrobjective.filter(_.id === id).filter(_.login.toLowerCase === login.toLowerCase).result.headOption)
 
   def find( login:String, quarterDate:java.sql.Date): Future[Seq[Tables.OkrobjectiveRow]] = db.run{
     Okrobjective.filter(_.login.toLowerCase === login.toLowerCase).filter(_.quarterdate === quarterDate).result
@@ -74,7 +74,7 @@ class OKRObjectiveRepo @Inject()(@NamedDatabase("default")  protected val dbConf
     }
     res.map{ x:Seq[(Tables.OkrobjectiveRow, Option[Tables.OkrkeyresultRow])] =>
         x.groupBy( _._1.id).map{ z =>
-          val krs = z._2.map(_._2).flatten
+          val krs = z._2.flatMap(_._2)
           ( z._2.head._1, krs )
         }.headOption
       }
@@ -127,7 +127,7 @@ class OKRObjectiveRepo @Inject()(@NamedDatabase("default")  protected val dbConf
     db.run(Okrobjective returning Okrobjective.map(_.id) += empTag )
     .map(id => empTag.copy(id = id ))
 
-  def update(id: Long, empTag:OkrobjectiveRow) = {
+  def update(id: Long, empTag:OkrobjectiveRow): Future[Boolean] = {
     db.run(Okrobjective.filter(_.id === id).update( empTag.copy(id = id))) map { _ > 0 }
   }
 

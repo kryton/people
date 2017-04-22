@@ -22,7 +22,8 @@
         keyResults: Seq[OkrkeyresultRow],
         otherObjectives:Seq[OkrobjectiveRow],
         pastObjectives:Seq[OkrobjectiveRow],
-        futureObjectives:Seq[OkrobjectiveRow])(implicit
+        futureObjectives:Seq[OkrobjectiveRow],
+        canEdit:Boolean)(implicit
         webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
@@ -34,7 +35,21 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2><a href="@routes.OKRController.login(login,Some(quarter))">@emp.fullName @quarter</a> - @objective.objective - Score (XX) - Calculated (YY) BUTTON(SAVE Score) BUTTON(NEW KR)</h2>
+                    <h2><a href="@routes.OKRController.login(login,Some(quarter))">@emp.fullName @quarter</a> -
+@if(canEdit) {
+<span class="OBJECTIVE" data-type="text" data-pk="@objective.id" data-name="objective" data-title="Objective" data-url="#">
+@objective.objective</span>
+
+- Score (<span class="OBJECTIVE" data-type="number" data-pk="@objective.id" data-name="score" data-title="Score" data-url="#">@objective.score.map{ x =>
+            @x
+            }</span>) - Calculated (YY) BUTTON(SAVE Score) BUTTON(NEW KR)
+} else {
+@objective.objective @objective.score.map{ x =>
+(@x)
+}
+}
+
+</h2>
                     <ul class="nav navbar-right panel_toolbox">
                         <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                         </li>
@@ -124,4 +139,19 @@
             </div> <!-- x_panel -->
         </div>
     </div>
+<script nonce="PMAN" >
+window.onload = function () {
+    //turn to inline mode
+    //$.fn.editable.defaults.mode = 'inline';
+    $(document).ready(function() {
+        $('.OBJECTIVE').editable({
+            params: function(params) {
+                //originally params contain pk, name and value
+                params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                return params;
+                }
+                });
+    });
+}
+</script>
 }
