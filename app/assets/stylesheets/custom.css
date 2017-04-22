@@ -1,14 +1,10 @@
 
 html , body{
-	
  height:100%;
- 
 }
  
 .full-width {
-	
  width:100%;
- 
  }
  
 .full-height{
@@ -4254,4 +4250,21 @@ dl.error {
 }
 dd.error {
     color: #E74C3C;
+}
+
+.equal > .equal-child:nth-child(3n+1) {
+    clear: left;
+}
+
+.equal > .equal-child2:nth-child(2n+1) {
+    clear: left;
+}
+
+@media (max-width: 768px) {
+    .equal > .equal-child:nth-child(2n+1) {
+        clear: left;
+    }
+    .equal > .equal-child2:nth-child(2n+1) {
+        clear: left;
+    }
 }

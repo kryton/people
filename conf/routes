@@ -44,7 +44,16 @@ GET         /shoutout/:id                          controllers.KudosController.i
 GET         /OKR/                                  controllers.OKRController.topX(size: Int ?= 10, format: Option[String] ?= None)
 GET         /OKR/:login                            controllers.OKRController.login(login:String, quarter:Option[String] ?= None)
 GET         /OKR/:login/:id                        controllers.OKRController.byObjective(login:String, id:Long)
-POST         /OKR/:login/:id                        controllers.OKRController.byObjectiveUPD(login:String, id:Long)
+POST        /OKR/:login/:id/                        controllers.OKRController.byObjectiveUPD(login:String, id:Long)
+POST        /OKR/:login/:okr/:kr/                   controllers.OKRController.byObjectiveKRUPD(login:String, okr:Long, kr:Long)
+POST        /OKR/:login/:okr/kr/new                controllers.OKRController.newKR(login:String, okr:Long)
+POST        /OKR/:login/new                 controllers.OKRController.newObjective(login:String, quarter:Option[String] ?= None )
+
+GET         /OKR/:login/:id/complete               controllers.OKRController.completeObjective(login:String, id:Long)
+GET         /OKR/:login/:id/uncomplete             controllers.OKRController.unCompleteObjective(login:String, id:Long)
+GET         /OKR/:login/:okr/:kr/complete          controllers.OKRController.completeKR(login:String, okr:Long, kr:Long)
+GET         /OKR/:login/:okr/:kr/uncomplete        controllers.OKRController.unCompleteKR(login:String, okr:Long, kr:Long)
+GET         /OKR/:login/:okr/:kr/delete            controllers.OKRController.deleteKR(login:String, okr:Long, kr:Long)
 ###
 #
 # Product URLs

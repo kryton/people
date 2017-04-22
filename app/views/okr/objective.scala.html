@@ -23,11 +23,20 @@
         otherObjectives:Seq[OkrobjectiveRow],
         pastObjectives:Seq[OkrobjectiveRow],
         futureObjectives:Seq[OkrobjectiveRow],
-        canEdit:Boolean)(implicit
+        canEdit:Boolean,
+        form: Form[forms.KRForm.Data])(implicit
         webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
+        messages: Messages,
         ldap: util.LDAP )
+@scoreC(krs:Seq[OkrkeyresultRow]) = {
+    @if(krs.exists(_.completed)) {
+        @{krs.filter(_.completed).flatMap{ _.score }.sum/krs.count(_.completed)}
+    } else {
+        0
+    }
+}
 
 @main(s"${emp.fullName} - $quarter ${objective.objective}!") {
 
@@ -35,21 +44,7 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2><a href="@routes.OKRController.login(login,Some(quarter))">@emp.fullName @quarter</a> -
-@if(canEdit) {
-<span class="OBJECTIVE" data-type="text" data-pk="@objective.id" data-name="objective" data-title="Objective" data-url="#">
-@objective.objective</span>
-
-- Score (<span class="OBJECTIVE" data-type="number" data-pk="@objective.id" data-name="score" data-title="Score" data-url="#">@objective.score.map{ x =>
-            @x
-            }</span>) - Calculated (YY) BUTTON(SAVE Score) BUTTON(NEW KR)
-} else {
-@objective.objective @objective.score.map{ x =>
-(@x)
-}
-}
-
-</h2>
+                    <h2><a href="@routes.OKRController.login(login,Some(quarter))">@emp.fullName @quarter</a></h2>
                     <ul class="nav navbar-right panel_toolbox">
                         <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                         </li>
@@ -61,13 +56,51 @@
                 </div>
                 <div class="x_content">
                     <div class="content">
-                        @keyResults.map{ kr =>
+                      <div class="row">
+                        <div class="col-xs-1">
+                          @if(objective.completed) {
+                          <i class="fa fa-check-square-o"></i>
+                          } else {
+                          <i class="fa fa-square-o"></i>
+                          }
+                        </div>
+                        <div class="col-xs-10">
+                      @if(canEdit) {
+                      <span class="OBJECTIVE editable editable-click" data-type="text" data-pk="@objective.id" data-name="objective" data-title="Objective" data-url="#">
+                      @objective.objective</span>
+
+                      - Score (<span class="OBJECTIVE editable editable-click" data-type="number" data-pk="@objective.id" data-name="score" data-title="Score" data-url="#">@objective.score.map{ x =>
+                                  @x
+                                  }.getOrElse{
+                                          -
+                                  }</span>) - Calculated (@scoreC(keyResults))
+                      @if( objective.completed) {
+                          <a href="@routes.OKRController.unCompleteObjective(login,objective.id)"><i class="fa fa-scissors" title="Set as ongoing"></i></a>
+                      } else {
+
+                          <a href="@routes.OKRController.completeObjective(login,objective.id)"> <i class="fa fa-check" title="Set as completed"></i></a>
+                      }
+                      <a id="addKR" href="#"><i class="fa fa-plus" title="Add a new Key result"></i></a>
+                      } else {
+                      @objective.objective @objective.score.map{ x =>
+                      (@x)
+                      }
+                      }
+                    </div>
+                    </div>
+                    <hr />
+                        @keyResults.map{ kr: OkrkeyresultRow =>
                         <div class="row">
                             <div class="col-xs-1">
                                 @if(kr.completed) {
                                     <i class="fa fa-check-square-o" title="completed"></i>
-                                    @if( kr.score.isDefined) {
-                                        @kr.score
+                                      @if( canEdit) {
+                                        <span class="OBJECTIVE editable editable-click" data-type="number" data-pk="@kr.id" data-name="scorekr" data-title="KR Objective"
+                                        data-url="@routes.OKRController.byObjectiveKRUPD(login, kr.objectiveid, kr.id)">@kr.score.map{ x=> @x }.getOrElse{ 0 }</span>
+                                      } else {
+                                        @kr.score.map{ x => @x}.getOrElse{
+                                        0
+                                        }
                                     }
                                 } else {
                                     <i class="fa fa-square-o" title="underway"></i>
@@ -75,24 +108,87 @@
                             </div>
 
                             <div class="col-xs-10">
-                                @kr.objective @if(kr.completed) {
-                                BUTTON(revise)
+                                @if( canEdit) {
+                                <div class="row"><div class="col-xs-12">
+                                  <span class="OBJECTIVE editable editable-click" data-type="text" data-pk="@kr.id" data-name="objectivekr" data-title="KR Objective"
+                                  data-url="@routes.OKRController.byObjectiveKRUPD(login, kr.objectiveid, kr.id)">
+                                  @kr.objective</span>
+                                    @if(kr.completed) {
+                                        <a href="@routes.OKRController.unCompleteKR(login,kr.objectiveid,kr.id)"><i class="fa fa-scissors" title="mark key result as on-going"></i></a>
+                                    } else {
+                                        <a href="@routes.OKRController.completeKR(login,kr.objectiveid,kr.id)"><i class="fa fa-check" title="complete key result"></i></a>
+                                    }
+<a href="@routes.OKRController.deleteKR(login,kr.objectiveid,kr.id)"><i class="fa fa-times" title="delete this Key result"></i></a>
+                                  </div></div>
+                                    <div class="row"><div class="col-xs-6">
+                                      <span class="OBJECTIVE editable editable-inline editable-input" data-type="textarea" data-pk="@kr.id" data-name="descriptionkr"
+                                    data-title="KR Description"
+                                    data-url="@routes.OKRController.byObjectiveKRUPD(login, kr.objectiveid, kr.id)">@kr.description.map{ x=> <p
+                                      >@x</p>}.getOrElse{<p
+                                      >None</p>}</span>
+                                  </div></div>
                                 } else {
-                                BUTTON(complete)
+                                  @kr.objective
+                                      <pre>@kr.description</pre>
                                 }
-                                <pre>@kr.description</pre>
                             </div>
-
-
-
                         </div>
 
                         }
                     </div>
+                </div>
+                <div id="addNewKR" class="modal fade">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">Add a new Key Result</h4>
+                            </div>
+                            @helper.form( action = routes.OKRController.newKR(login,objective.id)) {
 
+                            <div class="modal-body">
+                                  @helper.CSRF.formField
+                                  @helper.inputText(form("keyResult"), '_label -> "Key Result", 'placeholder -> "Key Result", 'class -> "form-control" )
+                                  @helper.textarea(form("description"),'_label -> "Description", 'placeholder -> "Description", 'class ->"form-control")
+
+                                <p>Do you want to save changes you made to document before closing?</p>
+                                <p class="text-warning"><small>If you don't save, your changes will be lost.</small></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                            </div>
+                          }
+                        </div>
+                    </div>
                 </div>
             </div> <!-- x_panel -->
 
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Other Objectives</h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                    </li>
+
+                                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                                    </li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div> <!-- title -->
+                            <div class="x_content">
+                                <div class="content">
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                     @otherObjectives.map{ obj =>
+                                        <li><a href="@routes.OKRController.byObjective(login, obj.id)">@obj.objective</a></li>
+                                     }
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- x_panel -->
             <div class="x_panel">
                 <div class="x_title">
                     <h2>Past Objectives</h2>
@@ -109,7 +205,9 @@
                     <div class="content">
                         <div class="row">
                             <div class="col-xs-12">
-                         TBD
+                         @pastObjectives.map{ obj =>
+                           <li><a href="@routes.OKRController.byObjective(login, obj.id)">@obj.objective</a></li>
+                         }
                             </div>
                         </div>
                     </div>
@@ -131,15 +229,18 @@
                     <div class="content">
                         <div class="row">
                             <div class="col-xs-12">
-                         TBD
+                         @futureObjectives.map{ obj =>
+                           <li><a href="@routes.OKRController.byObjective(login, obj.id)">@obj.objective</a></li>
+                         }
                             </div>
                         </div>
                     </div>
                 </div>
             </div> <!-- x_panel -->
         </div>
-    </div>
-<script nonce="PMAN" >
+
+<script nonce="PMAN" type="text/javascript"><script nonce="PMAN" type="text/javascript"><script nonce="PMAN" type="text/javascript"><script nonce="PMAN" type="text/javascript"><script nonce="PMAN" type="text/javascript"><script nonce="PMAN" type="text/javascript"><script nonce="PMAN" type="text/javascript"><script nonce="PMAN" type="text/javascript">
+<!--
 window.onload = function () {
     //turn to inline mode
     //$.fn.editable.defaults.mode = 'inline';
@@ -151,7 +252,13 @@ window.onload = function () {
                 return params;
                 }
                 });
+        $("#addKR").click( function() {
+                    $("#addNewKR").modal('show');
+            });
     });
+
 }
+-->
 </script>
+</div>
 }

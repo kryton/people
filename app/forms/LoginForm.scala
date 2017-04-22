@@ -17,6 +17,7 @@
 
 package forms
 
+import offline.Tables
 import play.api.data.Form
 import play.api.data.Forms._
 
@@ -48,4 +49,22 @@ object LoginForm {
                    username: String,
                    password: String,
                    rememberMe: Boolean)
+}
+
+object KRForm {
+  val form = Form(
+    mapping(
+      "keyResult" -> text(maxLength = 100),
+      "description" -> optional(text)
+    )(Data.apply)(Data.unapply)
+  )
+  case class Data(keyResult:String, description:Option[String])
+}
+object ObjectiveForm {
+  val form = Form(
+    mapping(
+      "objective" -> text(maxLength = 100)
+    )(Data.apply)(Data.unapply)
+  )
+  case class Data(objective:String)
 }

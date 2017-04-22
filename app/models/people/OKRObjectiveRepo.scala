@@ -80,6 +80,17 @@ class OKRObjectiveRepo @Inject()(@NamedDatabase("default")  protected val dbConf
       }
   }
 
+   def findKR(login:String, okr:Long, kr:Long): Future[Option[(Tables.OkrobjectiveRow, Tables.OkrkeyresultRow)]] = {
+    db.run{
+      Okrobjective
+        .filter(_.id === okr )
+        .filter(_.login.toLowerCase === login.toLowerCase)
+        .join( Okrkeyresult).on( _.id === _.objectiveid)
+        .filter(_._2.id === kr )
+        .result.headOption
+    }
+  }
+
 
   def find( logins:Set[String], quarterDate:java.sql.Date): Future[Seq[Tables.OkrobjectiveRow]] = db.run{
     Okrobjective.filter(_.login.toLowerCase inSet logins.map( x =>x.toLowerCase)).filter(_.quarterdate === quarterDate).result
@@ -127,10 +138,22 @@ class OKRObjectiveRepo @Inject()(@NamedDatabase("default")  protected val dbConf
     db.run(Okrobjective returning Okrobjective.map(_.id) += empTag )
     .map(id => empTag.copy(id = id ))
 
+def insertKR(kr: OkrkeyresultRow): Future[Tables.OkrkeyresultRow] =
+    db.run(Okrkeyresult returning Okrkeyresult.map(_.id) += kr )
+    .map(id => kr.copy(id = id ))
+
   def update(id: Long, empTag:OkrobjectiveRow): Future[Boolean] = {
     db.run(Okrobjective.filter(_.id === id).update( empTag.copy(id = id))) map { _ > 0 }
   }
 
+  def updateKR(id: Long, kr:OkrkeyresultRow): Future[Boolean] = {
+    db.run(Okrkeyresult.filter(_.id === id).update( kr.copy(id = id))) map { _ > 0 }
+  }
+
   def delete(id: Long) =
     db.run(Okrobjective.filter(_.id === id).delete) map { _ > 0 }
+
+  def deleteKR(id: Long) =
+    db.run(Okrkeyresult.filter(_.id === id).delete) map { _ > 0 }
+
 }

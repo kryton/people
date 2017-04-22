@@ -24,14 +24,17 @@ import javax.inject._
 import models.people._
 import models.people.EmpRelationsRowUtils._
 import offline.Tables
-import offline.Tables.MatrixteamRow
+import offline.Tables.{MatrixteamRow, OkrkeyresultRow, OkrobjectiveRow}
+import org.joda.time.DateTime
+import play.api.Logger
+import play.api.data.Form
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc._
 import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
-import util.{LDAP, Page, User,Conversions}
+import util.{Conversions, LDAP, Page, User}
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -94,7 +97,8 @@ class OKRController @Inject()
               Set[Tables.EmprelationsRow],
               Set[Tables.EmprelationsRow],
               Seq[(Tables.OkrobjectiveRow, Seq[Tables.OkrkeyresultRow])],
-              Seq[(Date, String)])
+              Seq[(Date, String)],
+              Boolean)
             ]
           = for {
             objKR <- okrObjectiveRepo.findEx(login, quarterDate.get)
@@ -102,7 +106,8 @@ class OKRController @Inject()
             directs <- employeeRepo.managedBy(emp.login)
             mgr <- mgrF
             qtrDate <- okrObjectiveRepo.getQuartersAsSelect()
-          } yield (mgr, peers, directs, objKR, qtrDate)
+            userPerms <- user.isOwnerManagerOrAdmin(login,LDAPAuth.getUser())
+          } yield (mgr, peers, directs, objKR, qtrDate, userPerms)
           ppl.map { x =>
             val mgrs: Set[String] = x._1.toSet.map { xx: Tables.EmprelationsRow => xx.login.toLowerCase }
             val peers = x._2.filterNot(p => p.login == emp.login)
@@ -121,7 +126,7 @@ class OKRController @Inject()
                 (d.login, d, loginO.getOrElse(d.login.toLowerCase, Seq.empty))
               }
 
-              Ok(views.html.okr.search(login, emp, Conversions.quarterS(quarterDate), eO, x._1, mO, pO, dO, qtrDate))
+              Ok(views.html.okr.search(login, emp, Conversions.quarterS(quarterDate), eO, x._1, mO, pO, dO, qtrDate, x._6, forms.ObjectiveForm.form))
             }
           }.flatMap(identity)
 
@@ -133,19 +138,6 @@ class OKRController @Inject()
 
   }
 
-  def id( ID:Long,page:Int): Action[AnyContent] = Action.async{ implicit request =>
-    matrixTeamRepo.find(ID).map {
-      case Some(mt: MatrixteamRow) =>
-        val empsF = matrixTeamMemberRepo.findLoginByMatrixTeam(mt.id)
-        (for {
-          emps <- empsF
-        } yield emps)
-        .map { x =>
-          Ok(views.html.matrix.id( ID, mt, Page(x,page, pageSize = 9) ))
-        }
-      case None => Future.successful(NotFound(views.html.page_404("Team ID not found")))
-    }.flatMap(identity)
-  }
 
   def topX( size:Int, format:Option[String]) = Action.async { implicit request =>
     okrObjectiveRepo.latest(size).map { seq =>
@@ -181,19 +173,33 @@ class OKRController @Inject()
     } yield( e,o,u )).map{ x =>
       x._1 match {
         case Some(emp) => x._2 match {
-          case Some(okrKR) => Ok(views.html.okr.objective(login,
-            emp,
-            Conversions.quarterS(okrKR._1.quarterdate),
-            okrKR._1,
-            okrKR._2,
-            Seq.empty, Seq.empty, Seq.empty,
-            canEdit = x._3
-          ))
-          case None => NotFound(views.html.page_404("Objective not found"))
+          case Some(okrKR) =>
+            import com.github.nscala_time.time.Imports._
+            val quarter= okrKR._1.quarterdate.getOrElse(new java.sql.Date( System.currentTimeMillis()))
+            val jt:DateTime = new DateTime( quarter.getTime)
+            val pastQ = new java.sql.Date( (jt - 3.months).getMillis )
+            val postQ = new java.sql.Date( (jt + 3.months).getMillis )
+            (for{
+              objs <- okrObjectiveRepo.find(login,quarter)
+              future <- okrObjectiveRepo.find(login,postQ)
+              past <- okrObjectiveRepo.find(login,pastQ)
+            }yield(past, objs, future )).map { pastPresentFuture =>
+              Ok(views.html.okr.objective(login,
+                emp,
+                Conversions.quarterS(okrKR._1.quarterdate),
+                okrKR._1,
+                okrKR._2,
+                pastPresentFuture._2, pastPresentFuture._1, pastPresentFuture._3,
+                canEdit = x._3,
+                form = forms.KRForm.form
+              ))
+            }
+          case None =>  Future.successful(NotFound(views.html.page_404("Objective not found")))
         }
-        case None => NotFound(views.html.page_404("Person not found"))
+        case None => Future.successful(NotFound(views.html.page_404("Person not found")))
       }
-    }
+    }.flatMap(identity)
+
   }
 
 
@@ -236,6 +242,223 @@ class OKRController @Inject()
   }
 
 
+  def completeObjective(login:String, id:Long) = Action.async { implicit request =>
+    user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map { canEdit =>
+      if (canEdit) {
+        okrObjectiveRepo.findEx(login, id).map {
+          case Some(objective) =>
+            val score = objective._1.score match {
+              case None =>
+                val completed = objective._2.filter(p => p.completed).flatMap( _.score)
+                completed match {
+                  case Nil => None
+                  case x:Seq[Int] => Some( completed.sum / completed.size )
+                }
+              case Some(x) => Some(x)
+            }
+
+            okrObjectiveRepo.update(id, objective._1.copy(score = score, completed = true )).map{ x=>
+              Redirect(routes.OKRController.byObjective(login,id))
+            }
+          case None => Future.successful(NotFound(views.html.page_404("objective Not found")))
+        }.flatMap(identity)
+      } else {
+        Future.successful(Unauthorized(views.html.page_403("No Permission")))
+      }
+    }.flatMap(identity)
+  }
+
+  def unCompleteObjective(login:String, id:Long) = Action.async { implicit request =>
+    user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map { canEdit =>
+      if (canEdit) {
+        okrObjectiveRepo.findEx(login, id).map {
+          case Some(objective) =>
+            okrObjectiveRepo.update(id, objective._1.copy(completed = false )).map{ x=>
+              Redirect(routes.OKRController.byObjective(login,id))
+            }
+          case None => Future.successful(NotFound(views.html.page_404("objective Not found")))
+        }.flatMap(identity)
+      } else {
+        Future.successful(Unauthorized(views.html.page_403("No Permission")))
+      }
+    }.flatMap(identity)
+  }
+
+
+
+  def byObjectiveKRUPD(login:String, okr:Long, kr:Long) = Action.async { implicit request =>
+    request.body.asFormUrlEncoded match {
+      case None =>Future.successful( NotFound("No Fields"))
+      case Some((keys: Map[String, Seq[String]])) =>
+        user.isOwnerManagerOrAdmin(login,LDAPAuth.getUser()).map { canEdit =>
+          if (canEdit) {
+            okrObjectiveRepo.findKR(login, okr, kr ).map {
+              case Some(objectiveKR) =>
+                val fieldName: String = keys.getOrElse("name", Seq("x")).head.toLowerCase
+                val valueSeq: Seq[String] = keys.getOrElse("value", Seq.empty)
+                val res: Future[Result] = valueSeq.headOption match {
+                  case None => Future.successful(NotAcceptable("Missing value"))
+                  case Some(value) =>
+                    val updRec = fieldName match {
+                      case "objectivekr" => objectiveKR._2.copy( objective = value)
+                      case "scorekr" => objectiveKR._2.copy( score = Some(value.toInt))
+                      case "descriptionkr" =>
+                        if (value.isEmpty || value.trim == "") {
+                          objectiveKR._2.copy( description = None)
+                        } else {
+                          objectiveKR._2.copy( description = Some(value))
+                        }
+
+                      case _ => objectiveKR._2
+                    }
+                    okrObjectiveRepo.updateKR(objectiveKR._2.id, updRec)
+                      .map { r =>
+                        if (r) {
+                          Ok("Updated")
+                        } else {
+                          NotFound("Invalid Value/Not Updated")
+                        }
+                      }
+                }
+                res
+              case None => Future.successful(NotFound(views.html.page_404("Objective not found")))
+            }.flatMap(identity)
+          } else {
+            Future.successful(Unauthorized(views.html.page_403("No Permission")))
+          }
+        }.flatMap(identity)
+    }
+  }
+
+
+
+  def completeKR(login:String, okr:Long, kr:Long) = Action.async { implicit request =>
+    user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map { canEdit =>
+      if (canEdit) {
+        okrObjectiveRepo.findKR(login, okr, kr).map {
+          case Some(objectiveKR) =>
+            okrObjectiveRepo.updateKR( objectiveKR._2.id , objectiveKR._2.copy(completed = true )).map{ x=>
+              Redirect(routes.OKRController.byObjective(login,okr))
+            }
+          case None => Future.successful(NotFound(views.html.page_404("KR Not found")))
+        }.flatMap(identity)
+      } else {
+        Future.successful(Unauthorized(views.html.page_403("No Permission")))
+      }
+    }.flatMap(identity)
+  }
+
+  def unCompleteKR(login:String, okr:Long, kr:Long) = Action.async { implicit request =>
+    user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map { canEdit =>
+      if (canEdit) {
+        okrObjectiveRepo.findKR(login, okr,kr).map {
+          case Some(objectiveKR) =>
+            okrObjectiveRepo.updateKR(kr, objectiveKR._2.copy(completed = false )).map{ x=>
+              Redirect(routes.OKRController.byObjective(login,okr))
+            }
+          case None => Future.successful(NotFound(views.html.page_404("KR Not found")))
+        }.flatMap(identity)
+      } else {
+        Future.successful(Unauthorized(views.html.page_403("No Permission")))
+      }
+    }.flatMap(identity)
+  }
+
+  def newKR(login:String, okr:Long) = Action.async { implicit request =>
+
+    user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map { canEdit =>
+      if (canEdit) {
+        forms.KRForm.form.bindFromRequest.fold(
+          form => {
+            Future.successful(Redirect(routes.OKRController.byObjective(login, okr)))
+          },
+          data => {
+            okrObjectiveRepo.find(login, okr).map {
+              case Some(obj) =>
+                val nowD = new java.sql.Date( System.currentTimeMillis())
+                val newKR = OkrkeyresultRow(id=0,objectiveid = obj.id,
+                  description = data.description,
+                  objective = data.keyResult,
+                  score=None,
+                  completed=false,
+                  dateadded = nowD)
+
+                okrObjectiveRepo.insertKR( newKR ).map{ ignore =>
+                Redirect(routes.OKRController.byObjective(login, okr))
+              }
+              case None => Future.successful( NotFound(views.html.page_404("Objective not found")))
+            }.flatMap(identity)
+          }
+        )
+      } else {
+        Future.successful(Unauthorized(views.html.page_403("No Permission")))
+      }
+    }.flatMap(identity)
+  }
+
+  def newObjective(login:String, quarter:Option[String]) = Action.async { implicit request =>
+    val quarterDate = Conversions.quarterD(quarter)
+    user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map { canEdit =>
+      if (canEdit) {
+        forms.ObjectiveForm.form.bindFromRequest.fold(
+          form => {
+            Future.successful(Redirect(routes.OKRController.login(login, quarter)))
+          },
+          data => {
+            employeeRepo.findByLogin(login).map {
+              case Some(obj) =>
+                val nowD = new java.sql.Date( System.currentTimeMillis())
+                val newObj = OkrobjectiveRow(id=0, login = obj.login,
+                  objective = data.objective,
+                  quarterdate = quarterDate,
+                  score=None,
+                  completed=false,
+                  dateadded = nowD)
+
+                okrObjectiveRepo.insert( newObj ).map{ o =>
+                Redirect(routes.OKRController.byObjective(login, o.id))
+              }
+              case None => Future.successful( NotFound(views.html.page_404("Login not found")))
+            }.flatMap(identity)
+          }
+        )
+      } else {
+        Future.successful(Unauthorized(views.html.page_403("No Permission")))
+      }
+    }.flatMap(identity)
+  }
+
+  def deleteKR( login:String, okr:Long, kr:Long ) = Action.async { implicit request =>
+    user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map { canEdit =>
+      if (canEdit) {
+        okrObjectiveRepo.findKR(login,okr,kr).map{
+          case None => Future.successful(NotFound(views.html.page_404("Can't find that Key Result")))
+          case Some(obj) => okrObjectiveRepo.deleteKR(obj._2.id).map{ x =>
+            Redirect(routes.OKRController.byObjective(login,okr))
+          }
+        }.flatMap(identity)
+      } else {
+        Future.successful(Unauthorized(views.html.page_403("No Permission")))
+      }
+    }.flatMap(identity)
+  }
+
+  def delete( login:String, okr:Long) = Action.async { implicit request =>
+    user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map { canEdit =>
+      if (canEdit) {
+        okrObjectiveRepo.find(login,okr).map{
+          case None => Future.successful(NotFound(views.html.page_404("Can't find that objective")))
+          case Some(obj) => okrObjectiveRepo.delete(obj.id).map{ x =>
+            Redirect(routes.OKRController.login(login,Some(Conversions.quarterS(obj.quarterdate))))
+          }
+        }.flatMap(identity)
+      } else {
+        Future.successful(Unauthorized(views.html.page_403("No Permission")))
+      }
+    }.flatMap(identity)
+  }
+
+
   implicit val DateWrites = new Writes[java.sql.Date] {
     def writes( d: java.sql.Date): JsValue = Json.toJson(
       d.toString
@@ -253,6 +476,7 @@ class OKRController @Inject()
       "retired" -> k.retired
     )
   }
+
 }
 
 

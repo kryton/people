@@ -25,7 +25,9 @@
     mgrObjectives: Iterable[(String, EmprelationsRow, Seq[OkrobjectiveRow])],
     peers: Iterable[ EmprelationsRow] ,
     directsObjectives:Iterable[(String, EmprelationsRow, Seq[OkrobjectiveRow])],
-    qtrDate:Seq[(java.sql.Date,String)])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+    qtrDate:Seq[(java.sql.Date,String)],
+    canEdit:Boolean,
+    form:Form[forms.ObjectiveForm.Data])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], messages: Messages, ldap: util.LDAP )
 
 @score( objectiveKR:Seq[(OkrobjectiveRow, Seq[OkrkeyresultRow])]) = {
     @if( !objectiveKR.forall(p => p._1.retired) ) {
@@ -37,169 +39,26 @@
 
     }
 }
+
 @main(s"Objectives for ${emp.fullName}  $quarter") {
-<div class="row">
-    <div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
 
-        <div class="x_panel">
-            <div class="x_title">
-                <h2>Managed by  @mgr.map { x =>
-                <a href="@routes.OKRController.login(x.login, Some(quarter))">@x.fullName</a>
-                }.getOrElse {
-                    None
-                }
-                </h2>
-                <ul class="nav navbar-right panel_toolbox">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Change Quarter<i class="fa fa-wrench"></i></a>
-                        <ul  class="dropdown-menu" role="menu">
-                        @qtrDate.reverse.map { s =>
-                            <li><a href="@routes.OKRController.login(login,Some(s._2))">@s._2</a></li>
-                        }
-
-                        </ul>
-                    </li>
-                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                    </li>
-
-                    <li><a class="close-link"><i class="fa fa-close"></i></a>
-                    </li>
-                </ul>
-                <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-                <div class="container">
-                    <div class="row">
-                    @mgrObjectives.map { mgrO =>
-                        @if(mgrO._3.nonEmpty) {
-
-                            @mgrO._3.filterNot( p => p.retired).map { objective =>
-                                <div class="col-xs-12">
-                                    @if(objective.completed) {
-                                        <i class="fa fa-check-square-o" title="completed"></i>
-
-                                    } else {
-                                        <i class="fa fa-square-o" title="underway"></i>
-                                    }
-
-                                <a href="@routes.OKRController.byObjective(objective.login,objective.id)">@objective.objective</a>
-                                </div>
-                            }
-
-                        } else {
-                            No Objectives defined
-                        }
-                    }
-
-
-                    </div>
-                </div>
-
-            </div>
-        </div> <!-- x_panel -->
-
-        <div class="x_panel">
-            <div class="x_title">
-                <h2>OKRs for - @emp.fullName! @score(empObjectives) BUTTON(NEW OBJECTIVE)</h2>
-
-                <ul class="nav navbar-right panel_toolbox">
-                    <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Change Quarter<i class="fa fa-wrench"></i></a>
-                    <ul  class="dropdown-menu" role="menu">
-                        @qtrDate.reverse.map { s =>
-                            <li><a href="@routes.OKRController.login(login,Some(s._2))">@s._2</a></li>
-                        }
-
-                    </ul>
-                    </li>
-                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
-
-                    <li><a class="close-link"><i class="fa fa-close"></i></a>  </li>
-                </ul>
-                <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-                <div class="container">
-                    <div class="col-sm-9 col-xs-12">
-                    @empObjectives.sortBy(p => (p._1.retired, p._1.objective)).map { mtm =>
-                        <div class="col-xs-12 col-md-6 ">
-                            <div class="panel panel-default">
-                                <div class="panel-heading ">
-
-                                    @if( mtm._1.retired) {
-                                        <h4><strike><small><a href="#">@mtm._1.objective</a></small></strike></h4>
-                                    } else {
-                                        <h4>@if( mtm._1.completed) {
-                                            <i class="fa fa-check-square-o" title="completed"></i>
-
-                                        }<a href="@routes.OKRController.byObjective(login,mtm._1.id)">@mtm._1.objective</a>
-                                            @if(!mtm._1.retired && mtm._1.completed && mtm._1.score.isDefined) {
-                                                <small>(@mtm._1.score)</small>
-                                            }
-                                        </h4>
-                                    }
-
-
-
-                                </div>
-                                <div class="panel-body">
-                                    @if(! mtm._1.retired) {
-                                        @mtm._2.map { kr =>
-                                            <div class="row">
-
-                                                <div class=col-xs-11>
-                                                    @if(kr.completed) {
-                                                        <i class="fa fa-check-square-o" title="completed"></i>
-                                                    } else {
-                                                        <i class="fa fa-square-o" title="underway"></i>
-                                                    }
-
-                                                    @kr.objective
-                                                </div>
-                                                <div class="col-xs-1">
-                                                @if( kr.score.isDefined && kr.completed) {
-                                                    @kr.score
-                                                }
-                                                </div>
-                                            </div>
-                                        }
-                                    } else {
-                                        &lt;retired&gt;
-                                    }
-                                </div>
-                            </div>
-
-                        </div>
-                    }
-
-                    </div>
-                    <div class="col-sm-3 col-xs-12">
-                        <div class="panel panel-default">
-                            <div class="panel-heading ">
-                                <h2>Peers</h2>
-                            </div>
-                            <div class="panel-body">
-                            @peers.map { direct =>
-                                <li><a href="@routes.OKRController.login(direct.login,Some(quarter))">@direct.fullName</a></li>
-                            }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div> <!-- x_panel -->
-
-        @if( directsObjectives.nonEmpty) {
             <div class="x_panel">
                 <div class="x_title">
-                    <h2>Directs</h2>
+                    <h2>Managed by  @mgr.map { x =>
+                    <a href="@routes.OKRController.login(x.login, Some(quarter))">@x.fullName</a>
+                    }.getOrElse {
+                        None
+                    }
+                    </h2>
                     <ul class="nav navbar-right panel_toolbox">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Change Quarter<i class="fa fa-wrench"></i></a>
-                            <ul  class="dropdown-menu" role="menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                Change Quarter<i class="fa fa-wrench"></i></a>
+                            <ul class="dropdown-menu" role="menu">
                             @qtrDate.reverse.map { s =>
-                                <li><a href="@routes.OKRController.login(login,Some(s._2))">@s._2</a></li>
+                                <li><a href="@routes.OKRController.login(login, Some(s._2))">@s._2</a></li>
                             }
 
                             </ul>
@@ -215,36 +74,225 @@
                 <div class="x_content">
                     <div class="container">
                         <div class="row">
-                            @directsObjectives.toSeq.sortBy(p => p._2.lastname ).map{ direct =>
-                                <div class="col-xs-6 col-md-4 ">
-                                    <div class="panel panel-default">
-                                        <div class="panel-heading">
-                                            <a href="@routes.OKRController.login(direct._2.login,Some(quarter))">@direct._2.fullName</a>
-                                        </div>
-                                        <div class="panel-body">
-                                            @direct._3.filterNot( p=> p.retired ).map { objective =>
-                                                    <div class="col-xs-1">
-                                                        @if(objective.completed) {
-                                                            <i class="fa fa-check-square-o" title="completed"></i>
+                        @mgrObjectives.map { mgrO =>
+                            @if(mgrO._3.nonEmpty) {
 
-                                                        } else {
-                                                            <i class="fa fa-square-o" title="underway"></i>
-                                                        }
-                                                    </div>
-                                                    <div class="col-xs-11">
-                                                        <a href="@routes.OKRController.byObjective(objective.login,objective.id)">@objective.objective</a>
-                                                    </div>
-                                            }
-                                        </div>
+                                @mgrO._3.filterNot(p => p.retired).map { objective =>
+                                    <div class="col-xs-12">
+                                        @if(objective.completed) {
+                                            <i class="fa fa-check-square-o" title="completed"></i>
+
+                                        } else {
+                                            <i class="fa fa-square-o" title="underway"></i>
+                                        }
+
+                                    <a href="@routes.OKRController.byObjective(objective.login, objective.id)">@objective.objective</a>
                                     </div>
+                                }
+
+                            } else {
+                                No Objectives defined
+                            }
+                        }
+
+
+                        </div>
+                    </div>
+
+                </div>
+                <div id="addNewObj" class="modal fade">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">Add a new Objective</h4>
+                            </div>
+                            @helper.form(action = routes.OKRController.newObjective(login, Some(quarter))) {
+
+                                <div class="modal-body">
+                                    @helper.CSRF.formField
+                                    @helper.inputText(form("objective"), '_label -> "Objective", 'placeholder -> "Objective", 'class -> "form-control")
+
+                                    <p>Do you want to save changes you made to document before closing?</p>
+                                    <p class="text-warning"><small>
+                                        If you don't save, your changes will be lost.</small></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
                                 </div>
                             }
 
                         </div>
                     </div>
                 </div>
-            </div><!-- x_panel -->
-        }
+            </div> <!-- x_panel -->
+
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>OKRs for - @emp.fullName! @score(empObjectives) @if(canEdit) {
+                        <a id="newObj"><i class="fa fa-plus" title="Add new objective"></i></a>
+                    }</h2>
+
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                Change Quarter<i class="fa fa-wrench"></i></a>
+                            <ul class="dropdown-menu" role="menu">
+                            @qtrDate.reverse.map { s =>
+                                <li><a href="@routes.OKRController.login(login, Some(s._2))">@s._2</a></li>
+                            }
+
+                            </ul>
+                        </li>
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+
+                        <li><a class="close-link"><i class="fa fa-close"></i></a>  </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="container">
+                        <div class="col-sm-9 col-xs-12">
+                            <div class="row equal">
+                        @empObjectives.sortBy(p => (p._1.retired, p._1.objective)).map { mtm =>
+                            <div class="col-xs-12 col-md-6 equal-child2 ">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading ">
+
+                                        @if(mtm._1.retired) {
+                                            <h4><strike><small><a href="#">@mtm._1.objective</a></small></strike></h4>
+                                        } else {
+                                            <h4>@if(mtm._1.completed) {
+                                                <i class="fa fa-check-square-o" title="completed"></i>
+
+                                            } <a href="@routes.OKRController.byObjective(login, mtm._1.id)">@mtm._1.objective</a>
+                                                @if(!mtm._1.retired && mtm._1.completed && mtm._1.score.isDefined) {
+                                                    <small>(@mtm._1.score)</small>
+                                                }
+                                            </h4>
+                                        }
+
+                                    </div>
+                                    <div class="panel-body">
+                                    @if(!mtm._1.retired) {
+                                        @mtm._2.map { kr =>
+                                            <div class="row">
+
+                                                <div class=col-xs-11>
+                                                    @if(kr.completed) {
+                                                        <i class="fa fa-check-square-o" title="completed"></i>
+                                                    } else {
+                                                        <i class="fa fa-square-o" title="underway"></i>
+                                                    }
+
+                                                    @kr.objective
+                                                </div>
+                                                <div class="col-xs-1">
+                                                @if(kr.score.isDefined && kr.completed) {
+                                                    @kr.score
+                                                }
+                                                </div>
+                                            </div>
+                                        }
+                                    } else {
+                                            &lt;retired&gt;
+                                    }
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+                        </div>
+
+                        </div>
+                        <div class="col-sm-3 col-xs-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading ">
+                                    <h2>Peers</h2>
+                                </div>
+                                <div class="panel-body">
+                                @peers.map { direct =>
+                                    <li><a href="@routes.OKRController.login(direct.login, Some(quarter))">@direct.fullName</a></li>
+                                }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div> <!-- x_panel -->
+
+            @if(directsObjectives.nonEmpty) {
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Directs</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                    Change Quarter<i class="fa fa-wrench"></i></a>
+                                <ul class="dropdown-menu" role="menu">
+                                @qtrDate.reverse.map { s =>
+                                    <li><a href="@routes.OKRController.login(login, Some(s._2))">@s._2</a></li>
+                                }
+
+                                </ul>
+                            </li>
+                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                            </li>
+
+                            <li><a class="close-link"><i class="fa fa-close"></i></a>
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="container">
+                            <div class="row equal">
+                            @directsObjectives.toSeq.sortBy(p => p._2.lastname).map { direct =>
+                                <div class="col-xs-6 col-md-4 equal-child">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <a href="@routes.OKRController.login(direct._2.login, Some(quarter))">@direct._2.fullName</a>
+                                        </div>
+                                        <div class="panel-body">
+                                        @direct._3.filterNot(p => p.retired).map { objective =>
+                                            <div class="col-xs-1">
+                                                @if(objective.completed) {
+                                                    <i class="fa fa-check-square-o" title="completed"></i>
+
+                                                } else {
+                                                    <i class="fa fa-square-o" title="underway"></i>
+                                                }
+                                            </div>
+                                            <div class="col-xs-11">
+                                                <a href="@routes.OKRController.byObjective(objective.login, objective.id)">@objective.objective</a>
+                                            </div>
+                                        }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    <!-- x_panel -->
+            }
+        </div>
+
+  <script nonce="PMAN" type="text/javascript">
+  <!--
+  window.onload = function () {
+      $(document).ready(function() {
+          $("#newObj").click( function() {
+                      $("#addNewObj").modal('show');
+              });
+      });  
+  }
+  -->
+  </script>
     </div>
-</div>
+
 }

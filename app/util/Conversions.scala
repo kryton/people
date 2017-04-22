@@ -143,6 +143,7 @@ object Conversions {
       workInDays
     }
   }
+
   def parsePercent(inString:String, default:Double):Double = {
     if (inString.trim.isEmpty || inString.trim.equals("")) {
       default
