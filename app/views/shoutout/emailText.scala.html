@@ -1,0 +1,29 @@
+@import offline.Tables.KudostoRow
+@import offline.Tables.EmprelationsRow
+@import models.people.EmpRelationsRowUtils._
+@(obj:KudostoRow,
+        from:Option[EmprelationsRow], to:Option[EmprelationsRow],
+        host:String, admins:Seq[EmprelationsRow],
+        emailDomain:String )(implicit  ldap: util.LDAP )
+
+A Shoutout from @from.map{ x=> @x.fullName }.getOrElse{
+    @obj.fromperson
+} was received for @to.map{ x=> @x.fullName }.getOrElse{
+    @obj.toperson
+} on @obj.dateadded
+
+@from.map{ x=> @x.fullName }.getOrElse {
+    @obj.fromperson
+} wrote the following:
+
+@obj.feedback
+
+    If you find this recognition inappropriate, please contact
+    please ignore this message or forward it to one of the admins: @admins.map { admin =>
+    @admin.getLDAPPerson().map { LDAPPerson =>
+        @admin.eMail(Some(LDAPPerson))
+    }.getOrElse {
+        @admin.login@@@emailDomain
+    }
+    }
+

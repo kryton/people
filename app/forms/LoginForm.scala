@@ -60,6 +60,7 @@ object KRForm {
   )
   case class Data(keyResult:String, description:Option[String])
 }
+
 object ObjectiveForm {
   val form = Form(
     mapping(
@@ -67,4 +68,17 @@ object ObjectiveForm {
     )(Data.apply)(Data.unapply)
   )
   case class Data(objective:String)
+}
+
+object KudosForm{
+
+  val form = Form(
+    mapping(
+      "from" -> text,
+      "to" -> text,
+      "message" -> text
+    )(Data.apply)(Data.unapply)
+  )
+  case class Data(from: String, to: String, message: String)
+
 }

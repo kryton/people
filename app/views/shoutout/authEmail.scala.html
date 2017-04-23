@@ -1,0 +1,22 @@
+@import offline.Tables.KudostoRow
+@import offline.Tables.EmprelationsRow
+@import models.people.EmpRelationsRowUtils._
+@(obj:KudostoRow, from:EmprelationsRow, to:EmprelationsRow,
+        host:String, url:String, admins:Seq[EmprelationsRow],
+        emailDomain:String)(implicit  ldap: util.LDAP )
+
+<h1>A Shoutout was received for @to.fullName on @obj.dateadded</h1>
+@from.fullName  wrote the following:
+
+<p>@obj.feedback</p>
+
+<p>
+    Please click <a href="@host@url">here</a> to confirm your post. If you didn’t post this recognition,
+    please ignore this message or forward it to one of the admins: @admins.map { admin =>
+        @admin.getLDAPPerson().map { LDAPPerson =>
+            <a href="mailto:@admin.eMail(Some(LDAPPerson))">@admin.fullName</a>
+        }.getOrElse{
+            <a href="mailto:@admin.login@@@emailDomain">@admin.fullName</a>
+        }
+    }
+</p>

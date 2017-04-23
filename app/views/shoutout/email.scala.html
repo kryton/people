@@ -1,0 +1,32 @@
+@import offline.Tables.KudostoRow
+@import offline.Tables.EmprelationsRow
+@import models.people.EmpRelationsRowUtils._
+@(obj:KudostoRow, from:Option[EmprelationsRow], to:Option[EmprelationsRow],
+        host:String, admins:Seq[EmprelationsRow],
+        emailDomain:String)(implicit  ldap: util.LDAP )
+
+<h1>A Shoutout from @from.map{ x => @x.fullName }.getOrElse{
+    @obj.fromperson
+} was received for @to.map{ x=> @x.fullName}.getOrElse{
+    @obj.toperson
+} on @obj.dateadded</h1>
+@from.map{ x => @x.fullName }.getOrElse{
+    @obj.fromperson
+} wrote the following:
+
+<p>@obj.feedback</p>
+
+<p>If you find this recognition inappropriate, please contact
+    @admins.map { admin =>
+        @admin.getLDAPPerson().map { LDAPPerson =>
+            <a href="mailto:@admin.eMail(Some(LDAPPerson))">@admin.fullName</a>
+        }.getOrElse{
+            <a href="mailto:@admin.login@@@emailDomain">@admin.fullName</a>
+        }
+    }
+</p>
+<p>
+
+    Thanks!
+
+</p>

@@ -1,0 +1,22 @@
+@import offline.Tables.KudostoRow
+@import offline.Tables.EmprelationsRow
+@import models.people.EmpRelationsRowUtils._
+@(obj:KudostoRow, from:EmprelationsRow, to:EmprelationsRow,
+        host:String, url:String, admins:Seq[EmprelationsRow],
+        emailDomain:String)(implicit  ldap: util.LDAP )
+
+A Shoutout was received for @to.fullName on @obj.dateadded
+@from.fullName  wrote the following:
+
+@obj.feedback
+
+
+Please click @host@url">here to confirm your post. If you didn't post this recognition,
+please ignore this message or forward it to one of the admins: @admins.map { admin =>
+    @admin.getLDAPPerson().map { LDAPPerson =>
+        @admin.eMail(Some(LDAPPerson))
+    }.getOrElse {
+        @admin.login@@@emailDomain
+    }
+}
+

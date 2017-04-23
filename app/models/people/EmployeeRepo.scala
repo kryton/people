@@ -46,6 +46,8 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
   import offline.Tables.profile.api._
 
   def findByLogin(login:String):Future[Option[EmprelationsRow]] = db.run(Emprelations.filter(_.login === login.toLowerCase).result.headOption)
+  def findByLogin(logins:Set[String]):Future[Seq[EmprelationsRow]] =
+    db.run(Emprelations.filter(_.login inSet logins.map(_.toLowerCase)).result)
 
   def findByPersonNumber(ID:Long):Future[Option[EmprelationsRow]] = db.run(Emprelations.filter(_.personnumber === ID).result.headOption)
 
@@ -172,7 +174,6 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
 
   def delete(logins:Set[String], batchSize:Int =100 ): Iterator[Future[Int]] = {
      logins.grouped(batchSize).map( group => db.run ( Emprelations.filter(_.login inSet group).delete ) )
-    //db.run(Emprelations.filter(_.login inSet login).delete) map { _ > 0}
   }
 }
 

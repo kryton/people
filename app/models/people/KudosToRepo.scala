@@ -22,7 +22,8 @@ import javax.inject.Inject
 import offline.Tables
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
-import slick.jdbc.JdbcProfile
+import slick.basic.DatabaseConfig
+import slick.jdbc.{JdbcBackend, JdbcProfile}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,12 +34,15 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 
 class KudosToRepo @Inject()(@NamedDatabase("default")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
-  val dbConfig = dbConfigProvider.get[JdbcProfile]
-  val db = dbConfig.db
+  val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
+  val db: JdbcBackend#DatabaseDef = dbConfig.db
   import offline.Tables._
   import offline.Tables.profile.api._
 
-  def find(id:Long):Future[Option[KudostoRow]] = db.run(Kudosto.filter(_.rejected===false).filter(_.id === id).result.headOption)
+  def find(id:Long, isAdmin:Boolean = false):Future[Option[KudostoRow]] = db.run(
+    Kudosto.filter( p => p.rejected===false || p.rejected === isAdmin )
+      .filter(_.id === id).result.headOption
+  )
   def findFrom(login:String):Future[Seq[KudostoRow]] = db.run(Kudosto.filter(_.fromperson === login.toLowerCase).filter(_.rejected === false).result)
   def findTo(login:String):Future[Seq[KudostoRow]] = db.run(Kudosto.filter(_.toperson === login.toLowerCase).filter(_.rejected === false).result)
 
@@ -50,12 +54,12 @@ class KudosToRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPro
     db.run( qry.result ).map( x=> x.slice(0, size)).map( seq => seq.map( x=> ( x._1._1,x._1._2,x._2)))
   }
 
-  def insert(office: KudostoRow) = db
-    .run(Kudosto returning Kudosto.map(_.id) += office)
-    .map(id => office.copy(id = id))
+  def insert(kudos: KudostoRow) = db
+    .run(Kudosto returning Kudosto.map(_.id) += kudos)
+    .map(id => kudos.copy(id = id))
 
-  def update(id:Long, er:KudostoRow) = {
-    db.run(Kudosto.filter(_.id === id ).update( er.copy(id = id))) map { _ > 0 }
+  def update(id:Long, kudos:KudostoRow) = {
+    db.run(Kudosto.filter(_.id === id ).update( kudos.copy(id = id))) map { _ > 0 }
   }
 
   def delete(id:Long) =

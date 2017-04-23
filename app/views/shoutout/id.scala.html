@@ -17,16 +17,12 @@
 
 @import offline.Tables.EmprelationsRow
 @import people.EmpRelationsRowUtils._
-@import offline.Tables.TeamdescriptionRow
-@import offline.Tables.EmpbioRow
 @import offline.Tables.KudostoRow
-@import offline.Tables.OfficeRow
-@import offline.Tables.EmptagRow
-@import offline.Tables.MatrixteamRow
 @(      id:Long,
         kudos:KudostoRow,
         from:Option[EmprelationsRow],
-        to:Option[EmprelationsRow])(implicit  webJarAssets: WebJarAssets,
+        to:Option[EmprelationsRow],
+        isAdmin:Boolean)(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
         ldap: util.LDAP)
@@ -38,7 +34,14 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Details</h2>
+
+                @if(kudos.rejected) {
+                    <h2 class="bg-red">REJECTED</h2>
+                }else {
+                    <h2>
+                    Details
+                    </h2>
+                    }
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
                     <li><a class="close-link"><i class="fa fa-close"></i></a></li>
@@ -48,15 +51,68 @@
             <!-- x_title -->
             <div class="x_content">
                 <div class="container">
-               From: @from.map{ f => @f.fullName }.getOrElse { @kudos.fromperson }<br/>
-               To: @to.map{ f => @f.fullName }.getOrElse { @kudos.toperson }
-                    @kudos.feedback
+        <div class="row">
+            <div class="col-xs-4">
+                <div class="row">
+                    <div class="col-xs-1">
+                        From:
+                    </div>
+                    <div class="col-xs-2">
+                        <img class="img-responsive img-circle" src="@routes.HeadshotController.headShot(kudos.fromperson,None)" />
+                    </div>
+                    <div class="col-xs-8">
+                        @from.map{ f =>
+                        <a href="@routes.PersonController.id(f.login)">@f.fullName</a>
+                        }.getOrElse { @kudos.fromperson
+                        }
+                    </div>
+                </div>
 
+                <div class="row">
+                    <div class="col-xs-1">
+                        To:
+                    </div>
+                    <div class="col-xs-2">
+                        <img class="img-responsive img-circle" src="@routes.HeadshotController.headShot(kudos.toperson,None)" />
+                    </div>
+                    <div class="col-xs-8">
+                    @to.map{ f =>
+                    <a href="@routes.PersonController.id(f.login)">@f.fullName</a>
+                    }.getOrElse { @kudos.toperson
+                    }
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4">
+                <div class="row">
+                    <div class="col-xs-8">
+                        @kudos.feedback
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if(kudos.rejected) {
+            <div class="row bg-red" >
+                <div class="col-xs-3">**REJECTED**</div>
+                <div class="col-xs-3">@kudos.rejectedby</div>
+                <div class="col-xs-3">@kudos.rejectedon</div>
+                <div class="col-xs-3">@kudos.rejectedreason</div>
+            </div>
+        }
+        @if( isAdmin ) {
+            <div class="row">
+                <div class="col-xs-1 bg-red">ADMIN</div>
+                <div class="col-xs-1">Actions:</div>
+                <div class="col-xs-10">@if(kudos.rejected) {
+                    <a href="@routes.KudosController.reject(kudos.id,reject= false)">Approve</a>
+                } else {
+                    <a href="@routes.KudosController.reject(kudos.id)">Reject</a>
+                }</div>
+            </div>
+        }
                 </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->
-
-
     </div ><!-- col -->
 </div> <!-- row -->
 

@@ -26,6 +26,7 @@ libraryDependencies ++= Seq(
   "org.apache.poi" % "poi" % "3.15",
   "org.apache.poi" % "poi-ooxml" % "3.15",
   "org.apache.poi" % "poi-scratchpad" % "3.15",
+  "com.typesafe.play" %% "play-mailer" % "6.0.0-M1",
 //"be.objectify" %% "deadbolt-scala" % "2.5.1",
  // "org.slf4j" % "slf4j-nop" % "1.6.4",
  // "com.typesafe.slick" %% "slick-hikaricp" %  slickVersion

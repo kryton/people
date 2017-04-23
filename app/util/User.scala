@@ -47,25 +47,17 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo, executionContext: Execu
       case None => Future.successful(false)
     }
   }
-  def isOwnerOrKudosAdmin(owner: String, userO:Option[String]): Future[Boolean] = {
-    userO match {
-      case Some(user) =>
-        if (user.toLowerCase == owner.toLowerCase) {
-          Future.successful(true)
-        } else {
-          isKudosAdmin(Some(user))
-        }
-      case None => Future.successful(false)
-    }
-  }
 
-   def isOwnerOrACEAwardAdmin(owner: String, userO:Option[String]): Future[Boolean] = {
+  def isOwnerManagerOrKudosAdmin(owner: String, userO:Option[String]): Future[Boolean] = {
     userO match {
       case Some(user) =>
         if (user.toLowerCase == owner.toLowerCase) {
           Future.successful(true)
         } else {
-          isACEAwardAdmin(Some(user))
+          isKudosAdmin(Some(user)).map {
+            case true =>  Future.successful(true)
+            case false => inManagementTree(user,owner.toLowerCase)
+          }.flatMap(identity)
         }
       case None => Future.successful(false)
     }
