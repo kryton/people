@@ -109,7 +109,7 @@ class OKRObjectiveRepo @Inject()(@NamedDatabase("default")  protected val dbConf
   def latest( size:Int): Future[Seq[(OkrobjectiveRow, EmprelationsRow)]] = {
     val qry = Okrobjective
       .join(Emprelations).on( _.login === _.login)
-      .sortBy(_._1.quarterdate desc)
+      .sortBy( p=> (p._1.quarterdate desc, p._1.dateadded desc ))
     db.run( qry.result ).map( x=> x.slice(0, size)).map( seq => seq.map( x=> ( x._1,x._2)))
   }
 

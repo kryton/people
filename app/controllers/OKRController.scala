@@ -24,7 +24,7 @@ import javax.inject._
 import models.people._
 import models.people.EmpRelationsRowUtils._
 import offline.Tables
-import offline.Tables.{MatrixteamRow, OkrkeyresultRow, OkrobjectiveRow}
+import offline.Tables.{EmprelationsRow, OkrkeyresultRow, OkrobjectiveRow}
 import org.joda.time.DateTime
 import play.api.Logger
 import play.api.data.Form
@@ -53,8 +53,6 @@ class OKRController @Inject()
    teamDescriptionRepo: TeamDescriptionRepo,
    empTagRepo: EmpTagRepo,
    okrObjectiveRepo: OKRObjectiveRepo,
-   matrixTeamRepo: MatrixTeamRepo,
-   matrixTeamMemberRepo: MatrixTeamMemberRepo,
    user: User
 
   )(implicit    costCenterRepo: CostCenterRepo,
@@ -141,27 +139,32 @@ class OKRController @Inject()
 
   def topX( size:Int, format:Option[String]) = Action.async { implicit request =>
     okrObjectiveRepo.latest(size).map { seq =>
-      seq.map { line =>
-        OKRObjectiveExt(login  = line._1.login,
-          person = Some(line._2.fullName),
-          dateAdded = line._1.dateadded,
-          objective = line._1.objective,
-          quarter = line._1.quarterdate,
-          score = line._1.score match {
-            case Some(x) => Some(x.toDouble)
-            case None => None
-          },
-          completed = line._1.completed,
-          retired = line._1.retired
-        )
-      }
-    }.map { seq =>
       val toFormat = format match {
         case Some(x) => x.toLowerCase
-        case None => "json"
+        case None => "html"
       }
-      val json = Json.toJson( seq )
-      Ok( json).as("application/json;charset=utf-8").withHeaders(("Access-Control-Allow-Origin","*"))
+      toFormat match {
+        case "json" =>
+          val jsonSeq = seq.map { line =>
+            OKRObjectiveExt(login = line._1.login,
+              person = Some(line._2.fullName),
+              dateAdded = line._1.dateadded,
+              objective = line._1.objective,
+              quarter = line._1.quarterdate,
+              score = line._1.score match {
+                case Some(x) => Some(x.toDouble)
+                case None => None
+              },
+              completed = line._1.completed,
+              retired = line._1.retired
+            )
+          }
+          val json = Json.toJson( jsonSeq )
+          Ok( json).as("application/json;charset=utf-8").withHeaders(("Access-Control-Allow-Origin","*"))
+        case _ =>
+          val orderedSeq= seq.groupBy(p=> ( p._1.quarterdate, p._2) ).toSeq
+          Ok(views.html.okr.lastX(orderedSeq))
+      }
     }
   }
 
