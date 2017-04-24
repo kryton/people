@@ -12,4 +12,5 @@ target
 /conf/db.secret.prod
 /conf/application.conf.docker
 /conf/secret.conf
+/conf/secret.conf.docker
 /RUNNING_PID

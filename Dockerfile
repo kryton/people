@@ -22,7 +22,7 @@ ADD         project/build.properties /root/project/
 # TEST AND BUILD THE PROJECT -- FAILURE WILL HALT IMAGE CREATION
 #RUN         cd /root; /usr/local/activator/activator test stage
 RUN         cd /root; /usr/local/activator/bin/activator package stage
-RUN         cd  /root/conf; cp application.conf.docker application.conf
+RUN         cd  /root/conf; cp secret.conf.docker secret.conf
 RUN         cd  /root/conf; cp logback.xml.docker logback.xml
 RUN         rm /root/target/universal/stage/bin/*.bat
 
