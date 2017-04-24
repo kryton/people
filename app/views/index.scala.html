@@ -19,7 +19,8 @@
 @import people.EmpRelationsRowUtils._
 @(newHires:Seq[(EmphistoryRow, EmprelationsRow)],
   shoutOuts:Seq[(KudostoRow, EmprelationsRow, Option[EmprelationsRow])],
-  anniversaries: Seq[(EmphistoryRow, EmprelationsRow, Long )])(implicit
+  anniversaries: Seq[(EmphistoryRow, EmprelationsRow, Long )],
+  emp:Option[EmprelationsRow])(implicit
         webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
@@ -31,7 +32,11 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
       <div class="x_panel">
         <div class="x_title">
-          <h2>Welcome!</h2>
+          <h2>@emp.map{ x =>
+            Welcome <a href="@routes.PersonController.id(x.login)">@x.fullName</a>!
+          }.getOrElse{
+            Welcome!
+          }</h2>
           <ul class="nav navbar-right panel_toolbox">
             <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>

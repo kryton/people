@@ -8,7 +8,8 @@ ADD         app /root/app
 ADD         lib /root/lib
 ADD         test /root/test
 ADD         conf /root/conf
-RUN         cd /root/conf  && cp application.conf.docker application.conf
+#RUN         cd /root/conf  && cp application.conf application.conf
+RUN         cd /root/conf  && cp secret.conf.docker secret.conf
 RUN         cd /root/conf  && cp logback.xml.docker logback.xml
 ADD         public /root/public
 ADD         public/javascripts/main.js /root/public/javascripts/main.js

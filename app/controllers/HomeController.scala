@@ -96,12 +96,17 @@ class HomeController @Inject()
     cal.setTime(now)
     val week  = cal.get( Calendar.WEEK_OF_YEAR )
    // Logger.info(s"Week = $week")
+    val empF = request.session.get("userId") match {
+      case Some(userid) => employeeRepo.findByLogin(userid)
+      case None => Future.successful(None)
+    }
     (for {
       s <- shoutouts
       nh <- newHires
       anniversaries <- empHistoryRepo.anniversariesThisWeek( week )
-    } yield( nh,s, anniversaries  )).map{ x =>
-      Ok(views.html.index(x._1,x._2, x._3.sortBy( y => -y._3)))
+      e <- empF
+    } yield( nh,s, anniversaries,e   )).map{ x =>
+      Ok(views.html.index(x._1,x._2, x._3.sortBy( y => -y._3), x._4))
     }
   }
 
@@ -209,7 +214,6 @@ class HomeController @Inject()
         }
 
       }
-
   }
 
 }
