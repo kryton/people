@@ -29,6 +29,7 @@ import offline.Tables.EmprelationsRow
 import play.api._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
+import play.api.libs.json.{JsObject, Json, Writes}
 import play.api.mvc._
 import play.db.NamedDatabase
 import util.{LDAP, User}
@@ -76,8 +77,25 @@ class PersonController @Inject()
     * will be called when the application receives a `GET` request with
     * a path of `/`.
     */
+  case class person(id: String, name: String)
+  case class autoCompleteResult(total_count: Int, incomplete_Results: Boolean, items: List[person])
 
 
+  def personAutoComplete(q: Option[String]) = Action.async { implicit request =>
+    val result:Future[autoCompleteResult] = q match {
+      case None =>  Future.successful(autoCompleteResult(0,incomplete_Results=false,List.empty) )
+      case Some(query) =>
+        if (query.length < 2) {
+          Future.successful( autoCompleteResult(total_count = 0, incomplete_Results = false, items = List.empty))
+        } else {
+          employeeRepo.search(query).map{ seq =>
+            autoCompleteResult(seq.size, incomplete_Results = false, items = seq.map{ e => person( e.login, e.fullName)}.toList )
+          }
+        }
+    }
+    result.map{ x => Ok(Json.toJson(x)).as("application/json; charset=utf-8").withHeaders(("Access-Control-Allow-Origin", "*"))}
+    //Future.successful(Ok(""))
+  }
 
   def search( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
       search match {
@@ -173,5 +191,22 @@ class PersonController @Inject()
     }.flatMap(identity)
   }
 
+
+  implicit val personWrites = new Writes[person] {
+    def writes( k : person ): JsObject = Json.obj(
+      "id" -> k.id,
+      "name" -> k.name
+    )
+  }
+
+    implicit val autoCompleteResultWrites = new Writes[autoCompleteResult] {
+    def writes( k : autoCompleteResult ): JsObject = Json.obj(
+      "total_count" -> k.total_count,
+      "incomplete_Results" -> k.incomplete_Results,
+      "items"-> k.items
+    )
+  }
+
+//total_count: Int, incomplete_Results: Boolean, items
 }
 

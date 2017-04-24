@@ -66,10 +66,14 @@
                         </div>
                         <div class="col-xs-10">
                       @if(canEdit) {
-                      <span class="OBJECTIVE editable editable-click" data-type="text" data-pk="@objective.id" data-name="objective" data-title="Objective" data-url="#">
+                      <span class="OBJECTIVE editable editable-click" data-type="text" data-pk="@objective.id"
+                            data-name="objective" data-title="Objective"
+                            data-url="@routes.OKRController.byObjectiveUPD(objective.login,objective.id)">
                       @objective.objective</span>
 
-                      - Score (<span class="OBJECTIVE editable editable-click" data-type="number" data-pk="@objective.id" data-name="score" data-title="Score" data-url="#">@objective.score.map{ x =>
+                      - Score (<span class="OBJECTIVE editable editable-click" data-type="number"
+                                     data-pk="@objective.id" data-name="score" data-title="Score"
+                                     data-url="@routes.OKRController.byObjectiveUPD(objective.login, objective.id)">@objective.score.map{ x =>
                                   @x
                                   }.getOrElse{
                                           -
