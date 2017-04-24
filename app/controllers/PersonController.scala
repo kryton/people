@@ -104,7 +104,7 @@ class PersonController @Inject()
           if (emps.size == 1 ) {
             Redirect(routes.PersonController.id( emps.head.login))
           } else {
-            Ok(emps.map(x => x.fullName).mkString("\n"))
+            Ok(views.html.person.search(search.getOrElse(""),util.Page(emps, page = page)))
           }
         }
       }

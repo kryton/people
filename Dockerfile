@@ -8,6 +8,8 @@ ADD         app /root/app
 ADD         lib /root/lib
 ADD         test /root/test
 ADD         conf /root/conf
+ADD         certs /root/certs
+ADD         play /root/play
 #RUN         cd /root/conf  && cp application.conf application.conf
 RUN         cd /root/conf  && cp secret.conf.docker secret.conf
 RUN         cd /root/conf  && cp logback.xml.docker logback.xml
@@ -29,6 +31,7 @@ RUN         rm /root/target/universal/stage/bin/*.bat
 
 # TESTS PASSED -- CONFIGURE IMAGE
 WORKDIR     /root
-ENTRYPOINT  target/universal/stage/bin/$(ls target/universal/stage/bin)
+#ENTRYPOINT  target/universal/stage/bin/$(ls target/universal/stage/bin)
+ENTRYPOINT  ./play
 VOLUME      ["/pic/cache","/pic/source","/pic/user-upload","/pic/tmp","/logs"]
 EXPOSE      9000 9443

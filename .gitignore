@@ -1,5 +1,6 @@
 *.un~
 *~
+*.swp
 *.cmd
 logs
 target
@@ -13,4 +14,7 @@ target
 /conf/application.conf.docker
 /conf/secret.conf
 /conf/secret.conf.docker
+/conf/generated.keystore
 /RUNNING_PID
+/certs
+/play
