@@ -48,13 +48,25 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
   def findByLogin(login:String):Future[Option[EmprelationsRow]] = db.run(Emprelations.filter(_.login === login.toLowerCase).result.headOption)
   def findByLogin(logins:Set[String]):Future[Seq[EmprelationsRow]] =
     db.run(Emprelations.filter(_.login inSet logins.map(_.toLowerCase)).result)
+  def findByCC(costcenter:Long):Future[Seq[EmprelationsRow]] =
+    db.run(Emprelations.filter(_.costcenter === costcenter).sortBy(_.lastname).result)
 
   def findByPersonNumber(ID:Long):Future[Option[EmprelationsRow]] = db.run(Emprelations.filter(_.personnumber === ID).result.headOption)
 
   def search(searchString:String): Future[Seq[EmprelationsRow]] = db.run{
-    Emprelations.filter { m =>
-      (  m.lastname startsWith searchString ) || ( m.firstname startsWith searchString ) || ( m.login startsWith searchString ) || (m.nickname startsWith searchString)
-    }.sortBy(_.lastname).result
+    if ( searchString.trim.contains(" ")) {
+      val parts = searchString.trim.split(" ",2)
+      Emprelations.filter { m =>
+        ( (  m.lastname startsWith parts(1) ) && ( m.firstname startsWith parts(0) )   )   ||
+          ((  m.lastname startsWith parts(1) ) && ( m.nickname startsWith parts(0) ))
+      }.sortBy(_.lastname).result
+    } else {
+      Emprelations.filter { m =>
+        (  m.lastname startsWith searchString ) || ( m.firstname startsWith searchString )      ||
+          ( m.login startsWith searchString ) || (m.nickname startsWith searchString)
+      }.sortBy(_.lastname).result
+    }
+
   }
 
   def manager(login:String): Future[Option[EmprelationsRow]] = {

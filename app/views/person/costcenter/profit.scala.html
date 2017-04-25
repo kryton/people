@@ -1,0 +1,117 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+
+@import offline.Tables.CostcenterRow
+@import offline.Tables.EmprelationsRow
+@import util.Page
+@import people.EmpRelationsRowUtils._
+@import offline.Tables.ProfitcenterRow
+@import offline.Tables.FunctionalareaRow
+@(      id:Long,
+        profitCenter: ProfitcenterRow,
+        costc:Page[CostcenterRow],
+        functionalAreas:Seq[FunctionalareaRow])(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP)
+
+
+@main(s"${profitCenter.profitcenter} - ${profitCenter.shortname.getOrElse("-None-")}") {
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+             <div class="x_panel">
+            <div class="x_title">
+                <h2>Details</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+                <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                    @profitCenter.profitcenter - @profitCenter.shortname
+                </div>
+            </div> <!-- x_content -->
+        </div><!-- x_panel -->
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Cost Centers</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+                <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                @Option(costc.items).filterNot(_.isEmpty).map { results =>
+                        <div class="row">@results.map { emp =>
+                            <div class="col-sm-4 ">
+                                <a href="@routes.CostCenterController.id(emp.costcenter)">@emp.costcenter</a> - @emp.costcentertext.map{ x => @x}
+                            </div>
+                        }
+                        </div>
+                        <div class="row">
+                            @costc.prev.map { x =>
+                                <a href="@routes.CostCenterController.profit(id, x)">... prev ...</a>
+                            }
+                            @costc.next.map { x =>
+                                <a href="@routes.CostCenterController.profit(id,x)">... next ...</a>
+                            }
+
+                        </div>
+                }
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Functional Areas</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+                <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                    <div class="row">
+
+                    @functionalAreas.map { func =>
+                            <div class="col-sm-4 ">
+                                <a href="@routes.CostCenterController.function(func.functionalarea)">@func.functionalarea</a> - @func.shortname.map{ x => @x}
+                            </div>
+                    }
+                    </div>
+
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+
+    </div ><!-- col -->
+</div> <!-- row -->
+
+}
+

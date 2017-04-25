@@ -73,15 +73,17 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-6">
-                        @emp.position (<a href="@routes.PersonController.personNumber(emp.personnumber)">@emp.personnumber</a>)<br/>
+
                         <table class="table-responsive">
+                        <tr><td>Position:</td><td>@emp.position</td></tr>
 
                         @manager.map{ m => <tr><td>Manager:</td><td><a href="@routes.PersonController.id(m.login)">@m.fullName</a></td></tr>}
+                        <tr><td>Cost Center:</td><td><a href="@routes.CostCenterController.id(emp.costcenter)">@emp.costcenter</a></td></tr>
+                        <tr><td>Employee#:</td><td><a href="@routes.PersonController.personNumber(emp.personnumber)">@emp.personnumber</a></td></tr>
 
                         @team.map{ t:TeamdescriptionRow =>
                                 <tr><td >Team:</td>
                                 <td>
-
                                     <a href="@routes.TeamDescriptionController.id(t.tagtext)"><span class="TEAMNAME2">@t.tagtext</span></a>
                                 @if( canEdit ) {
                                     <span class="TEAMNAME" data-type="text" data-pk="@emp.login" data-name="team"

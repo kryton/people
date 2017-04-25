@@ -1,0 +1,109 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+
+@import offline.Tables.CostcenterRow
+@import offline.Tables.EmprelationsRow
+@import util.Page
+@import people.EmpRelationsRowUtils._
+@import offline.Tables.ProfitcenterRow
+@import offline.Tables.FunctionalareaRow
+@(      id:Long,
+        costc:CostcenterRow,
+        func:Option[FunctionalareaRow],
+        profit:Option[ProfitcenterRow],
+        emps:Page[EmprelationsRow] )(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP)
+
+
+@main(s"${costc.costcenter} - ${costc.costcentertext.getOrElse("-None-")}") {
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+             <div class="x_panel">
+            <div class="x_title">
+                <h2>Details</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+                <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                    <table>
+
+                    @func.map { x =>
+                        <tr><th>Functional Area:</th>
+                            <td><a href="@routes.CostCenterController.function(x.functionalarea)">@x.functionalarea</a> - @x.company - @x.pandlcategory @x.department</td>
+                        </tr>
+                    }
+                    @profit.map { x =>
+                        <tr><th>Profit Center:</th>
+                            <td><a href="@routes.CostCenterController.profit(x.profitcenter)">@x.profitcenter</a> - @x.shortname</td>
+                        </tr>
+
+                    }
+                    </table>
+
+
+            </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Employees</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+                <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                @Option(emps.items).filterNot(_.isEmpty).map { results =>
+                        <div class="row">@results.map { emp =>
+                            <div class="col-sm-4 ">
+                                <a href="@routes.PersonController.id(emp.login)">@emp.fullName</a>
+                            </div>
+                        }
+                        </div>
+                        <div class="row">
+
+
+                            @emps.prev.map { x =>
+                                <a href="@routes.CostCenterController.id(id, x)">... prev ...</a>
+                            }
+                            @emps.next.map { x =>
+                                <a href="@routes.CostCenterController.id(id,x)">... next ...</a>
+                            }
+
+                        </div>
+                }
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+
+    </div ><!-- col -->
+</div> <!-- row -->
+
+}
+

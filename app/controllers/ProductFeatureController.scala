@@ -61,15 +61,6 @@ class ProductFeatureController @Inject()
     ldap:LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
 
- // implicit val ldap: LDAP = new LDAP
-  /**
-    * Create an Action to render an HTML page.
-    *
-    * The configuration in the `routes` file means that this method
-    * will be called when the application receives a `GET` request with
-    * a path of `/`.
-    */
-
 
 
   def search( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
@@ -113,7 +104,10 @@ class ProductFeatureController @Inject()
 
   def importFile = LDAPAuthAction {
     Action.async { implicit request =>
-      Future(Ok(views.html.product.productFeature.importFile()))
+      user.isAdmin(LDAPAuth.getUser()).map {
+        case true =>Ok(views.html.product.productFeature.importFile() )
+        case false => Unauthorized(views.html.page_403("User not authorized"))
+      }
     }
   }
   def doImport = Action.async(parse.multipartFormData) { implicit request =>

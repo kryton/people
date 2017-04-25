@@ -1,20 +1,3 @@
-/*
- * Copyright (C) 2014  Ian Holsman
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package offline
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
@@ -31,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Aceawardnominationto.schema, Authpermission.schema, Authrole.schema, Authrolepermission.schema, Authuser.schema, Businessunit.schema, Corplevel.schema, Costcenter.schema, Empbio.schema, Emphistory.schema, Employeemilestone.schema, Employeeroster.schema, Emppayroll.schema, Emprelations.schema, Emptag.schema, Gitcommit.schema, Gitissue.schema, Individualarchetype.schema, Individualbusinessunit.schema, Jiraissue.schema, Jiraparentissue.schema, Kudosto.schema, Managerarchetype.schema, Matrixteam.schema, Matrixteammember.schema, Milestone.schema, Office.schema, Okrkeyresult.schema, Okrobjective.schema, PlayEvolutions.schema, Positiontype.schema, Ratecard.schema, Ratecardrate.schema, Ratecardrole.schema, Resourcepool.schema, Resourcepoolteam.schema, Scenario.schema, Scenariodetail.schema, Scenariolevel.schema, Surveyanswer.schema, Surveycategory.schema, Surveyquestion.schema, Surveyset.schema, Surveysetinstance.schema, Surveysetperson.schema, Teamdescription.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Aceawardnominationto.schema, Authpermission.schema, Authrole.schema, Authrolepermission.schema, Authuser.schema, Businessunit.schema, Corplevel.schema, Costcenter.schema, Empbio.schema, Emphistory.schema, Employeemilestone.schema, Employeeroster.schema, Emppayroll.schema, Emprelations.schema, Emptag.schema, Functionalarea.schema, Gitcommit.schema, Gitissue.schema, Individualarchetype.schema, Individualbusinessunit.schema, Jiraissue.schema, Jiraparentissue.schema, Kudosto.schema, Managerarchetype.schema, Matrixteam.schema, Matrixteammember.schema, Milestone.schema, Office.schema, Okrkeyresult.schema, Okrobjective.schema, PlayEvolutions.schema, Positiontype.schema, Profitcenter.schema, Ratecard.schema, Ratecardrate.schema, Ratecardrole.schema, Resourcepool.schema, Resourcepoolteam.schema, Scenario.schema, Scenariodetail.schema, Scenariolevel.schema, Surveyanswer.schema, Surveycategory.schema, Surveyquestion.schema, Surveyset.schema, Surveysetinstance.schema, Surveysetperson.schema, Teamdescription.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -303,18 +286,20 @@ trait Tables {
    *  @param costcentertext Database column CostCenterText SqlType(VARCHAR), Length(254,true), Default(None)
    *  @param account Database column account SqlType(VARCHAR), Length(254,true), Default(None)
    *  @param functionalarea Database column functionalArea SqlType(VARCHAR), Length(254,true), Default(None)
-   *  @param businessunit Database column businessUnit SqlType(BIGINT), Default(None) */
-  final case class CostcenterRow(costcenter: Long, costcentertext: Option[String] = None, account: Option[String] = None, functionalarea: Option[String] = None, businessunit: Option[Long] = None)
+   *  @param businessunit Database column businessUnit SqlType(BIGINT), Default(None)
+   *  @param functionalareaid Database column FunctionalAreaID SqlType(BIGINT), Default(None)
+   *  @param profitcenterid Database column ProfitCenterID SqlType(BIGINT), Default(None) */
+  final case class CostcenterRow(costcenter: Long, costcentertext: Option[String] = None, account: Option[String] = None, functionalarea: Option[String] = None, businessunit: Option[Long] = None, functionalareaid: Option[Long] = None, profitcenterid: Option[Long] = None)
   /** GetResult implicit for fetching CostcenterRow objects using plain SQL queries */
   implicit def GetResultCostcenterRow(implicit e0: GR[Long], e1: GR[Option[String]], e2: GR[Option[Long]]): GR[CostcenterRow] = GR{
     prs => import prs._
-    CostcenterRow.tupled((<<[Long], <<?[String], <<?[String], <<?[String], <<?[Long]))
+    CostcenterRow.tupled((<<[Long], <<?[String], <<?[String], <<?[String], <<?[Long], <<?[Long], <<?[Long]))
   }
   /** Table description of table CostCenter. Objects of this class serve as prototypes for rows in queries. */
   class Costcenter(_tableTag: Tag) extends profile.api.Table[CostcenterRow](_tableTag, Some("offline"), "CostCenter") {
-    def * = (costcenter, costcentertext, account, functionalarea, businessunit) <> (CostcenterRow.tupled, CostcenterRow.unapply)
+    def * = (costcenter, costcentertext, account, functionalarea, businessunit, functionalareaid, profitcenterid) <> (CostcenterRow.tupled, CostcenterRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(costcenter), costcentertext, account, functionalarea, businessunit).shaped.<>({r=>import r._; _1.map(_=> CostcenterRow.tupled((_1.get, _2, _3, _4, _5)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(costcenter), costcentertext, account, functionalarea, businessunit, functionalareaid, profitcenterid).shaped.<>({r=>import r._; _1.map(_=> CostcenterRow.tupled((_1.get, _2, _3, _4, _5, _6, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column CostCenter SqlType(BIGINT), PrimaryKey */
     val costcenter: Rep[Long] = column[Long]("CostCenter", O.PrimaryKey)
@@ -326,6 +311,15 @@ trait Tables {
     val functionalarea: Rep[Option[String]] = column[Option[String]]("functionalArea", O.Length(254,varying=true), O.Default(None))
     /** Database column businessUnit SqlType(BIGINT), Default(None) */
     val businessunit: Rep[Option[Long]] = column[Option[Long]]("businessUnit", O.Default(None))
+    /** Database column FunctionalAreaID SqlType(BIGINT), Default(None) */
+    val functionalareaid: Rep[Option[Long]] = column[Option[Long]]("FunctionalAreaID", O.Default(None))
+    /** Database column ProfitCenterID SqlType(BIGINT), Default(None) */
+    val profitcenterid: Rep[Option[Long]] = column[Option[Long]]("ProfitCenterID", O.Default(None))
+
+    /** Foreign key referencing Functionalarea (database name CostCenter_ibfk_1) */
+    lazy val functionalareaFk = foreignKey("CostCenter_ibfk_1", functionalareaid, Functionalarea)(r => Rep.Some(r.functionalarea), onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Profitcenter (database name CostCenter_ibfk_2) */
+    lazy val profitcenterFk = foreignKey("CostCenter_ibfk_2", profitcenterid, Profitcenter)(r => Rep.Some(r.profitcenter), onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
   }
   /** Collection-like TableQuery object for table Costcenter */
   lazy val Costcenter = new TableQuery(tag => new Costcenter(tag))
@@ -623,6 +617,38 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Emptag */
   lazy val Emptag = new TableQuery(tag => new Emptag(tag))
+
+  /** Entity class storing rows of table Functionalarea
+   *  @param functionalarea Database column functionalArea SqlType(BIGINT), PrimaryKey
+   *  @param department Database column department SqlType(VARCHAR), Length(100,true), Default(None)
+   *  @param shortname Database column shortname SqlType(VARCHAR), Length(100,true), Default(None)
+   *  @param pandlcategory Database column PandLCategory SqlType(VARCHAR), Length(10,true), Default(None)
+   *  @param company Database column company SqlType(VARCHAR), Length(100,true), Default(None) */
+  final case class FunctionalareaRow(functionalarea: Long, department: Option[String] = None, shortname: Option[String] = None, pandlcategory: Option[String] = None, company: Option[String] = None)
+  /** GetResult implicit for fetching FunctionalareaRow objects using plain SQL queries */
+  implicit def GetResultFunctionalareaRow(implicit e0: GR[Long], e1: GR[Option[String]]): GR[FunctionalareaRow] = GR{
+    prs => import prs._
+    FunctionalareaRow.tupled((<<[Long], <<?[String], <<?[String], <<?[String], <<?[String]))
+  }
+  /** Table description of table FunctionalArea. Objects of this class serve as prototypes for rows in queries. */
+  class Functionalarea(_tableTag: Tag) extends profile.api.Table[FunctionalareaRow](_tableTag, Some("offline"), "FunctionalArea") {
+    def * = (functionalarea, department, shortname, pandlcategory, company) <> (FunctionalareaRow.tupled, FunctionalareaRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(functionalarea), department, shortname, pandlcategory, company).shaped.<>({r=>import r._; _1.map(_=> FunctionalareaRow.tupled((_1.get, _2, _3, _4, _5)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column functionalArea SqlType(BIGINT), PrimaryKey */
+    val functionalarea: Rep[Long] = column[Long]("functionalArea", O.PrimaryKey)
+    /** Database column department SqlType(VARCHAR), Length(100,true), Default(None) */
+    val department: Rep[Option[String]] = column[Option[String]]("department", O.Length(100,varying=true), O.Default(None))
+    /** Database column shortname SqlType(VARCHAR), Length(100,true), Default(None) */
+    val shortname: Rep[Option[String]] = column[Option[String]]("shortname", O.Length(100,varying=true), O.Default(None))
+    /** Database column PandLCategory SqlType(VARCHAR), Length(10,true), Default(None) */
+    val pandlcategory: Rep[Option[String]] = column[Option[String]]("PandLCategory", O.Length(10,varying=true), O.Default(None))
+    /** Database column company SqlType(VARCHAR), Length(100,true), Default(None) */
+    val company: Rep[Option[String]] = column[Option[String]]("company", O.Length(100,varying=true), O.Default(None))
+  }
+  /** Collection-like TableQuery object for table Functionalarea */
+  lazy val Functionalarea = new TableQuery(tag => new Functionalarea(tag))
 
   /** Entity class storing rows of table Gitcommit
    *  @param sha Database column sha SqlType(VARCHAR), PrimaryKey, Length(30,true)
@@ -1239,6 +1265,29 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Positiontype */
   lazy val Positiontype = new TableQuery(tag => new Positiontype(tag))
+
+  /** Entity class storing rows of table Profitcenter
+   *  @param profitcenter Database column profitCenter SqlType(BIGINT), PrimaryKey
+   *  @param shortname Database column shortname SqlType(VARCHAR), Length(10,true), Default(None) */
+  final case class ProfitcenterRow(profitcenter: Long, shortname: Option[String] = None)
+  /** GetResult implicit for fetching ProfitcenterRow objects using plain SQL queries */
+  implicit def GetResultProfitcenterRow(implicit e0: GR[Long], e1: GR[Option[String]]): GR[ProfitcenterRow] = GR{
+    prs => import prs._
+    ProfitcenterRow.tupled((<<[Long], <<?[String]))
+  }
+  /** Table description of table ProfitCenter. Objects of this class serve as prototypes for rows in queries. */
+  class Profitcenter(_tableTag: Tag) extends profile.api.Table[ProfitcenterRow](_tableTag, Some("offline"), "ProfitCenter") {
+    def * = (profitcenter, shortname) <> (ProfitcenterRow.tupled, ProfitcenterRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(profitcenter), shortname).shaped.<>({r=>import r._; _1.map(_=> ProfitcenterRow.tupled((_1.get, _2)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column profitCenter SqlType(BIGINT), PrimaryKey */
+    val profitcenter: Rep[Long] = column[Long]("profitCenter", O.PrimaryKey)
+    /** Database column shortname SqlType(VARCHAR), Length(10,true), Default(None) */
+    val shortname: Rep[Option[String]] = column[Option[String]]("shortname", O.Length(10,varying=true), O.Default(None))
+  }
+  /** Collection-like TableQuery object for table Profitcenter */
+  lazy val Profitcenter = new TableQuery(tag => new Profitcenter(tag))
 
   /** Entity class storing rows of table Ratecard
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey

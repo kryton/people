@@ -34,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ErrorHandler @Inject()( environment: Environment)(implicit executionContext: ExecutionContext) extends HttpErrorHandler {
   val default = DefaultHttpErrorHandler
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
-    Logger.error(s"ErrorHandler ${environment.mode} $message")
+    Logger.error(s"ErrorHandler ${environment.mode} $statusCode $message")
     default.onClientError(request, statusCode, message)
 
   }

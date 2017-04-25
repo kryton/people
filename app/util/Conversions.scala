@@ -107,8 +107,11 @@ object Conversions {
     }
   }
   def toLong( s:String, default:Long):Long = {
-    toLongO(s).getOrElse(default)
+    val regex = """\.\d+"""
+    val remDecimal = s.replaceAll(regex ,"")
+    toLongO(remDecimal).getOrElse(default)
   }
+
   def toStringO( value:String):Option[String] = {
     if (value.isEmpty || value.trim.equals("")) {
       None
