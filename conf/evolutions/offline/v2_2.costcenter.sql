@@ -2,8 +2,7 @@ CREATE TABLE FunctionalArea (
   functionalArea BIGINT PRIMARY KEY,
   department     VARCHAR(100),
   shortname      VARCHAR(100),
-  PandLCategory  VARCHAR(10),
-  company        VARCHAR(100)
+  PandLCategory  VARCHAR(10)
 
 ) engine=innodb DEFAULT CHARSET=utf8;
 
@@ -16,6 +15,8 @@ ALTER TABLE CostCenter
   ADD COLUMN `FunctionalAreaID` BIGINT  NULL ;
 ALTER TABLE CostCenter
   ADD COLUMN `ProfitCenterID` BIGINT  NULL;
+ALTER TABLE CostCenter
+  ADD COLUMN `company` VARCHAR(100)  NULL;
 
 Alter table CostCenter add FOREIGN KEY  (FunctionalAreaID) REFERENCES FunctionalArea(functionalArea);
 Alter table CostCenter add FOREIGN KEY  (ProfitCenterID) REFERENCES ProfitCenter(profitCenter);

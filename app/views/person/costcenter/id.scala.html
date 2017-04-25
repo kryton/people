@@ -49,10 +49,12 @@
             <div class="x_content">
                 <div class="container">
                     <table>
-
+                        <tr><th>Company:</th>
+                            <td>@costc.company.map{ x => @x}</td>
+                        </tr>
                     @func.map { x =>
                         <tr><th>Functional Area:</th>
-                            <td><a href="@routes.CostCenterController.function(x.functionalarea)">@x.functionalarea</a> - @x.company - @x.pandlcategory @x.department</td>
+                            <td><a href="@routes.CostCenterController.function(x.functionalarea)">@x.functionalarea</a> - @x.pandlcategory @x.department</td>
                         </tr>
                     }
                     @profit.map { x =>

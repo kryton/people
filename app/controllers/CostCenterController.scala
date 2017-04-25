@@ -137,14 +137,17 @@ class CostCenterController @Inject()
           CostCenterImport.importFile(path).map {
             case Left(errorMsg) => Future.successful(Ok(errorMsg))
             case Right(seq) =>
-              val functions = seq.groupBy(p => (p.functionalArea, p.functionalDept, p.functionalDeptShortName, p.pAndlCategory, p.companyShort))
-                .map(x => FunctionalareaRow(x._1._1, Some(x._1._2), Some(x._1._3), Some(x._1._4), Some(x._1._5)))
+              val functions = seq.groupBy(p => (p.functionalArea, p.functionalDept, p.functionalDeptShortName, p.pAndlCategory))
+                .map(x => FunctionalareaRow(x._1._1, Some(x._1._2), Some(x._1._3), Some(x._1._4)))
               val profits = seq.groupBy(p => (p.profitCenterNumber, p.profitCenterDesc))
                 .map(x => ProfitcenterRow(x._1._1, Some(x._1._2)))
 
               //  val sizes = functions.foldLeft( (0,0))( (a,b)=> ( Math.max( a._1, b.shortname.getOrElse("").size  ), Math.max(a._2, b.company.getOrElse("").size )    ))
               val ccs = seq.map { p =>
-                CostcenterRow(p.costCenter, Some(p.costCenterShort), functionalareaid = Some(p.functionalArea), profitcenterid = Some(p.profitCenterNumber))
+                CostcenterRow(p.costCenter, Some(p.costCenterShort),
+                  functionalareaid = Some(p.functionalArea),
+                  profitcenterid = Some(p.profitCenterNumber),
+                  company = Some(p.companyShort))
               }
               (for {
                 funcImport <- functionalCenterRepo.bulkInsertUpdate(functions)

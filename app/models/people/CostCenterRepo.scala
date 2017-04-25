@@ -63,10 +63,12 @@ class CostCenterRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
   def update(costcenter:Long, er:CostcenterRow) = {
     db.run(Costcenter.filter(_.costcenter === costcenter).update( er.copy(costcenter = costcenter))) map { _ > 0 }
   }
-  private def updateFromImport(costcenter:Long, desc:Option[String], functionalAreaId:Option[Long], profitCenterId:Option[Long]) = {
+  private def updateFromImport(costcenter:Long, desc:Option[String],
+                               functionalAreaId:Option[Long], profitCenterId:Option[Long],
+                              company:Option[String]) = {
     db.run(Costcenter.filter(_.costcenter === costcenter)
-      .map( x=> (x.costcenter, x.costcentertext, x.functionalareaid, x.profitcenterid))
-      .update(costcenter, desc, functionalAreaId,profitCenterId )) map { _ > 0 }
+      .map( x=> (x.costcenter, x.costcentertext, x.functionalareaid, x.profitcenterid, x.company))
+      .update(costcenter, desc, functionalAreaId,profitCenterId, company )) map { _ > 0 }
   }
 
   def delete(costcenter:Long) =
@@ -76,7 +78,7 @@ class CostCenterRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
     Future.sequence(rows.map{ row =>
       find( row.costcenter).map{
         case None => insert(row)
-        case Some(pc) => updateFromImport(row.costcenter, row.costcentertext, row.functionalareaid, row.profitcenterid)
+        case Some(pc) => updateFromImport(row.costcenter, row.costcentertext, row.functionalareaid, row.profitcenterid, row.company)
           .map{ ignore => row }
       }.flatMap(identity)
     })
