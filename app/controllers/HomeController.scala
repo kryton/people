@@ -25,7 +25,7 @@ import forms.LoginForm
 import models.people._
 import models.product.{ProductFeatureRepo, ProductTrackRepo}
 import offline.Tables.{EmphistoryRow, EmprelationsRow, KudostoRow}
-import util.{LDAP, Page}
+import util.{LDAP, Page, User}
 import play.api._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.mvc._
@@ -56,7 +56,8 @@ class HomeController @Inject()
    productFeatureRepo: ProductFeatureRepo,
    resourcePoolTeamRepo: ResourcePoolTeamRepo,
    kudosToRepo: KudosToRepo,
-   empHistoryRepo: EmpHistoryRepo
+   empHistoryRepo: EmpHistoryRepo,
+  user: User
   )(implicit ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
@@ -134,24 +135,29 @@ class HomeController @Inject()
   }
   def loginInSubmit: Action[AnyContent] = Action.async { implicit request =>
     Future {
-      Logger.info("loginSubmit1")
+     // Logger.info("loginSubmit1")
       LoginForm.form.bindFromRequest.fold(
         form => {
-          Logger.info("loginSubmit2")
+          Logger.info("loginSubmit2 - BadRequest")
           Future.successful(BadRequest(views.html.login("Login", form)))
         },
         data => {
-          Logger.info("loginSubmit3")
+       //   Logger.info("loginSubmit3")
         val enableAuth = ConfigFactory.load().getBoolean("auth.enable")
         val credentials = data.username
         if (enableAuth) {
           if (ldap.authenticateAccount(data.username, data.password)) {
             Logger.info(s"LoginSubmit ${data.username} Auth")
-            employeeRepo.findByLogin(data.username).map {
-              case Some(emp) =>
-                Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> emp.fullName)
-              case None =>
-                Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" ->"?Not Found?")
+            (for{
+              emp <- employeeRepo.findByLogin(data.username)
+              isLighter <- user.isLightColor( Some( data.username))
+            } yield (emp, isLighter)).map { x =>
+              x._1 match {
+                case Some(emp) =>
+                  Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> emp.fullName, "lightcolor" -> x._2.toString)
+                case None =>
+                  Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> "?Not Found?",  "lightcolor" ->false.toString)
+              }
             }
           } else {
             Logger.info(s"LoginSubmit ${data.username} Bad Password")
@@ -159,9 +165,14 @@ class HomeController @Inject()
           }
         } else {
           Logger.info(s"LoginSubmit ${data.username} NoAuth")
-          employeeRepo.findByLogin(data.username).map {
-            case Some(emp) => Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" ->emp.fullName)
-            case None => Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> "?Not Found?")
+          (for{
+            emp <- employeeRepo.findByLogin(data.username)
+            isLighter <- user.isLightColor( Some( data.username))
+          } yield (emp, isLighter)).map { x =>
+            x._1 match {
+              case Some(emp) => Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> emp.fullName, "lightcolor" -> x._2.toString)
+              case None => Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> "?Not Found?", "lightcolor" -> false.toString)
+            }
           }
         }
       }

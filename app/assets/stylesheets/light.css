@@ -1,0 +1,17 @@
+
+.left_col {
+    background: yellowgreen;
+}
+.nav_title {
+    background: yellowgreen;
+}
+body {
+
+    background: yellowgreen;
+}
+
+.fa-binocularsX {
+    background-image: url("/assets/images/logo.gif");
+    background-repeat-x: no-repeat;
+    background-repeat-y: no-repeat;
+}

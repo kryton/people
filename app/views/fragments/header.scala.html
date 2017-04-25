@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@(title:String, styles:Html = Html(""))(implicit webJarAssets: WebJarAssets, assets: AssetsFinder)
+@(title:String, styles:Html = Html(""))(implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: RequestHeader)
 
 @* Here's where we render the page title `String`. *@
 <head>
@@ -43,6 +43,12 @@
 <link rel="stylesheet" href='@routes.WebJarAssets.at(webJarAssets.locate("nprogress.css" ))'>
 <link href='@routes.WebJarAssets.at(webJarAssets.locate( "animate.css"))' rel="stylesheet">
 <link href='@assets.path( "/stylesheets/custom.css")' rel="stylesheet">
+    @request.session.get("lightcolor").map{ x =>
+            @if( x.equals("true")) {
+<link href='@assets.path( "/stylesheets/light.css")' rel="stylesheet">
+            }
+    }
+    <!-- LIGHT=@request.session.get("lightcolor") -->
 
 @styles
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
