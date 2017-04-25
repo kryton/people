@@ -4268,3 +4268,8 @@ dd.error {
         clear: left;
     }
 }
+
+.img-responsive{
+    width:100%;
+    max-width:100%
+}
