@@ -360,12 +360,14 @@ class KudosController @Inject()
     )
   }
 
+  // XXX TEMPORARY FIX
+  // TODO REVERT THIS BACK
   implicit val KudosExtWrites = new Writes[KudosExt] {
     def writes( k : KudosExt ): JsObject = Json.obj(
-      "fromLogin" -> k.fromLogin,
-      "toLogin" -> k.toLogin,
-      "fromPerson" -> k.fromPerson,
-      "toPerson" -> k.toPerson,
+      "toLogin" -> k.fromLogin,
+      "fromLogin" -> k.toLogin,
+      "toPerson" -> k.fromPerson,
+      "fromPerson" -> k.toPerson,
       "dateAdded"-> k.dateAdded,
       "feedback" -> k.feedback,
       "headshotFrom" -> k.headShotFrom,
