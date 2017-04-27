@@ -212,7 +212,8 @@ class HomeController @Inject()
               Redirect(routes.TeamDescriptionController.id( tdList.head))
             } else {
               if (results._3.size ==1 && results._1.isEmpty && tdList.isEmpty) {
-                Ok("TBD go to Product Track Page")
+                Redirect(routes.ProductFeatureController.id( results._3.head.id ))
+              //  Ok("TBD go to Product Track Page")
               } else {
                 Ok( views.html.universalSearch( searchString,
                   Page( results._1),

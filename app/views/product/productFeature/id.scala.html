@@ -22,18 +22,22 @@
 @import projectdb.Tables.FeatureflagRow
 @import projectdb.Tables.ProductfeatureflagRow
 @import projectdb.Tables.ResourceteamRow
+@import projectdb.Tables.ResourceteamprojectRow
 @import projectdb.Tables.ResourceteamproductfeatureRow
 @import projectdb.Tables.ManagedclientRow
 @import projectdb.Tables.ManagedclientproductfeatureRow
 @import projectdb.Tables.StageRow
+@import projectdb.Tables.ProjectRow
+@import projectdb.Tables.StatuscolorRow
+@import projectdb.Tables.ProjectdependencyRow
 @(      id:Int,
         productFeature:ProductfeatureRow,
         tracks:Seq[(ProducttrackRow, ProducttrackfeatureRow)],
         flags:Seq[(FeatureflagRow, ProductfeatureflagRow)],
         stage: Option[StageRow],
         rteams:Seq[( ResourceteamproductfeatureRow, ResourceteamRow)],
-        managedClients:Seq[(ManagedclientRow,ManagedclientproductfeatureRow)]
-
+        managedClients:Seq[(ManagedclientRow,ManagedclientproductfeatureRow)],
+        projects:Seq[(ProjectRow, Option[StatuscolorRow], Seq[(ResourceteamprojectRow,ResourceteamRow)], Seq[(ProjectdependencyRow, ProjectRow)])]
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
@@ -61,7 +65,29 @@
                             @stage.map{ x =>
                                 Stage: <a href="@routes.StageController.id(x.id)">@x.name</a><br/>
                             }
-                            @productFeature.name
+                            @productFeature.name<br/>
+                            Start: @productFeature.start.map{ x=> @x}<br/>
+                            Finish: @productFeature.finish.map{ x=> @x}<br/>
+                            Active:
+                            @if(productFeature.isactive.getOrElse(false)) {
+                                <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                            } else {
+                                <i class="fa fa-square-o" aria-hidden="true"></i>
+                            }<br/>
+                            CID:
+                            @if(productFeature.iscid.getOrElse(false)) {
+                                <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                            } else {
+                                <i class="fa fa-square-o" aria-hidden="true"></i>
+                            }<br/>
+
+                            Anchor:
+                            @if(productFeature.isanchor.getOrElse(false)) {
+                                <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                            } else {
+                                <i class="fa fa-square-o" aria-hidden="true"></i>
+                            }<br/>
+
                         </div>
                         <div class="col-xs-4">
                             <div class="list-group">
@@ -102,26 +128,29 @@
                                 </table>
                                 </li>
                             </div><!-- list-group -->
-                            <div class="list-group">
-                                <h4 class="list-group-item-heading">Managed Clients</h4>
-                                <li class="list-group-item">
-                                <table class="table-responsive table table-striped">
-                                    <thead>
-                                        <tr><th>Client</th>
-                                            <th align="right">Allocation</th>
-                                        </tr>
-                                    </thead>
-                                    @managedClients.map { mc =>
-                                      <tr>
-                                          <td><a href="@routes.ManagedClientController.id(mc._1.id)">@mc._1.name</a></td>
-                                          <td align="right">@mc._2.allocation</td>
+                            @if(productFeature.iscid.getOrElse(false)) {
+                                <div class="list-group">
+                                    <h4 class="list-group-item-heading">Managed Clients</h4>
+                                    <li class="list-group-item">
+                                        <table class="table-responsive table table-striped">
+                                            <thead>
+                                                <tr><th>Client</th>
+                                                    <th align="right">Allocation</th>
+                                                </tr>
+                                            </thead>
+                                            @managedClients.map { mc =>
+                                                <tr>
+                                                    <td><a href="@routes.ManagedClientController.id(mc._1.id)">@mc._1.name</a></td>
+                                                    <td align="right">@mc._2.allocation</td>
 
-                                         @* <td align="right">@track._2.priority</td> *@
-                                      </tr>
-                                    }
-                                </table>
-                                </li>
-                            </div><!-- list-group -->
+                                                    @* <td align="right">@track._2.priority</td> *@
+                                                </tr>
+                                            }
+                                        </table>
+                                    </li>
+                                </div>
+                                    <!-- list-group -->
+                            }
 
                             <div class="list-group">
                                 <h4 class="list-group-item-heading">Teams</h4>
@@ -170,13 +199,35 @@
                             <div class="col-xs-12">
                                 <table class="table table-responsive">
                                     <thead>
-                                        <tr><th>Project</th>
+                                        <tr><th>ID</th>
+                                            <th>Active</th>
+                                            <th>Project</th>
                                             <th>Status</th>
+                                            <th>Dependencies</th>
+                                            <th>Resource</th>
+                                            <th>Start</th>
+                                            <th>Finish</th>
                                         </tr>
                                     </thead>
-<tr><td>XXX</td><td>TBD</td></tr>
+                                    @projects.map { project =>
+                                      <tr>
+                                          <td>@project._1.id</td>
+                                          <td>@if(project._1.isactive) {
+                                              <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                                          } else {
+                                              <i class="fa fa-square-o" aria-hidden="true"></i>
+                                          }</td>
+                                          <td>@project._1.name</td>
+                                      <td>@project._2.map{ stat => @stat.name}.getOrElse{
+                                          -
+                                      }</td>
+                                          <td>@project._4.map{ x=> @x._1.toproject }</td>
+                                          <td>@project._3.map{ x => @x._2.name (@x._1.featuresize)} </td>
+                                      <td>@project._1.started.map{ x => @x}</td>
+                                      <td>@project._1.finished.map{ x => @x}</td>
+                                      </tr>
 
-
+                                    }
                                 </table>
                             </div>
 

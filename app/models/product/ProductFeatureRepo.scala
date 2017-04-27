@@ -104,12 +104,14 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
   def delete(id: Int) =
     db.run(Productfeature.filter(_.id === id).delete) map { _ > 0 }
 
-  def repopulate( features:Seq[FeatureImport]
-                )(implicit
+  def repopulate( features:Seq[FeatureImport])(
+            implicit
                   productTrackRepo: ProductTrackRepo,
                   resourceTeamRepo: ResourceTeamRepo,
                   stageRepo: StageRepo,
-                  managedClientRepo: ManagedClientRepo
+                  managedClientRepo: ManagedClientRepo,
+                  projectRepo: ProjectRepo,
+                  projectDependencyRepo: ProjectDependencyRepo
                 ): Future[(Seq[ProductfeatureRow])] = {
     val maxPri = features.map( _.priority).max +1
     val oldMSFL = db.run( Productfeature.filterNot(_.msprojectname.isEmpty).result )
@@ -127,7 +129,6 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
         val stage = x._3
         val track = x._1
         val mc = x._4.map{ x => x.msprojectname -> x}.toMap
-
 
         val foundPFF:Future[(ProductfeatureRow,
             Seq[(ProducttrackRow,ProducttrackfeatureRow)],
@@ -162,7 +163,7 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
         }
 
         foundPFF.map { addition =>
-          val currentPF = addition._1
+          val currentPF: ProductfeatureRow = addition._1
           val pff = addition._2
           val resourceTeams = addition._3
           if ( pff.isEmpty) {
@@ -198,7 +199,7 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
             }
           }
 
-          deleteResourcesForFeature( currentPF.id).map { ignore =>
+          val d: Future[(Iterable[Option[ResourceteamprojectRow]], Seq[Seq[Option[ProjectdependencyRow]]])] = deleteResourcesForFeature( currentPF.id).map { ignore =>
             val summary: Map[String, (Double, Int, Int)] = feature.projects
               .filter( p => p.resource.nonEmpty)
               .map{ p =>
@@ -217,23 +218,15 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
                 insert(newRTPF)
               }
             }
-            /*
-            feature.projects.map { project =>
-              val remaining = project.devEstimate * (1 - project.percentComplete)
-              resourceTeamRepo.findOrCreate(project.resource).map { rt =>
-                val newRTPF = ResourceteamproductfeatureRow(id = 0,
-                  featuresize = project.devEstimate.toInt,
-                  maxdevs = project.resourceNumber,
-                  resourceteamid = rt.id,
-                  productfeatureid = currentPF.id,
-                  featuresizeremaining = Some(remaining))
-                insert(newRTPF)
-              }
-            }
-            */
+           val xyz = projectRepo.repopulate( currentPF.id, feature.projects)
+            xyz
+          }.flatMap(identity)
+
+          d.map{ ig =>
+            currentPF
           }
-          currentPF
-        }
+          //currentPF
+        }.flatMap(identity)
       }.flatMap(identity)
     })
 
@@ -252,7 +245,7 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
           m <- deleteMClientForFeature(deleteId)
           f <- deleteFFlagForFeature(deleteId)
         } yield ( r, t, m,f)).map { y =>
-          Logger.info( s"Deleting ID $deleteId")
+          Logger.info( s"Deleting Feature ID $deleteId")
           delete(deleteId).map( x=> x)
         }
       }
@@ -285,7 +278,5 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
 
   protected def deleteFFlagForFeature(featureId: Int): Future[Boolean] =
     db.run(Productfeatureflag.filter(_.productfeatureid === featureId).delete) map {  _ > 0  }
-
-
 
 }

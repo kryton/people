@@ -43,14 +43,16 @@
                         <div class="col-sm-12">
                     <table class="table table-responsive">
                         <thead>
-                            <tr><th>Priority</th>
+                            <tr>
+                                <th>Priority</th>
                                 <th>Name</th>
                                 <th>Anchor</th>
                                 <th>CID</th>
                                 <th>Active?</th>
                                 <th>Start</th>
                                 <th>Finish</th>
-                            </tr></thead>
+                            </tr>
+                        </thead>
 
                     @results.map { mtm =>
                       <tr><td>@mtm.ordering</td>

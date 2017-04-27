@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Empefficiency.schema, Featureflag.schema, Managedclient.schema, Managedclientproductfeature.schema, PlayEvolutions.schema, Productfeature.schema, Productfeatureflag.schema, Producttrack.schema, Producttrackfeature.schema, Project.schema, Projectarea.schema, Projectfeature.schema, Projecthighlight.schema, Projectperson.schema, Projectpersontype.schema, Projectrelease.schema, Projectrole.schema, Resourcepool.schema, Resourceteam.schema, Resourceteamproductfeature.schema, Stage.schema, Statuscolor.schema, Statusupdate.schema, Systemrole.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Empefficiency.schema, Featureflag.schema, Managedclient.schema, Managedclientproductfeature.schema, PlayEvolutions.schema, Productfeature.schema, Productfeatureflag.schema, Producttrack.schema, Producttrackfeature.schema, Project.schema, Projectarea.schema, Projectdependency.schema, Projectfeature.schema, Projecthighlight.schema, Projectperson.schema, Projectpersontype.schema, Projectrelease.schema, Projectrole.schema, Resourcepool.schema, Resourceteam.schema, Resourceteamproductfeature.schema, Resourceteamproject.schema, Stage.schema, Statuscolor.schema, Statusupdate.schema, Systemrole.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -338,31 +338,32 @@ trait Tables {
 
   /** Entity class storing rows of table Project
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
-   *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
-   *  @param execsummary Database column ExecSummary SqlType(TEXT)
+   *  @param name Database column Name SqlType(VARCHAR), Length(200,true)
+   *  @param execsummary Database column ExecSummary SqlType(MEDIUMTEXT), Length(16777215,true)
    *  @param currentstatusid Database column currentStatusId SqlType(INT)
    *  @param started Database column started SqlType(DATE), Default(None)
    *  @param finished Database column finished SqlType(DATE), Default(None)
    *  @param isactive Database column isActive SqlType(BIT)
-   *  @param productfeatureid Database column productFeatureId SqlType(INT), Default(1) */
-  final case class ProjectRow(id: Int, name: String, execsummary: String, currentstatusid: Int, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None, isactive: Boolean, productfeatureid: Int = 1)
+   *  @param productfeatureid Database column productFeatureId SqlType(INT), Default(1)
+   *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None) */
+  final case class ProjectRow(id: Int, name: String, execsummary: String, currentstatusid: Int, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None, isactive: Boolean, productfeatureid: Int = 1, msprojectname: Option[String] = None)
   /** GetResult implicit for fetching ProjectRow objects using plain SQL queries */
-  implicit def GetResultProjectRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Date]], e3: GR[Boolean]): GR[ProjectRow] = GR{
+  implicit def GetResultProjectRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Date]], e3: GR[Boolean], e4: GR[Option[String]]): GR[ProjectRow] = GR{
     prs => import prs._
-    ProjectRow.tupled((<<[Int], <<[String], <<[String], <<[Int], <<?[java.sql.Date], <<?[java.sql.Date], <<[Boolean], <<[Int]))
+    ProjectRow.tupled((<<[Int], <<[String], <<[String], <<[Int], <<?[java.sql.Date], <<?[java.sql.Date], <<[Boolean], <<[Int], <<?[String]))
   }
   /** Table description of table project. Objects of this class serve as prototypes for rows in queries. */
   class Project(_tableTag: Tag) extends profile.api.Table[ProjectRow](_tableTag, Some("project_db"), "project") {
-    def * = (id, name, execsummary, currentstatusid, started, finished, isactive, productfeatureid) <> (ProjectRow.tupled, ProjectRow.unapply)
+    def * = (id, name, execsummary, currentstatusid, started, finished, isactive, productfeatureid, msprojectname) <> (ProjectRow.tupled, ProjectRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(execsummary), Rep.Some(currentstatusid), started, finished, Rep.Some(isactive), Rep.Some(productfeatureid)).shaped.<>({r=>import r._; _1.map(_=> ProjectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7.get, _8.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(execsummary), Rep.Some(currentstatusid), started, finished, Rep.Some(isactive), Rep.Some(productfeatureid), msprojectname).shaped.<>({r=>import r._; _1.map(_=> ProjectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7.get, _8.get, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
-    /** Database column Name SqlType(VARCHAR), Length(45,true) */
-    val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
-    /** Database column ExecSummary SqlType(TEXT) */
-    val execsummary: Rep[String] = column[String]("ExecSummary")
+    /** Database column Name SqlType(VARCHAR), Length(200,true) */
+    val name: Rep[String] = column[String]("Name", O.Length(200,varying=true))
+    /** Database column ExecSummary SqlType(MEDIUMTEXT), Length(16777215,true) */
+    val execsummary: Rep[String] = column[String]("ExecSummary", O.Length(16777215,varying=true))
     /** Database column currentStatusId SqlType(INT) */
     val currentstatusid: Rep[Int] = column[Int]("currentStatusId")
     /** Database column started SqlType(DATE), Default(None) */
@@ -373,6 +374,8 @@ trait Tables {
     val isactive: Rep[Boolean] = column[Boolean]("isActive")
     /** Database column productFeatureId SqlType(INT), Default(1) */
     val productfeatureid: Rep[Int] = column[Int]("productFeatureId", O.Default(1))
+    /** Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None) */
+    val msprojectname: Rep[Option[String]] = column[Option[String]]("msprojectname", O.Length(200,varying=true), O.Default(None))
 
     /** Foreign key referencing Statuscolor (database name Project_ibfk_1) */
     lazy val statuscolorFk = foreignKey("Project_ibfk_1", currentstatusid, Statuscolor)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
@@ -414,6 +417,37 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Projectarea */
   lazy val Projectarea = new TableQuery(tag => new Projectarea(tag))
+
+  /** Entity class storing rows of table Projectdependency
+   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param fromproject Database column fromProject SqlType(INT)
+   *  @param toproject Database column toProject SqlType(INT) */
+  final case class ProjectdependencyRow(id: Long, fromproject: Int, toproject: Int)
+  /** GetResult implicit for fetching ProjectdependencyRow objects using plain SQL queries */
+  implicit def GetResultProjectdependencyRow(implicit e0: GR[Long], e1: GR[Int]): GR[ProjectdependencyRow] = GR{
+    prs => import prs._
+    ProjectdependencyRow.tupled((<<[Long], <<[Int], <<[Int]))
+  }
+  /** Table description of table ProjectDependency. Objects of this class serve as prototypes for rows in queries. */
+  class Projectdependency(_tableTag: Tag) extends profile.api.Table[ProjectdependencyRow](_tableTag, Some("project_db"), "ProjectDependency") {
+    def * = (id, fromproject, toproject) <> (ProjectdependencyRow.tupled, ProjectdependencyRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(fromproject), Rep.Some(toproject)).shaped.<>({r=>import r._; _1.map(_=> ProjectdependencyRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column fromProject SqlType(INT) */
+    val fromproject: Rep[Int] = column[Int]("fromProject")
+    /** Database column toProject SqlType(INT) */
+    val toproject: Rep[Int] = column[Int]("toProject")
+
+    /** Foreign key referencing Project (database name ProjectDependency_ibfk_1) */
+    lazy val projectFk1 = foreignKey("ProjectDependency_ibfk_1", fromproject, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Project (database name ProjectDependency_ibfk_2) */
+    lazy val projectFk2 = foreignKey("ProjectDependency_ibfk_2", toproject, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Projectdependency */
+  lazy val Projectdependency = new TableQuery(tag => new Projectdependency(tag))
 
   /** Entity class storing rows of table Projectfeature
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
@@ -751,6 +785,46 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Resourceteamproductfeature */
   lazy val Resourceteamproductfeature = new TableQuery(tag => new Resourceteamproductfeature(tag))
+
+  /** Entity class storing rows of table Resourceteamproject
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param featuresize Database column featureSize SqlType(INT UNSIGNED), Default(0)
+   *  @param maxdevs Database column maxDevs SqlType(INT UNSIGNED), Default(0)
+   *  @param resourceteamid Database column resourceTeamId SqlType(INT)
+   *  @param projectid Database column projectId SqlType(INT)
+   *  @param featuresizeremaining Database column featureSizeRemaining SqlType(DECIMAL), Default(Some(0.00)) */
+  final case class ResourceteamprojectRow(id: Int, featuresize: Int = 0, maxdevs: Int = 0, resourceteamid: Int, projectid: Int, featuresizeremaining: Option[scala.math.BigDecimal] = Some(scala.math.BigDecimal("0.00")))
+  /** GetResult implicit for fetching ResourceteamprojectRow objects using plain SQL queries */
+  implicit def GetResultResourceteamprojectRow(implicit e0: GR[Int], e1: GR[Option[scala.math.BigDecimal]]): GR[ResourceteamprojectRow] = GR{
+    prs => import prs._
+    ResourceteamprojectRow.tupled((<<[Int], <<[Int], <<[Int], <<[Int], <<[Int], <<?[scala.math.BigDecimal]))
+  }
+  /** Table description of table ResourceTeamProject. Objects of this class serve as prototypes for rows in queries. */
+  class Resourceteamproject(_tableTag: Tag) extends profile.api.Table[ResourceteamprojectRow](_tableTag, Some("project_db"), "ResourceTeamProject") {
+    def * = (id, featuresize, maxdevs, resourceteamid, projectid, featuresizeremaining) <> (ResourceteamprojectRow.tupled, ResourceteamprojectRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(featuresize), Rep.Some(maxdevs), Rep.Some(resourceteamid), Rep.Some(projectid), featuresizeremaining).shaped.<>({r=>import r._; _1.map(_=> ResourceteamprojectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column featureSize SqlType(INT UNSIGNED), Default(0) */
+    val featuresize: Rep[Int] = column[Int]("featureSize", O.Default(0))
+    /** Database column maxDevs SqlType(INT UNSIGNED), Default(0) */
+    val maxdevs: Rep[Int] = column[Int]("maxDevs", O.Default(0))
+    /** Database column resourceTeamId SqlType(INT) */
+    val resourceteamid: Rep[Int] = column[Int]("resourceTeamId")
+    /** Database column projectId SqlType(INT) */
+    val projectid: Rep[Int] = column[Int]("projectId")
+    /** Database column featureSizeRemaining SqlType(DECIMAL), Default(Some(0.00)) */
+    val featuresizeremaining: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("featureSizeRemaining", O.Default(Some(scala.math.BigDecimal("0.00"))))
+
+    /** Foreign key referencing Project (database name resourceteamprojectfeature_ibfk_2) */
+    lazy val projectFk = foreignKey("resourceteamprojectfeature_ibfk_2", projectid, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Resourceteam (database name resourceteamprojectfeature_ibfk_1) */
+    lazy val resourceteamFk = foreignKey("resourceteamprojectfeature_ibfk_1", resourceteamid, Resourceteam)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Resourceteamproject */
+  lazy val Resourceteamproject = new TableQuery(tag => new Resourceteamproject(tag))
 
   /** Entity class storing rows of table Stage
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey

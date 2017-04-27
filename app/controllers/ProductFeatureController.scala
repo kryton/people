@@ -52,7 +52,8 @@ class ProductFeatureController @Inject()
     productTrackRepo: ProductTrackRepo,
     stageRepo: StageRepo,
     managedClientRepo: ManagedClientRepo,
-
+    projectRepo: ProjectRepo,
+    projectDependencyRepo: ProjectDependencyRepo,
     ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
@@ -60,8 +61,6 @@ class ProductFeatureController @Inject()
     assets: AssetsFinder,
     ldap:LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
-
-
 
   def search( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
     val pageSize = 20
@@ -86,6 +85,7 @@ class ProductFeatureController @Inject()
         val stage = stageRepo.find(pf.stageid)
         val rteams = productFeatureRepo.findResourceTeams(id)
         val managedClients: Future[Seq[(ManagedclientRow,ManagedclientproductfeatureRow)]] = productFeatureRepo.findByManagedClients(id)
+        val projects = projectRepo.findByFeatureEx(id)
 
         (for {
           t <- tracks
@@ -93,9 +93,10 @@ class ProductFeatureController @Inject()
           s <- stage
           r <- rteams
           m <- managedClients
-        } yield(t,f,s,r,m))
+          p <- projects
+        } yield(t,f,s,r,m,p))
         .map { x =>
-          Ok(views.html.product.productFeature.id( id, pf, x._1, x._2, x._3, x._4, x._5 ) )
+          Ok(views.html.product.productFeature.id( id, pf, x._1, x._2, x._3, x._4, x._5, x._6 ) )
         }
 
       case None => Future.successful(NotFound(views.html.page_404("Login not found")))

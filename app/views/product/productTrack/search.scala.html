@@ -46,14 +46,10 @@
                             <div class="col-sm-12">
                                 <a href="@routes.ProductTrackController.id(mtm.id)">@mtm.name</a>
                             </div>
-
-
-                    </div>
+                        </div>
                     }
 
                <div class="row">
-
-
                 @page.prev.map { x =>
                     <a href="@routes.ProductTrackController.search(x,searchTerm)">... prev ...</a>
                 }

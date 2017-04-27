@@ -63,6 +63,13 @@ class ResourceTeamRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
         .result
     }
   }
+  def findProjects(resourceteamid:Int): Future[Seq[( Tables.ResourceteamprojectRow, Tables.ProjectRow)]] = {
+    db.run{
+      Resourceteamproject.filter(_.resourceteamid === resourceteamid)
+        .join(Project).on(_.projectid === _.id)
+        .result
+    }
+  }
 
   def findInPool(poolId:Int): Future[Seq[ResourceteamRow]] = db.run( Resourceteam.filter(_.resourcepoolid === poolId).sortBy(_.name).result)
 

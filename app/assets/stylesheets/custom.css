@@ -4268,8 +4268,12 @@ dd.error {
         clear: left;
     }
 }
-
-.img-responsive{
-    width:100%;
-    max-width:100%
+/*
+IE only (not edge)
+ */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .img-responsive {
+        width: 100%;
+        max-width: 100%
+    }
 }
