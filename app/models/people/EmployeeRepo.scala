@@ -86,7 +86,7 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
   def managedBy( ): Future[Set[EmprelationsRow]] = {
     db.run(
       Emprelations.filter(_.managerid.isEmpty).join(Emprelations).on( _.login === _.managerid).map(_._2).result
-     
+
     ).map( _.toSet)
   }
 

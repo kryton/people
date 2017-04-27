@@ -251,12 +251,12 @@ class PersonController @Inject()
         case None => NotFound("Login not found/CEO not found")
         case Some(emp) =>
         //  val mgr = empMgrO._2
-          val directsEmp = empMgrO._2.map{ p => p.login -> p}.toMap
+          val directsEmp = empMgrO._2.map{ p => p.login.toLowerCase -> p}.toMap
           val offices = empMgrO._3
           val directsDirectsEmp: Map[Option[String], Set[EmprelationsRow]] = empMgrO._4.flatten.groupBy(_.managerid)
 
            val children = directsDirectsEmp.map{ dDirects =>
-            val direct:Option[EmprelationsRow] = directsEmp.get( dDirects._1.getOrElse(""))
+            val direct:Option[EmprelationsRow] = directsEmp.get( dDirects._1.getOrElse("").toLowerCase)
             val ddJ = dDirects._2.map{  x:EmprelationsRow =>
               val o3 =officeString(x.officeid,offices)
               val directsA:String = if ( x.directs>0L) {

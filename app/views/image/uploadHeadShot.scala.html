@@ -40,10 +40,8 @@
                     Please ensure your profile picture is a head shot and a minimum 300x300 size.<br>
                     Current Photo - <img class="img-responsive" src='@routes.HeadshotController.headShot(login)' >
 
-                    @form(action = routes.HeadshotController.headShotUpdate(login),  'enctype -> "multipart/form-data") {
+                    @form(action = CSRF(routes.HeadshotController.headShotUpdate(login)),  'enctype -> "multipart/form-data") {
                         <div class="col-xs-12 col-md-8">
-
-                            @CSRF.formField
                             <fieldset>
                                 <input type="file" name='file' >
                             </fieldset>
