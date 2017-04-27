@@ -1,0 +1,125 @@
+@import offline.Tables.EmprelationsRow
+@import models.people.EmpRelationsRowUtils._
+@(title: String,
+    emp:EmprelationsRow,
+    manager:Option[EmprelationsRow])(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP)
+
+
+@main(title,
+    scripts = Html("<script src='"+routes.Assets.at("js/ex/raphael-ggorgchart.js")+"'></script>"+
+            "<script src='"+ routes.Assets.at("js/ex/jspdf-ggorgchart.js")+"'></script>"+
+            "<script src='"+ routes.Assets.at("js/ex/rgbcolor.js")+"'></script>"+
+            "<script src='"+ routes.Assets.at("js/ex/canvg.js")+"'></script>"+
+            "<script src='"+ routes.Assets.at("js/ex/lib_gg_orgchart_v100b1.js")+"'></script>"
+
+    )
+
+     ) {
+    <div class="container">
+        <div class="page-header " id="banner">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h1>@title</h1>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+               <h1>@emp.fullName <a href='@routes.PersonController.id(emp.login)'><i class="fa fa-user" title="Person Details"></i></a></h1>
+                @if( manager.isDefined) {
+                    <h2>Manager: @manager.get.fullName
+                        <a href='@routes.PersonController.personOrgChart(Some(manager.get.login))'><i class="fa fa-sitemap" title="Manager's Org Chart"></i></a>
+                        <a href='@routes.PersonController.id(manager.get.login)'><i class="fa fa-user" title="Manager's Details"></i></a>
+                    </h2>
+                }
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div id="oc_supracontainer_4">
+                    <div id="oc_content_dragonfly" class="dragon">
+                        <div id="oc_container_1" class="chart_container"></div>
+                    </div>
+                    <canvas id="oc_print_canvas_4"></canvas>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <button id="oc_btnZommIn">Zoom in</button>
+                <button id="oc_btnZommOut">Zoom out</button>
+                <button id="oc_btnPrint">Print</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript" nonce="PMAN">
+    var merged_options = false;
+    var oc_options_1 = {
+        container         : 'oc_container_1',
+        box_color         : '#ffffff',
+        box_color_hover   : '#faa',
+        box_border_color  : '#000000',
+        box_border_radius : 0,
+		box_border_width  : 1,
+		inner_padding     : 10,
+        max_text_width    : 20,
+        box_html_template : null,
+        line_color        : '#9999FF',
+        title_color       : '#000000',
+        subtitle_color    : '#aaaaaa',
+        text_font         : 'Verdana',
+        title_char_size   : [6, 10],
+        subtitle_char_size: [2, 8],
+        title_font_size   : 10,
+        subtitle_font_size: 8,
+        use_images        : false,
+        use_zoom_print    : true,                    // wheter to use zoom and print or not (only one graph per web page can do so)
+        container_supra   : 'oc_supracontainer_4',   // container of the container (DIV); needed for zoom and print
+        initial_zoom      : 0.75,                    // initial zoom
+        pdf_canvas        : 'oc_print_canvas_4',     // name of the invisible HTML5 canvas needed for print
+        pdf_canvas_width  : 800,                     // size of the container (X axis)
+        pdf_canvas_height : 480,                     // size of the container (Y axis)
+        pdf_filename      : 'orgChart.pdf',          // default filename for PDF printing
+        box_click_handler : oc_box_click_handler
+    };
+
+    function oc_box_click_handler(event, box) {
+        if (box.oc_id !== undefined) {
+            window.location="@routes.PersonController.personOrgChart(None)?login="+ box.oc_id;
+        }
+    }
+
+    function ggOrgChart_render ()
+    {
+        var result;
+        result = ggOrgChart.render(oc_options_1, "@routes.PersonController.personHierarchy(Some(emp.login))");
+        if (result === false) {
+            alert("INFO: render() failed (bad 'options' or 'data' definition)");
+         } else {
+            merged_options=result;
+        }
+    }
+    // WINDOW.ONLOAD TASKS
+    // put here all the task that should be done when the page finish to load
+    //
+    window.onload = function () {
+        ggOrgChart_render();
+        $("#oc_btnZommIn").click( function () {
+            ggOrgChart.zoom_in(merged_options);
+        } );
+
+        $("#oc_btnZommOut").click( function () {
+            ggOrgChart.zoom_out(merged_options);
+        } );
+
+        $("#oc_btnPrint").click( function () {
+            ggOrgChart.print(merged_options);
+        } );
+    } ;
+    </script>
+
+
+}

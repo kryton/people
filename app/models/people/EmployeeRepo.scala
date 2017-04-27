@@ -51,6 +51,10 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
   def findByCC(costcenter:Long):Future[Seq[EmprelationsRow]] =
     db.run(Emprelations.filter(_.costcenter === costcenter).sortBy(_.lastname).result)
 
+  def findCEO(): Future[Option[EmprelationsRow]] = {
+    db.run( Emprelations.filter(_.managerid.isEmpty).result.headOption)
+  }
+
   def findByPersonNumber(ID:Long):Future[Option[EmprelationsRow]] = db.run(Emprelations.filter(_.personnumber === ID).result.headOption)
 
   def search(searchString:String): Future[Seq[EmprelationsRow]] = db.run{
@@ -75,6 +79,15 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
       mgr <- Emprelations if mgr.login === emp.managerid
     } yield mgr).result.headOption
     db.run(qry)
+  }
+
+
+  /* special case for CEO's directs.. */
+  def managedBy( ): Future[Set[EmprelationsRow]] = {
+    db.run(
+      Emprelations.filter(_.managerid.isEmpty).join(Emprelations).on( _.login === _.managerid).map(_._2).result
+     
+    ).map( _.toSet)
   }
 
   def managedBy( login:String): Future[Set[EmprelationsRow]] = {

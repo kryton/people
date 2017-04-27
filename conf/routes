@@ -23,6 +23,9 @@ GET         /person/id/:id                         controllers.PersonController.
 GET         /person/admin/import                   controllers.PersonController.importFile
 POST        /person/admin/import                   controllers.PersonController.doImport
 
+GET         /orgchart/hier                         controllers.PersonController.personHierarchy(login:Option[String]?=None)
+GET         /orgchart                              controllers.PersonController.personOrgChart(login:Option[String]?=None)
+
 GET         /matrix/                               controllers.MatrixTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
 GET         /matrix/:id                            controllers.MatrixTeamController.id( id:Long, p:Int ?= 0 )
 

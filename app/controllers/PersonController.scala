@@ -25,7 +25,7 @@ import models.people.EmpRelationsRowUtils._
 import models.people._
 import models.product.ProductTrackRepo
 import offline.Tables
-import offline.Tables.EmprelationsRow
+import offline.Tables.{EmprelationsRow, OfficeRow}
 import play.api._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
@@ -121,7 +121,6 @@ class PersonController @Inject()
           empsd.map { empd => matrixTeamMemberRepo.findMatrixTeamByLogin(empd.login).map(mtseq => ( empd, mtseq )) }
         }.map { x => Future.sequence(x)}.flatMap(identity)
 
-
         val team = teamDescriptionRepo.findTeamForLogin(login)(employeeRepo)
         val bio = empBioRepo.findByLogin(login)
         val kTo = kudosToRepo.findTo(login).map( x=>  Future.sequence(x.map( k =>  employeeRepo.findByLogin(k.fromperson).map( e =>  (k,e))))).flatMap(identity)
@@ -192,6 +191,123 @@ class PersonController @Inject()
   }
 
 
+  def personOrgChart(login:Option[String]) = Action.async { implicit request =>
+
+    val empF = login match {
+      case None => employeeRepo.findCEO()
+      case Some(x) => employeeRepo.findByLogin(x)
+    }
+    val mgrF = login match {
+      case None => Future.successful(None)
+      case Some(x) => employeeRepo.manager(x)
+
+    }
+    (for {
+      e <- empF
+      m <- mgrF
+    } yield (e, m))
+      .map { empMgrO =>
+        empMgrO._1 match {
+          case None => NotFound("I can't find that person/CEO not found")
+          case Some(emp) => Ok(views.html.person.orgChart("Org Chart", emp, empMgrO._2))
+        }
+      }
+  }
+  protected def officeString( id:Option[Long], officeMap: Map[Long,OfficeRow]):String = {
+    id match {
+      case Some(officeID) => officeMap.get(officeID) match {
+        case Some(office) => " (" + office.city.getOrElse("-") + "/" + office.country.getOrElse("-") + ")"
+        case None => ""
+      }
+      case None => ""
+    }
+  }
+  def personHierarchy(login:Option[String]) = Action.async { implicit request =>
+
+    val empF = login match {
+      case None => employeeRepo.findCEO()
+      case Some(x) => employeeRepo.findByLogin(x)
+    }
+
+    val directsF:Future[Set[EmprelationsRow]] = login match {
+      case None => employeeRepo.managedBy
+      case Some(x) => employeeRepo.managedBy(x)
+
+    }
+    (for {
+      e <- empF
+    //  m <- mgrF
+      d <- directsF
+      dd <- directsF.map{ seq =>
+        Future.sequence(seq.map{ di =>
+         employeeRepo.managedBy(di.login)
+        })
+      }.flatMap(identity)
+      o <- officeRepo.all().map{ seq => seq.map{ x => x.id -> x}.toMap }
+    } yield (e, d, o, dd)) .map { empMgrO =>
+
+
+      empMgrO._1 match {
+        case None => NotFound("Login not found/CEO not found")
+        case Some(emp) =>
+        //  val mgr = empMgrO._2
+          val directsEmp = empMgrO._2.map{ p => p.login -> p}.toMap
+          val offices = empMgrO._3
+          val directsDirectsEmp: Map[Option[String], Set[EmprelationsRow]] = empMgrO._4.flatten.groupBy(_.managerid)
+
+           val children = directsDirectsEmp.map{ dDirects =>
+            val direct:Option[EmprelationsRow] = directsEmp.get( dDirects._1.getOrElse(""))
+            val ddJ = dDirects._2.map{  x:EmprelationsRow =>
+              val o3 =officeString(x.officeid,offices)
+              val directsA:String = if ( x.directs>0L) {
+                s"(${x.directs})"
+              } else {
+                ""
+              }
+              JS_GG_ORGCHART(id = x.login,
+                title = x.fullName +directsA,
+                subtitle = x.position + o3, isFTE =  !emp.isContractor, children=List.empty)
+            }
+            direct match {
+              case None =>  JS_GG_ORGCHART(id = "??", title = "???", subtitle = "???", isFTE =  false, children=List.empty)
+              case Some(empD) =>
+                val o3 =officeString(empD.officeid,offices)
+                JS_GG_ORGCHART(id = empD.login, title = empD.fullName ,  subtitle = empD.position + o3, isFTE =  !empD.isContractor, children= ddJ.toList )
+            }
+          }
+          val o = officeString(emp.officeid,offices)
+          val empJ = JS_GG_ORGCHART( id = emp.login, title = emp.fullName ,  subtitle = emp.position + o, isFTE =  !emp.isContractor,
+            children = children.toList  )
+
+          Ok(JS_GG_ORGCHART_ROOT(id = emp.personnumber, title = s"${emp.fullName}'s org", root = empJ).toJson).as("application/json; charset=utf-8").withHeaders(("Access-Control-Allow-Origin", "*"))
+      }
+    }
+
+  }
+  case class JS_GG_ORGCHART_ROOT(id: Long, title:String, root:JS_GG_ORGCHART) {
+    def toJson:String = {
+      val tit = title.replaceAll("'","''")
+      // "{ \"id\":"+id+", \"title\": \""+title+"\",  \"root\":" +root.toJson+" }"
+      "{ \"id\":"+1+", \"root\":" +root.toJson+" }"
+    }
+  }
+
+  case class JS_GG_ORGCHART(id:String, title:String, subtitle:String,
+                            isFTE:Boolean, children:List[JS_GG_ORGCHART] ) {
+    def toJson:String ={
+      val x = "{\"id\":\""+id+"\", \"title\":\""+title+"\", \"subtitle\":\""+subtitle+"\""
+      if ( children.isEmpty ) {
+        if(isFTE) {
+          x+  ",\"type\":\"staff\" }"
+        } else {
+          x + ", \"type\":\"staff\", \"subtype\":\"dashed\" }"
+        }
+      } else {
+        s"$x, "+"\"children\": [ "+ children.map( x=> x.toJson ).mkString(",") +" ] }\n"
+      }
+
+    }
+  }
   implicit val personWrites = new Writes[person] {
     def writes( k : person ): JsObject = Json.obj(
       "id" -> k.id,

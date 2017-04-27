@@ -57,6 +57,7 @@ class OfficeRepo @Inject()( @NamedDatabase("default")  protected val dbConfigPro
       case None => insert( OfficeRow(id =0, city, street, POBox, region, zipcode, country  ))
     }.flatMap(identity)
   }
+  def all(): Future[Seq[OfficeRow]] = db.run(Office.result)
   def insert(office: OfficeRow): Future[Tables.OfficeRow] =
     db.run(Office returning Office.map(_.id) += office)
     .map(id => office.copy(id = id))
