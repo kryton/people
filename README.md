@@ -1,5 +1,18 @@
-People tool was initially designed to be some kind of corporate directory (and learn Scala/Play).
-It has since morphed into areas to help me (and others) do resource planning and answer questions around organisational metrics.
+People tool was initially designed to be some kind of corporate directory (and to learn Scala/Play).
+It has since morphed into areas to help me (and others) do resource planning and answer questions around organisational metrics and run a medium-large size department.
+
+# features
+## People
+* Imports employee from Master file (currently an extract from SAP)
+* Basic search/display of Org
+* Add photos of people
+* Recognize people (shoutouts)
+* OKR's
+* Matrix teams, Tagging, Workgroups
+
+## Project
+* Ability to see what work is going on within the department
+* Basic stats on why a project is being done, and for who
 
 # feature requests
 ## general
