@@ -5,8 +5,8 @@ It has since morphed into areas to help me (and others) do resource planning and
 ## general
 Things are general usability of the site
 ### user preferences
- * Allow user to remove pictures of directs/add more info in table there
  * OKR style
+ * [x] Allow user to remove pictures of directs/add more info in table there
 
 ## People
  * ramp up monitoring of new hires
