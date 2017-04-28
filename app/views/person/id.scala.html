@@ -183,7 +183,54 @@
             </div>
         <div class="x_content">
             <div class="row">
-            <div class="col-sm-12 ">
+            <div class="col-sm-12">
+            @request.session.get("compact").map{ compact =>
+            <table class="table table-responsive table-striped">
+            <thead>
+                <tr>
+                <th>Name</th>
+                <th class="hidden-xs hidden-sm">Title</th>
+                <th>Cell</th>
+                <th>Desk</th>
+                <th class="hidden-xs hidden-sm">FTE?</th>
+
+                <th class="hidden-xs hidden-sm">Reports</th>
+                <th class="hidden-xs hidden-sm">Vertical</th>
+                </tr>
+            </thead>
+            @directs.toList.sortBy( x=> (x._1.lastname,x._1.firstname )).map{ direct =>
+
+            <tr>
+                <td><a href="@routes.PersonController.id(direct._1.login)">@direct._1.fullName</a></td>
+                <td><a href="@routes.PersonController.id(direct._1.login)">@direct._1.position</a></td>
+                @direct._1.getLDAPPerson().map { LDAPPerson =>
+                    <td>@emp.cellPhone(Some(LDAPPerson))</td>
+                    <td>@emp.deskPhone(Some(LDAPPerson))</td>
+
+                }.getOrElse {
+                    <td>#N/A</td>
+                    <td>#N/A</td>
+                }
+            <td>@if(direct._1.isContractor) {
+                <i class="fa fa-square-o" aria-hidden="true"></i>
+            } else {
+                <i class="fa fa-check-square-o" aria-hidden="true"></i>
+            }</td>
+            <td>@if(direct._1.reports >0 ) {
+                @{direct._1.reports - direct._1.reportscontractor}
+                @if(direct._1.reportscontractor>0) {
+                    (@direct._1.reportscontractor)
+                }
+            }
+            </td>
+        <td>@direct._2.map { matrix2 =>
+            <a href='@routes.MatrixTeamController.id(matrix2.id)'>@matrix2.name</a>
+        }.reduceLeftOption((e1: Html, e2: Html) => Html(e1 + "," + e2))</td>
+            </tr>
+            }
+
+            </table>
+            }.getOrElse{
 
             <table width="100%" class="table table-responsive table-striped">
             <thead>
@@ -220,6 +267,8 @@
             </tr>
             }
             </table>
+    }
+
             </div>
             </div>
 
@@ -325,9 +374,9 @@
     </div ><!-- col -->
 </div> <!-- row -->
 
-        <script nonce='PMAN'>
+    <script nonce='PMAN'>
 
-        window.onload = function () {
+    window.onload = function () {
         //turn to inline mode
         //$.fn.editable.defaults.mode = 'inline';
     $(document).ready(function() {

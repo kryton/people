@@ -43,12 +43,18 @@
 <link rel="stylesheet" href='@routes.WebJarAssets.at(webJarAssets.locate("nprogress.css" ))'>
 <link href='@routes.WebJarAssets.at(webJarAssets.locate( "animate.css"))' rel="stylesheet">
 <link href='@assets.path( "/stylesheets/custom.css")' rel="stylesheet">
-    @request.session.get("lightcolor").map{ x =>
-            @if( x.equals("true")) {
+    @request.session.get("light").map{ x =>
+            @if( x.equals("Y")) {
 <link href='@assets.path( "/stylesheets/light.css")' rel="stylesheet">
             }
     }
-    <!-- LIGHT=@request.session.get("lightcolor") -->
+    <!-- LIGHT=@request.session.get("light") -->
+ @request.session.get("speciallogo").map{ x =>
+            @if( x.equals("true")) {
+<link href='@assets.path( "/stylesheets/special.css")' rel="stylesheet">
+            }
+    }
+    <!-- special=@request.session.get("speciallogo") -->
 
 @styles
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->

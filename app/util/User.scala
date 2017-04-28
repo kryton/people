@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class User @Inject()(implicit employeeRepo:EmployeeRepo, executionContext: ExecutionContext ) {
   import scala.collection.JavaConversions._
-  val lightColors: Set[String] = ConfigFactory.load().getStringList("offline.lightcolor").toList.map(x => x.toLowerCase).toSet
+  val specialLogo: Set[String] = ConfigFactory.load().getStringList("offline.speciallogo").toList.map(x => x.toLowerCase).toSet
   val admins: Set[String] = ConfigFactory.load().getStringList("scenario.admins").toList.map(x => x.toLowerCase).toSet
   val adminsHierarchy: Set[String] = ConfigFactory.load().getStringList("scenario.admins_hierarchy").toList.map(x => x.toLowerCase).toSet
   val kudosAdmins: Set[String] = ConfigFactory.load().getStringList("kudos.admins").toList.map(x => x.toLowerCase).toSet
@@ -48,11 +48,11 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo, executionContext: Execu
       case None => Future.successful(false)
     }
   }
-  def isLightColor(userO:Option[String]):Future[Boolean] = {
-    Logger.info(s"LIGHT ${lightColors.mkString(",")}"  )
+  def isSpecialLogo(userO:Option[String]):Future[Boolean] = {
+   // Logger.info(s"LIGHT ${specialLogo.mkString(",")}"  )
     userO match {
       case None =>Future.successful(false)
-      case Some(user) => Future.successful(lightColors.contains(user.toLowerCase))
+      case Some(user) => Future.successful(specialLogo.contains(user.toLowerCase))
     }
   }
 

@@ -18,7 +18,7 @@
 @()(implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: RequestHeader)
 
 <div class="navbar nav_title" style="border: 0;">
-    @request.session.get("lightcolor").map { x =>
+    @request.session.get("speciallogo").map { x =>
         @if(x.equals("true")) {
           <!--  <img src="/assets/images/cornifycorn.gif" width="52" height="51" border="0" alt="Cornify" /> -->
             <a href="@routes.HomeController.index()" class="site_title fa-binocularsX">&nbsp;</a>

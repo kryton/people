@@ -57,7 +57,8 @@ class HomeController @Inject()
    resourcePoolTeamRepo: ResourcePoolTeamRepo,
    kudosToRepo: KudosToRepo,
    empHistoryRepo: EmpHistoryRepo,
-  user: User
+   userRepo: UserRepo,
+   user: User
   )(implicit ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
@@ -150,13 +151,16 @@ class HomeController @Inject()
             Logger.info(s"LoginSubmit ${data.username} Auth")
             (for{
               emp <- employeeRepo.findByLogin(data.username)
-              isLighter <- user.isLightColor( Some( data.username))
-            } yield (emp, isLighter)).map { x =>
+              prefs <- userRepo.userPrefs(data.username).map( s=> s.map(_._2.code))
+              isSpecial <- user.isSpecialLogo( Some( data.username))
+            } yield (emp, isSpecial,prefs)).map { x =>
+              val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString) ++ x._3.map(y=> y -> "Y")
+
               x._1 match {
                 case Some(emp) =>
-                  Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> emp.fullName, "lightcolor" -> x._2.toString)
+                  Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> emp.fullName)
                 case None =>
-                  Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> "?Not Found?",  "lightcolor" ->false.toString)
+                  Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> "?Not Found?")
               }
             }
           } else {
@@ -167,11 +171,14 @@ class HomeController @Inject()
           Logger.info(s"LoginSubmit ${data.username} NoAuth")
           (for{
             emp <- employeeRepo.findByLogin(data.username)
-            isLighter <- user.isLightColor( Some( data.username))
-          } yield (emp, isLighter)).map { x =>
+            isSpecial <- user.isSpecialLogo( Some( data.username))
+            prefs <- userRepo.userPrefs(data.username).map( s=> s.map(_._2.code))
+          } yield (emp, isSpecial,prefs)).map { x =>
+            val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString) ++ x._3.map(y=> y -> "Y")
+
             x._1 match {
-              case Some(emp) => Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> emp.fullName, "lightcolor" -> x._2.toString)
-              case None => Redirect(routes.HomeController.index()).addingToSession("userId" -> data.username, "name" -> "?Not Found?", "lightcolor" -> false.toString)
+              case Some(emp) => Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> emp.fullName)
+              case None => Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> "?Not Found?")
             }
           }
         }

@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Aceawardnominationto.schema, Authpermission.schema, Authrole.schema, Authrolepermission.schema, Authuser.schema, Businessunit.schema, Corplevel.schema, Costcenter.schema, Empbio.schema, Emphistory.schema, Employeemilestone.schema, Employeeroster.schema, Emppayroll.schema, Emprelations.schema, Emptag.schema, Functionalarea.schema, Gitcommit.schema, Gitissue.schema, Individualarchetype.schema, Individualbusinessunit.schema, Jiraissue.schema, Jiraparentissue.schema, Kudosto.schema, Managerarchetype.schema, Matrixteam.schema, Matrixteammember.schema, Milestone.schema, Office.schema, Okrkeyresult.schema, Okrobjective.schema, PlayEvolutions.schema, Positiontype.schema, Profitcenter.schema, Ratecard.schema, Ratecardrate.schema, Ratecardrole.schema, Resourcepool.schema, Resourcepoolteam.schema, Scenario.schema, Scenariodetail.schema, Scenariolevel.schema, Surveyanswer.schema, Surveycategory.schema, Surveyquestion.schema, Surveyset.schema, Surveysetinstance.schema, Surveysetperson.schema, Teamdescription.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Aceawardnominationto.schema, Authpermission.schema, Authpreference.schema, Authrole.schema, Authrolepermission.schema, Authuser.schema, Authuserpreference.schema, Businessunit.schema, Corplevel.schema, Costcenter.schema, Empbio.schema, Emphistory.schema, Employeemilestone.schema, Employeeroster.schema, Emppayroll.schema, Emprelations.schema, Emptag.schema, Functionalarea.schema, Gitcommit.schema, Gitissue.schema, Individualarchetype.schema, Individualbusinessunit.schema, Jiraissue.schema, Jiraparentissue.schema, Kudosto.schema, Managerarchetype.schema, Matrixteam.schema, Matrixteammember.schema, Milestone.schema, Office.schema, Okrkeyresult.schema, Okrobjective.schema, PlayEvolutions.schema, Positiontype.schema, Profitcenter.schema, Ratecard.schema, Ratecardrate.schema, Ratecardrole.schema, Resourcepool.schema, Resourcepoolteam.schema, Scenario.schema, Scenariodetail.schema, Scenariolevel.schema, Surveyanswer.schema, Surveycategory.schema, Surveyquestion.schema, Surveyset.schema, Surveysetinstance.schema, Surveysetperson.schema, Teamdescription.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -114,6 +114,37 @@ trait Tables {
   /** Collection-like TableQuery object for table Authpermission */
   lazy val Authpermission = new TableQuery(tag => new Authpermission(tag))
 
+  /** Entity class storing rows of table Authpreference
+   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(100,true)
+   *  @param code Database column code SqlType(VARCHAR), Length(10,true) */
+  final case class AuthpreferenceRow(id: Long, name: String, code: String)
+  /** GetResult implicit for fetching AuthpreferenceRow objects using plain SQL queries */
+  implicit def GetResultAuthpreferenceRow(implicit e0: GR[Long], e1: GR[String]): GR[AuthpreferenceRow] = GR{
+    prs => import prs._
+    AuthpreferenceRow.tupled((<<[Long], <<[String], <<[String]))
+  }
+  /** Table description of table AuthPreference. Objects of this class serve as prototypes for rows in queries. */
+  class Authpreference(_tableTag: Tag) extends profile.api.Table[AuthpreferenceRow](_tableTag, Some("offline"), "AuthPreference") {
+    def * = (id, name, code) <> (AuthpreferenceRow.tupled, AuthpreferenceRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(code)).shaped.<>({r=>import r._; _1.map(_=> AuthpreferenceRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(100,true) */
+    val name: Rep[String] = column[String]("name", O.Length(100,varying=true))
+    /** Database column code SqlType(VARCHAR), Length(10,true) */
+    val code: Rep[String] = column[String]("code", O.Length(10,varying=true))
+
+    /** Uniqueness Index over (code) (database name code) */
+    val index1 = index("code", code, unique=true)
+    /** Uniqueness Index over (name) (database name name) */
+    val index2 = index("name", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Authpreference */
+  lazy val Authpreference = new TableQuery(tag => new Authpreference(tag))
+
   /** Entity class storing rows of table Authrole
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param role Database column role SqlType(VARCHAR), Length(20,true) */
@@ -201,6 +232,35 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Authuser */
   lazy val Authuser = new TableQuery(tag => new Authuser(tag))
+
+  /** Entity class storing rows of table Authuserpreference
+   *  @param authpreferenceid Database column authPreferenceid SqlType(BIGINT), Default(0)
+   *  @param login Database column login SqlType(VARCHAR), Length(20,true) */
+  final case class AuthuserpreferenceRow(authpreferenceid: Long = 0L, login: String)
+  /** GetResult implicit for fetching AuthuserpreferenceRow objects using plain SQL queries */
+  implicit def GetResultAuthuserpreferenceRow(implicit e0: GR[Long], e1: GR[String]): GR[AuthuserpreferenceRow] = GR{
+    prs => import prs._
+    AuthuserpreferenceRow.tupled((<<[Long], <<[String]))
+  }
+  /** Table description of table AuthUserPreference. Objects of this class serve as prototypes for rows in queries. */
+  class Authuserpreference(_tableTag: Tag) extends profile.api.Table[AuthuserpreferenceRow](_tableTag, Some("offline"), "AuthUserPreference") {
+    def * = (authpreferenceid, login) <> (AuthuserpreferenceRow.tupled, AuthuserpreferenceRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(authpreferenceid), Rep.Some(login)).shaped.<>({r=>import r._; _1.map(_=> AuthuserpreferenceRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column authPreferenceid SqlType(BIGINT), Default(0) */
+    val authpreferenceid: Rep[Long] = column[Long]("authPreferenceid", O.Default(0L))
+    /** Database column login SqlType(VARCHAR), Length(20,true) */
+    val login: Rep[String] = column[String]("login", O.Length(20,varying=true))
+
+    /** Primary key of Authuserpreference (database name AuthUserPreference_PK) */
+    val pk = primaryKey("AuthUserPreference_PK", (authpreferenceid, login))
+
+    /** Foreign key referencing Authpreference (database name AuthUserPreference_ibfk_1) */
+    lazy val authpreferenceFk = foreignKey("AuthUserPreference_ibfk_1", authpreferenceid, Authpreference)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Authuserpreference */
+  lazy val Authuserpreference = new TableQuery(tag => new Authuserpreference(tag))
 
   /** Entity class storing rows of table Businessunit
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey

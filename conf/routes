@@ -16,9 +16,12 @@ GET         /headshot/:login/edit                  controllers.HeadshotControlle
 POST        /headshot/:login/edit                  controllers.HeadshotController.headShotUpdate(login)
 
 GET         /person/                               controllers.PersonController.search(p: Int ?= 0, search: Option[String] ?= None )
+
 GET         /person/autocomplete                   controllers.PersonController.personAutoComplete( q:Option[String] ?= None)
-GET         /person/:login                         controllers.PersonController.id(login:String )
+GET         /person/:login                         controllers.PersonController.id(login:String)
 POST        /person/:login/team                    controllers.TeamDescriptionController.setTeam(login:String )
+GET         /person/:login/prefs                   controllers.UserController.prefs(login:String )
+GET         /person/:login/prefs/:id/:enable             controllers.UserController.enabledisable(login:String,id:Long, enable:Boolean )
 GET         /person/id/:id                         controllers.PersonController.personNumber(id:Long)
 GET         /person/admin/import                   controllers.PersonController.importFile
 POST        /person/admin/import                   controllers.PersonController.doImport

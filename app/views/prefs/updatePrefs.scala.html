@@ -1,0 +1,86 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import offline.Tables.EmprelationsRow
+@import offline.Tables.AuthpreferenceRow
+@import people.EmpRelationsRowUtils._
+
+@import jdk.nashorn.internal.ir.annotations.Ignore
+@(login:String, emp:EmprelationsRow,
+    userPrefs:Map[Long,AuthpreferenceRow],
+    allPrefs:Map[Long,AuthpreferenceRow])(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+
+@import helper._
+
+    @implicitFieldConstructor = {
+        FieldConstructor(twitterBootstrapInput.f)
+    }
+
+@main("Self Service - User Preferences") {
+
+    <!-- Begin page content -->
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Self Service for @emp.fullName </h2>
+
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="col-xs-12">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Setting</th>
+                                    <th>Disabled</th>
+                                    <th>Enabled</th>
+                                    <th>In Session</th>
+                                </tr>
+                            </thead>
+                            @allPrefs.toSeq.sortBy(_._2.code).map { pref =>
+                            <tr>
+                                <td>@pref._2.name</td>
+                                <td>@userPrefs.get(pref._1).map { ignore =>
+                                  <a href="@routes.UserController.enabledisable(login,pref._2.id,enable=false)">Disable It</a>
+                                }.getOrElse{
+                                    <i class="fa fa-check-square-o" title="Preference Disabled"></i>
+
+                                } </td>
+                                <td>@userPrefs.get(pref._1).map { ignore =>
+                                <i class="fa fa-check-square-o" title="Preference Enabled"></i>
+                                }.getOrElse{
+                                    <a href="@routes.UserController.enabledisable(login,pref._2.id,enable=true)">Enable It</a>
+                                }</td>
+                                <td>@request.session.get(pref._2.code ).map{ x =>
+                                  <i class="fa fa-check-square-o" title="In Session"></i>
+                                }.getOrElse{
+                                    <i class="fa fa-square-o" title="Not Enabled in session"></i>
+                                }</td>
+                            </tr>
+                            }
+                        </table>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
