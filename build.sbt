@@ -14,6 +14,7 @@ val slickVersion = "3.2.0"
 
 libraryDependencies ++= Seq(
   filters,
+  ws,
   // jdbc,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0-M2" % Test,
   "com.typesafe.play" %% "play-slick" % "3.0.0-M4",
