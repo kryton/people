@@ -86,7 +86,7 @@ object ProjectXLSImport {
         }
       }).toMap
 
-      val fieldnames = Set("Predecessors", "Program", "CID", "Anchor", "Priority",
+      val fieldnames = Vector("Predecessors", "Program", "CID", "Anchor", "Priority",
         "CID Inventory File Name",
         "Task Name",
         "Resource Names", "Dev Estimate", "Buffered Estimate",
@@ -94,22 +94,40 @@ object ProjectXLSImport {
         "Start", "Finish", "% Complete")
       val numColumns = fieldnames.size
 
-      val headerCheck = headerCells.keySet.intersect(fieldnames)
+      val headerCheck = headerCells.keySet.intersect(fieldnames.toSet)
       if (headerCheck.size != fieldnames.size) {
-        Left(s"Missing Header Field(s): ${fieldnames.diff(headerCells.keySet).mkString(",")}")
+        Left(s"Missing Header Field(s): ${fieldnames.toSet.diff(headerCells.keySet).mkString(",")}")
       } else {
         val cellHeaders: Map[Int, String] = headerCells.map { x => x._2 -> x._1 }
         val projects: Seq[ProjectImport] = (1 until rows).flatMap { r =>
           val row: Row = sheet.getRow(r)
           if (row != null) {
             val featureCol = headerCells("Task Name")
-            val cellValues: Map[String, String] = (0 to numColumns).map { column =>
-              val cell: Cell = row.getCell(column)
+            val predCell = headerCells("Predecessors")
+            val cellValues: Map[String, String] = (0 until numColumns).map { column =>
+              // we only need to look at the columns that have fields we care about in them
+              val posn = fieldnames(column)
+              val cellNumber = headerCells(posn)
+              val cell: Cell = row.getCell(cellNumber)
+
+//              val cell: Cell = row.getCell(column)
               val value = if (cell == null) {
                 ""
               } else {
                 cell.getCellTypeEnum match {
-                  case CellType.NUMERIC => cell.getNumericCellValue.toString
+                  case CellType.NUMERIC =>
+                    if ( column == predCell) {
+                      // as this field is copy/pasted, excel thinks it's just a large number,
+                      // so when we convert it we think it's a large number instead of a comma separated field
+
+                      val doubleV = cell.getNumericCellValue
+                      val res = doubleV.formatted("%,.0f")
+                      res
+                      //cell.getNumericCellValue.toString
+                    }else {
+                      cell.getNumericCellValue.toString
+                    }
+                    cell.getNumericCellValue.toString
                   case CellType.BOOLEAN => if (cell.getBooleanCellValue) {
                     "Y"
                   } else {
@@ -124,7 +142,12 @@ object ProjectXLSImport {
                 // for Tasks, we need to keep the leading space if there is one so we can tell if this is a feature or task
                 cellHeaders.getOrElse(column, "") -> value
               } else {
-                cellHeaders.getOrElse(column, "") -> value.trim
+                if ( column == predCell) {
+                  // Start-to-Start (SS) & Finish-to-Finish (FF) aren't implemented yet
+                  cellHeaders.getOrElse(column, "") -> value.replaceAll("SS","").replaceAll("FF","").trim
+                } else {
+                  cellHeaders.getOrElse(column, "") -> value.trim
+                }
               }
             }.toMap
             val priCell = row.getCell(headerCells("Priority"))

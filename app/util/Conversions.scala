@@ -107,7 +107,7 @@ object Conversions {
     }
   }
   def toLong( s:String, default:Long):Long = {
-    val regex = """\.\d+"""
+    val regex = """\.\d+$"""
     val remDecimal = s.replaceAll(regex ,"")
     toLongO(remDecimal).getOrElse(default)
   }

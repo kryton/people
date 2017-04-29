@@ -137,16 +137,17 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
         val fullMap: Map[String, ProjectRow] = (insMap ++ toUpd).map{ x => x._1 -> x._2 }.toMap
 
         if (featureId == 539) {
-          Logger.info("DEBUG-Project-repopulate2")
+        //  Logger.info("DEBUG-Project-repopulate2")
         } else {
-          Logger.info(s"FeatureID ${featureId}")
+       //   Logger.info(s"FeatureID ${featureId}")
         }
 
         // update resources for project
         val resourceF: Future[Iterable[Option[ResourceteamprojectRow]]] = Future.sequence(fullMap.map{ projT =>
           deleteResourcesForProject(projT._2.id).map{ ignore =>
             newMap.get(projT._1) match {
-              case None => Logger.error("Logic Error. Should match (ProjectRepo/Resource")
+              case None =>
+                Logger.error("Logic Error. Should match (ProjectRepo/Resource")
                 Future.successful(None)
               case Some(imp) => imp.resourceTeam match {
                 case Some(rtp) => val rt= ResourceteamprojectRow(id=0,
@@ -157,7 +158,8 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
                   featuresizeremaining = Some( BigDecimal( imp.devEstimate*(1-imp.percentComplete)) )
                 )
                    insert(rt) .map{ x => Some(x)}
-                case None => Logger.error("Logic Error. Should have a resource team assigned at this stage??")
+                case None =>
+                  Logger.error("Logic Error. Should have a resource team assigned at this stage??")
                   Future.successful(None)
               }
             }
@@ -182,10 +184,12 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
                   case Some(projRow) =>
                     projectDependencyRepo.insert(ProjectdependencyRow(0,projID, projRow.id))
                       .map( res => Some(res) )
-                  case None => Logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key")
+                  case None =>
+                    Logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key")
                     Future.successful(None)
                 }
-                case None => Logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key x2")
+                case None =>
+                  Logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key x2")
                   Future.successful(None)
               }
             })//.flatMap(identity)
