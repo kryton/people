@@ -24,7 +24,8 @@ import offline.Tables
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
-import slick.jdbc.JdbcProfile
+import slick.basic.DatabaseConfig
+import slick.jdbc.{JdbcBackend, JdbcProfile}
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,16 +39,17 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 
 class TeamDescriptionRepo @Inject()(@NamedDatabase("default")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
-  val dbConfig = dbConfigProvider.get[JdbcProfile]
-  val db = dbConfig.db
+  val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
+  val db: JdbcBackend#DatabaseDef = dbConfig.db
   import offline.Tables._
   import offline.Tables.profile.api._
 
-  def find(id:Long):Future[Option[TeamdescriptionRow]] = db.run(Teamdescription.filter(_.id === id).result.headOption)
+  def find(id:Long):Future[Option[TeamdescriptionRow]] =
+    db.run(Teamdescription.filter(_.id === id).result.headOption)
   def findTeamForLoginEx(login:String)(implicit employeeRepo: EmployeeRepo):Future[Option[TeamdescriptionRow]] = {
     db.run( Teamdescription.filter(_.login === login ).result.headOption)
-
   }
+
   def findTeamForLoginEx(logins:Set[String])(implicit employeeRepo: EmployeeRepo):Future[Option[TeamdescriptionRow]] = {
     db.run( Teamdescription.filter(_.login inSet logins ).result.headOption)
   }
@@ -63,10 +65,12 @@ class TeamDescriptionRepo @Inject()(@NamedDatabase("default")  protected val dbC
         managerTeams.map { seq =>  seq.flatten.headOption }
     }.flatMap(identity)
   }
+
   def findTeam( team:String ) :Future[Seq[TeamdescriptionRow]] = {
     db.run( Teamdescription.filter(_.tagtext.toLowerCase === team.toLowerCase)
       .join(Emprelations).on( _.login.toLowerCase === _.login.toLowerCase).map(_._1)  .result)
   }
+
   def findTeamMembers( team:String):Future[Set[EmprelationsRow]] = {
     val qry = Teamdescription.filter( _.tagtext.toLowerCase === team.toLowerCase)
       .join(Emprelations).on(_.login.toLowerCase === _.login.toLowerCase).map(_._2)
@@ -76,6 +80,7 @@ class TeamDescriptionRepo @Inject()(@NamedDatabase("default")  protected val dbC
       findTeamMembers_ex( logins,  Future.successful(emps.toSet ))
     }.flatMap(identity)
   }
+
   def findTeamMembers_ex( managers:Set[String], acc:Future[Set[EmprelationsRow]]):Future[Set[EmprelationsRow]] = {
     managers.toList match {
       case Nil => acc
@@ -148,10 +153,13 @@ class TeamDescriptionRepo @Inject()(@NamedDatabase("default")  protected val dbC
     .map(id => td.copy(id = id))
 
 
-  def update(id: Long, td:TeamdescriptionRow) = {
+  def update(id: Long, td:TeamdescriptionRow): Future[Boolean] = {
     db.run(Teamdescription.filter(_.id === id).update( td.copy(id = id))) map { _ > 0 }
   }
 
-  def delete(id: Long) =
-    db.run(Office.filter(_.id === id).delete) map { _ > 0 }
+  def delete(id: Long): Future[Boolean] =
+    db.run(Teamdescription.filter(_.id === id).delete) map { _ > 0 }
+
+  def delete(login: String): Future[Boolean] =
+    db.run(Teamdescription.filter(_.login === login).delete) map { _ > 0 }
 }

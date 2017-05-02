@@ -49,12 +49,13 @@ class MatrixTeamRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
   }
 
   def all: Future[Seq[MatrixteamRow]] = db.run{
-    Matrixteam.sortBy(_.name).result
+    Matrixteam.sortBy(_.name.toLowerCase).result
   }
 
   def insert(empTag: MatrixteamRow): Future[Tables.MatrixteamRow] =
     db.run(Matrixteam returning Matrixteam.map(_.id) += empTag )
     .map(id => empTag.copy(id = id ))
+
 
   def update(id: Long, empTag:MatrixteamRow) = {
     db.run(Matrixteam.filter(_.id === id).update( empTag.copy(id = id))) map { _ > 0 }

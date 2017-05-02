@@ -91,6 +91,7 @@
                                     data-url='@routes.TeamDescriptionController.setTeam(emp.login)' data-title="Team Name">
                                     <i class="fa fa-pencil" aria-hidden="true"><span style="display:none">@t.tagtext</span></i>
                                     </span>
+                                    <a href="@routes.TeamDescriptionController.deleteTeam(emp.login)"><i class="fa fa-eraser" title="Remove Team"></i></a>
                                 }
                                 </td>
                                 </tr>
@@ -111,13 +112,21 @@
 
                         @if( matrix.nonEmpty ) {
                             <tr><td>Matrixed:</td><td>
-                                    @matrix.map { matrix2 =>
+                                    @matrix.map { matrix2:MatrixteamRow =>
                                         <a href="@routes.MatrixTeamController.id(matrix2.id)">@matrix2.name</a>
                                      }.reduceLeftOption((e1: Html, e2: Html) => Html(e1 + "," + e2))
-
-                                    </td></tr>
+                            @if(canEdit) {
+                                <a href="@routes.PersonController.matrix(emp.login)"><i class="fa fa-pencil"></i></a>
+                            }
+                                </td>
+                            </tr>
+                        } else {
+                            @if(canEdit) {
+                                <tr><td>Matrixed:</td><td>None
+                                    <a href="@routes.PersonController.matrix(emp.login)"><i class="fa fa-pencil"></i></a>
+                                </td></tr>
+                            }
                         }
-
 
                         @if(directs.nonEmpty) {
                             <tr><td>Directs:</td><td>@emp.directs </td></tr>
@@ -225,7 +234,11 @@
             </td>
         <td>@direct._2.map { matrix2 =>
             <a href='@routes.MatrixTeamController.id(matrix2.id)'>@matrix2.name</a>
-        }.reduceLeftOption((e1: Html, e2: Html) => Html(e1 + "," + e2))</td>
+        }.reduceLeftOption((e1: Html, e2: Html) => Html(e1 + "," + e2))
+        @if(canEdit) {
+            <a href="@routes.PersonController.matrix(direct._1.login)"><i class="fa fa-pencil"></i></a>
+        }
+        </td>
             </tr>
             }
 

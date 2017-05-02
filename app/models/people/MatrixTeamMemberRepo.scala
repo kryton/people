@@ -64,8 +64,17 @@ class MatrixTeamMemberRepo @Inject()(@NamedDatabase("default")  protected val db
     db.run( qry.result )
   }
 
-  def findByLogin(login:String):Future[Seq[MatrixteammemberRow]]=db.run(Matrixteammember.filter(_.login === login.toLowerCase).result)
+  def findByLogin(login:String):Future[Seq[MatrixteammemberRow]]=
+    db.run(Matrixteammember.filter(_.login === login.toLowerCase).result)
 
+  def enablePref(login:String,id:Long): Future[Int] = {
+    disablePref(login, id).map { x =>
+      db.run(Matrixteammember += MatrixteammemberRow(id=0,matrixteammemberid = id, login= login))
+    }.flatMap(identity)
+  }
+
+  def disablePref(login:String,id:Long): Future[Int] =
+    db.run( Matrixteammember.filter(_.login === login).filter(_.matrixteammemberid === id).delete)
 
   def insert(mtm: MatrixteammemberRow): Future[MatrixteammemberRow] =
     db.run(Matrixteammember returning Matrixteammember.map(_.id) += mtm )

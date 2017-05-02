@@ -25,7 +25,7 @@ import models.people.EmpRelationsRowUtils._
 import models.people._
 import models.product.ProductTrackRepo
 import offline.Tables
-import offline.Tables.{EmprelationsRow, OfficeRow}
+import offline.Tables.{EmprelationsRow, MatrixteammemberRow, OfficeRow}
 import play.api._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
@@ -213,6 +213,7 @@ class PersonController @Inject()
         }
       }
   }
+
   protected def officeString( id:Option[Long], officeMap: Map[Long,OfficeRow]):String = {
     id match {
       case Some(officeID) => officeMap.get(officeID) match {
@@ -222,8 +223,43 @@ class PersonController @Inject()
       case None => ""
     }
   }
-  def personHierarchy(login:Option[String]) = Action.async { implicit request =>
 
+  def matrix(login:String) = LDAPAuthAction {
+    Action.async { implicit request =>
+      user.isOwnerManagerOrAdmin(login,LDAPAuth.getUser()).map {
+        case true => (for{
+          e <- employeeRepo.findByLogin(login)
+          m <- matrixTeamMemberRepo.findMatrixTeamByLogin(login).map( s => s.map( p=> p.id -> p).toMap )
+          a <- matrixTeamRepo.all
+        } yield (e,m,a)).map { x =>
+          x._1 match {
+            case Some(emp) =>  Ok(views.html.person.matrix(emp,x._2,x._3))
+            case None => NotFound(views.html.page_404("Login not found"))
+          }
+        }
+        case false => Future(Unauthorized(views.html.page_403("No Access")))
+      }.flatMap(identity)
+    }
+  }
+
+  def matrixEnabledisable(login:String, pref:Long, enable:Boolean) = LDAPAuthAction {
+
+    Action.async { implicit request =>
+      user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map {
+        case true =>
+          (if ( enable ) {
+            matrixTeamMemberRepo.enablePref(login, pref)
+          } else {
+            matrixTeamMemberRepo.disablePref(login, pref)
+          }).map{ x => Redirect(routes.PersonController.matrix(login))}
+
+        case false => Future(Unauthorized(views.html.page_403("No Access")))
+      }.flatMap(identity)
+    //Future(Ok(""))
+    }
+  }
+
+  def personHierarchy(login:Option[String]) = Action.async { implicit request =>
     val empF = login match {
       case None => employeeRepo.findCEO()
       case Some(x) => employeeRepo.findByLogin(x)
@@ -245,7 +281,6 @@ class PersonController @Inject()
       }.flatMap(identity)
       o <- officeRepo.all().map{ seq => seq.map{ x => x.id -> x}.toMap }
     } yield (e, d, o, dd)) .map { empMgrO =>
-
 
       empMgrO._1 match {
         case None => NotFound("Login not found/CEO not found")
@@ -309,20 +344,18 @@ class PersonController @Inject()
     }
   }
   implicit val personWrites = new Writes[person] {
-    def writes( k : person ): JsObject = Json.obj(
+    def writes(k: person): JsObject = Json.obj(
       "id" -> k.id,
       "name" -> k.name
     )
   }
 
-    implicit val autoCompleteResultWrites = new Writes[autoCompleteResult] {
-    def writes( k : autoCompleteResult ): JsObject = Json.obj(
+  implicit val autoCompleteResultWrites = new Writes[autoCompleteResult] {
+    def writes(k: autoCompleteResult): JsObject = Json.obj(
       "total_count" -> k.total_count,
       "incomplete_Results" -> k.incomplete_Results,
-      "items"-> k.items
+      "items" -> k.items
     )
   }
-
-//total_count: Int, incomplete_Results: Boolean, items
 }
 

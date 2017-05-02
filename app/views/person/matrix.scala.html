@@ -1,0 +1,65 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import people.EmpRelationsRowUtils._
+@import offline.Tables.EmprelationsRow
+@import offline.Tables.MatrixteamRow
+@(  emp:EmprelationsRow,
+    enabled:Map[Long,MatrixteamRow],
+    all:Seq[MatrixteamRow])(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+
+
+@main(s"Matrix Teams for ${emp.fullName}") {
+
+    <!-- Begin page content -->
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Matrix Teams for <a href="@routes.PersonController.id(emp.login)">@emp.fullName</a></h2>
+
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-striped">
+                    <thead><th>Team</th>
+                        <th>Enabled?</th>
+                        <th>Disabled</th>
+                    </thead>
+                    @all.map{ m =>
+                      <tr>
+                          <td>@m.name</td>
+                          @enabled.get(m.id).map { x =>
+                            <td><i class="fa fa-check-square-o"></i></td>
+                            <td><a href="@routes.PersonController.matrixEnabledisable(emp.login,m.id,false)">disable</a></td>
+                          }.getOrElse{
+                              <td><a href="@routes.PersonController.matrixEnabledisable(emp.login,m.id,true)">enable</a></td>
+                              <td><i class="fa fa-check-square-o"></i></td>
+                          }
+                      </tr>
+
+                    }
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+}

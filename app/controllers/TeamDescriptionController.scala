@@ -96,6 +96,15 @@ class TeamDescriptionController @Inject()
     }
   }
 
+  def deleteTeam( login:String): Action[AnyContent] = LDAPAuthAction{
+    Action.async { implicit request =>
+      user.isOwnerManagerOrAdmin(login,LDAPAuth.getUser()).map {
+        case true => teamDescriptionRepo.delete(login).map{ x => Redirect(routes.PersonController.id(login )) }
+        case false => Future(Unauthorized(views.html.page_403("Unauthorized")))
+      }.flatMap(identity)
+    }
+  }
+
   def setTeam( login:String): Action[AnyContent] = Action.async { implicit request =>
     request.body.asFormUrlEncoded match {
       case None => Future.successful(NotFound("No Team"))
