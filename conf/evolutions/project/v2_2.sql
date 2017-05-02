@@ -16,7 +16,7 @@ CREATE TABLE `ResourceTeamProject` (
   `maxDevs` INT(10) UNSIGNED NOT NULL DEFAULT '0',
   `resourceTeamId` INT(11) NOT NULL,
   `projectId` INT(11) NOT NULL,
-  `featureSizeRemaining` DECIMAL(5,2) NULL DEFAULT '0.00',
+  `featureSizeRemaining` DECIMAL(9,2) NULL DEFAULT '0.00',
   PRIMARY KEY (`id`),
   INDEX `resourceTeamId` (`resourceTeamId`),
   INDEX `projectFeature` (`projectId`),
@@ -27,3 +27,5 @@ CREATE TABLE `ResourceTeamProject` (
   ENGINE=InnoDB
 ;
 alter table project convert to character set utf8 collate utf8_unicode_ci;
+ALTER TABLE `resourceteamproductfeature`
+  CHANGE COLUMN `featureSizeRemaining` `featureSizeRemaining` DECIMAL(9,2) NULL DEFAULT '0.00' AFTER `productFeatureId`;
