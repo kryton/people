@@ -196,6 +196,7 @@
                                     <thead>
                                         <tr><th>Priority</th>
                                             <th>Feature</th>
+                                            <th>Active</th>
                                             <th>Anchor</th>
                                             <th>CID</th>
                                             <th align="right">Estimate</th>
@@ -208,6 +209,9 @@
                         @results.map { item =>
                             <tr><td align="right">@item._1.ordering</td>
                                 <td><a href="@routes.ProductFeatureController.id(item._1.id)">@item._1.name</a></td>
+                                <td>@if(item._1.isactive.getOrElse(false)) {
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                }</td>
                                 <td>@if(item._1.isanchor.getOrElse(false)) {
                                     <i class="fa fa-anchor" aria-hidden="true"></i>
                                 }</td>
