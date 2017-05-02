@@ -135,7 +135,13 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
             Seq[(ResourceteamproductfeatureRow,ResourceteamRow)]
           )] = x._2 match {
           case Some(pf) =>
-            val newPF =  pf.copy(iscid = Some( feature.isCID), isanchor = Some(feature.isAnchor),ordering = maxPri - feature.priority)
+
+            val newPF =  pf.copy(
+              iscid = Some( feature.isCID),
+              isanchor = Some(feature.isAnchor),
+              ordering = maxPri - feature.priority,
+              isactive = Some(isActive)
+            )
             val tracksFeature: Future[Seq[(ProducttrackRow, ProducttrackfeatureRow)]] = findTracksByFeature(pf.id)
 
             val insertIt = this.update(pf.id, newPF ).map( ignore => newPF )
@@ -203,7 +209,7 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
             val summary: Map[String, (Double, Int, Int)] = feature.projects
               .filter( p => p.resource.nonEmpty)
               .map{ p =>
-                ( p.resource,  p.devEstimate * (1 - p.percentComplete), p.devEstimate.toInt, p.resourceNumber )
+                ( p.resource,  p.devEstimate * (100 - p.percentComplete)/100.0, p.devEstimate.toInt, p.resourceNumber )
             }.groupBy( _._1).map { gp =>
               ( gp._1, gp._2.foldLeft( (0.0,0,0) ) ( (z,i) => (z._1 + i._2, z._2 + i._3 , Math.max(z._3 , i._4)  )) )
             }

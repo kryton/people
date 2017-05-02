@@ -23,7 +23,7 @@
         FieldConstructor(twitterBootstrapInput.f)
     }
 
-@main("Import MS-Project XLS Export file") {
+@main("Import MS-Project MPP Export file") {
 
     <!-- Begin page content -->
 
@@ -31,15 +31,23 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Import MS Project XLS-export file</h2>
+                <h2>Import MS Project MPP-export file</h2>
 
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
+                The following expects a MS Project file with several custom fields.
+                <ul><li>Program</li>
+                    <li>CID</li>
+                    <li>Anchor</li>
+                    <li>CID Inventory File Name</li>
+                    <li>Dev Estimate</li>
+                    <li>Buffered Estimate</li>
+                </ul>
 
             @form(action = routes.ProductFeatureController.doImport(), 'enctype -> "multipart/form-data") {
                 @CSRF.formField
-                <label for="importFile">The XLS file from MS-Project:</label>
+                <label for="importFile">The MPP file from MS-Project:</label>
                 <input id="importFile" type="file" name="importFile">
 
                 <p>

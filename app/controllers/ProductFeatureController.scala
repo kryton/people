@@ -28,7 +28,7 @@ import play.api.mvc._
 import play.db.NamedDatabase
 import projectdb.Tables._
 import slick.jdbc.JdbcProfile
-import util.importFile.{ProjectXLSImport, SAPImport}
+import util.importFile.{ProjectMPPImport, ProjectXLSImport, SAPImport}
 import util.{LDAP, Page, User}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -117,7 +117,8 @@ class ProductFeatureController @Inject()
           request.body.file("importFile").map { picture =>
             val filename = picture.filename
             val path: Path = picture.ref.path
-            ProjectXLSImport.importFile(path).map {
+           // ProjectXLSImport.importFile(path).map {
+            ProjectMPPImport.importFile(path).map {
               case Left(errorMsg) => Future.successful(Ok(errorMsg))
               case Right(list) =>
                 productFeatureRepo.repopulate( list ).map { x =>

@@ -155,7 +155,7 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
                   maxdevs = imp.resourceNumber,
                   projectid = projT._2.id,
                   resourceteamid = rtp._1.id,
-                  featuresizeremaining = Some( BigDecimal( imp.devEstimate*(1-imp.percentComplete)) )
+                  featuresizeremaining = Some( BigDecimal( imp.devEstimate*(100-imp.percentComplete)/100) )
                 )
                    insert(rt) .map{ x => Some(x)}
                 case None =>
