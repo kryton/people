@@ -57,7 +57,13 @@
                     @results.map { mtm =>
                       <tr><td>@mtm.ordering</td>
 
-                                  <td><a href="@routes.ProductFeatureController.id(mtm.id)">@mtm.name</a></td>
+                          <td>@if(mtm.isactive.getOrElse(false)) {
+                              <a href="@routes.ProductFeatureController.id(mtm.id)">@mtm.name</a>
+                          } else {
+                              <strike><a href="@routes.ProductFeatureController.id(mtm.id)">@mtm.name</a></strike>
+
+                          }
+                          </td>
                           <td>@if(mtm.isanchor.getOrElse(false)) {
                               <i class="fa fa-anchor" aria-hidden="true"></i>
                           }</td>

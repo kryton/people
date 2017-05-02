@@ -117,7 +117,7 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
     val oldMSFL = db.run( Productfeature.filterNot(_.msprojectname.isEmpty).result )
 
     val newFeatures = Future.sequence(features.map{ feature =>
-      val isActive = !feature.projects.exists(_.disabled == false)
+      val isActive = feature.projects.exists(_.disabled == false)
       val prog: String = feature.program.getOrElse("Internal")
     //  Logger.info(s"Inserting Feature:${feature.feature} (${feature.feature.size})")
       (for{

@@ -114,6 +114,10 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
       val toDelS = existMap.keySet.diff( newMap.keySet )
       val toDel = existMap.filter( p => toDelS.contains(p._1))
       val toUpd = existMap.filterNot( p => toDelS.contains(p._1 ))
+      val toUpdF = Future.sequence( toUpd.map{ (rec: (String, ProjectRow)) =>
+        val imp = newMap(rec._1)
+        update(rec._2.id, rec._2.copy( isactive = !imp.disabled, started = Some(imp.start), finished = Some(imp.finish)))
+      })
       val delF: Future[Iterable [Boolean]] =Future.sequence( toDel.map{ (rec: (String,ProjectRow)) => delete( rec._2.id ) })
       val insF: Future[Set[ProjectRow]] = Future.sequence(newMap.keySet.diff(existMap.keySet).map{ msprojectname =>
         val imp = newMap(msprojectname)
@@ -132,7 +136,8 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
       (for {
         del <- delF
         ins <- insF
-      } yield (del,ins)).map{ x=>
+        upd <- toUpdF
+      } yield (del,ins,upd)).map{ x=>
         val insMap: Set[(String, ProjectRow)] = x._2.map{ prj => prj.msprojectname.getOrElse("") -> prj }
         val fullMap: Map[String, ProjectRow] = (insMap ++ toUpd).map{ x => x._1 -> x._2 }.toMap
 

@@ -159,7 +159,7 @@ object ProjectMPPImport {
 
     Some( ProjectImport(task.getID,
       predecessor = pred,
-      disabled = task.getActive,
+      disabled = !task.getActive,
       program = eTasks.get("Program").flatten,
       isCID= cidValue.equals("Y"),
       isAnchor = anchorValue.equals("Y"),

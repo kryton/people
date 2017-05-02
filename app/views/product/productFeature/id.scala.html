@@ -217,7 +217,13 @@
                                           } else {
                                               <i class="fa fa-square-o" aria-hidden="true"></i>
                                           }</td>
-                                          <td>@project._1.name</td>
+                                          <td>
+                                          @if(project._1.isactive) {
+                                              @project._1.name
+                                          } else {
+                                              <strike>@project._1.name</strike>
+                                          }
+                                          </td>
                                       <td>@project._2.map{ stat => @stat.name}.getOrElse{
                                           -
                                       }</td>
