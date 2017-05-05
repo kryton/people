@@ -1,20 +1,3 @@
-/*
- * Copyright (C) 2014  Ian Holsman
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package projectdb
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
@@ -45,8 +28,8 @@ trait Tables {
     prs => import prs._
     EmpefficiencyRow.tupled((<<[Long], <<[Int], <<?[scala.math.BigDecimal]))
   }
-  /** Table description of table EmpEfficiency. Objects of this class serve as prototypes for rows in queries. */
-  class Empefficiency(_tableTag: Tag) extends profile.api.Table[EmpefficiencyRow](_tableTag, Some("project_db"), "EmpEfficiency") {
+  /** Table description of table empefficiency. Objects of this class serve as prototypes for rows in queries. */
+  class Empefficiency(_tableTag: Tag) extends profile.api.Table[EmpefficiencyRow](_tableTag, Some("project_db"), "empefficiency") {
     def * = (id, month, efficiency) <> (EmpefficiencyRow.tupled, EmpefficiencyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(month), efficiency).shaped.<>({r=>import r._; _1.map(_=> EmpefficiencyRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -445,8 +428,8 @@ trait Tables {
     prs => import prs._
     ProjectdependencyRow.tupled((<<[Long], <<[Int], <<[Int]))
   }
-  /** Table description of table ProjectDependency. Objects of this class serve as prototypes for rows in queries. */
-  class Projectdependency(_tableTag: Tag) extends profile.api.Table[ProjectdependencyRow](_tableTag, Some("project_db"), "ProjectDependency") {
+  /** Table description of table projectdependency. Objects of this class serve as prototypes for rows in queries. */
+  class Projectdependency(_tableTag: Tag) extends profile.api.Table[ProjectdependencyRow](_tableTag, Some("project_db"), "projectdependency") {
     def * = (id, fromproject, toproject) <> (ProjectdependencyRow.tupled, ProjectdependencyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(fromproject), Rep.Some(toproject)).shaped.<>({r=>import r._; _1.map(_=> ProjectdependencyRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -816,8 +799,8 @@ trait Tables {
     prs => import prs._
     ResourceteamprojectRow.tupled((<<[Int], <<[Int], <<[Int], <<[Int], <<[Int], <<?[scala.math.BigDecimal]))
   }
-  /** Table description of table ResourceTeamProject. Objects of this class serve as prototypes for rows in queries. */
-  class Resourceteamproject(_tableTag: Tag) extends profile.api.Table[ResourceteamprojectRow](_tableTag, Some("project_db"), "ResourceTeamProject") {
+  /** Table description of table resourceteamproject. Objects of this class serve as prototypes for rows in queries. */
+  class Resourceteamproject(_tableTag: Tag) extends profile.api.Table[ResourceteamprojectRow](_tableTag, Some("project_db"), "resourceteamproject") {
     def * = (id, featuresize, maxdevs, resourceteamid, projectid, featuresizeremaining) <> (ResourceteamprojectRow.tupled, ResourceteamprojectRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(featuresize), Rep.Some(maxdevs), Rep.Some(resourceteamid), Rep.Some(projectid), featuresizeremaining).shaped.<>({r=>import r._; _1.map(_=> ResourceteamprojectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))

@@ -4,109 +4,119 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET         /                                      controllers.HomeController.index
-GET         /search                                controllers.HomeController.search( q:Option[String] ?= None )
-GET         /login                                 controllers.HomeController.login
-POST        /login                                 controllers.HomeController.loginInSubmit
-GET         /logout                                controllers.HomeController.logout
-GET         /logout2                               controllers.HomeController.logout2
+GET         /                                        controllers.HomeController.index
+GET         /search                                  controllers.HomeController.search( q:Option[String] ?= None )
+GET         /login                                   controllers.HomeController.login
+POST        /login                                   controllers.HomeController.loginInSubmit
+GET         /logout                                  controllers.HomeController.logout
+GET         /logout2                                 controllers.HomeController.logout2
 
-GET         /headshot/:login                       controllers.HeadshotController.headShot(login, notCurrent:Option[String] ?= None)
-GET         /headshot/:login/edit                  controllers.HeadshotController.headShotEdit(login)
-POST        /headshot/:login/edit                  controllers.HeadshotController.headShotUpdate(login)
+GET         /headshot/:login                         controllers.HeadshotController.headShot(login, notCurrent:Option[String] ?= None)
+GET         /headshot/:login/edit                    controllers.HeadshotController.headShotEdit(login)
+POST        /headshot/:login/edit                    controllers.HeadshotController.headShotUpdate(login)
 
-GET         /person/                               controllers.PersonController.search(p: Int ?= 0, search: Option[String] ?= None )
+GET         /person/                                 controllers.PersonController.search(p: Int ?= 0, search: Option[String] ?= None )
 
-GET         /person/autocomplete                   controllers.PersonController.personAutoComplete( q:Option[String] ?= None)
-GET         /person/:login                         controllers.PersonController.id(login:String)
-POST        /person/:login/team                    controllers.TeamDescriptionController.setTeam(login:String )
-GET         /person/:login/team/delete             controllers.TeamDescriptionController.deleteTeam(login:String )
-GET         /person/:login/prefs                   controllers.UserController.prefs(login:String )
-GET         /person/:login/prefs/:id/:enable       controllers.UserController.enabledisable(login:String,id:Long, enable:Boolean )
-GET         /person/:login/matrix/:id/:enable       controllers.PersonController.matrixEnabledisable(login:String,id:Long, enable:Boolean )
-GET         /person/:login/matrix                  controllers.PersonController.matrix(login:String)
-GET         /person/id/:id                         controllers.PersonController.personNumber(id:Long)
-GET         /person/admin/import                   controllers.PersonController.importFile
-POST        /person/admin/import                   controllers.PersonController.doImport
+GET         /person/autocomplete                     controllers.PersonController.personAutoComplete( q:Option[String] ?= None)
+GET         /person/:login                           controllers.PersonController.id(login:String)
+POST        /person/:login/team                      controllers.TeamDescriptionController.setTeam(login:String )
+GET         /person/:login/team/delete               controllers.TeamDescriptionController.deleteTeam(login:String )
+GET         /person/:login/prefs                     controllers.UserController.prefs(login:String )
+GET         /person/:login/prefs/:id/:enable         controllers.UserController.enabledisable(login:String,id:Long, enable:Boolean )
+GET         /person/:login/matrix/:id/:enable        controllers.PersonController.matrixEnabledisable(login:String,id:Long, enable:Boolean )
+GET         /person/:login/matrix                    controllers.PersonController.matrix(login:String)
+GET         /person/id/:id                           controllers.PersonController.personNumber(id:Long)
+GET         /person/admin/import                     controllers.PersonController.importFile
+POST        /person/admin/import                     controllers.PersonController.doImport
 
-GET         /orgchart/hier                         controllers.PersonController.personHierarchy(login:Option[String]?=None)
-GET         /orgchart                              controllers.PersonController.personOrgChart(login:Option[String]?=None)
+GET         /orgchart/hier                           controllers.PersonController.personHierarchy(login:Option[String]?=None)
+GET         /orgchart                                controllers.PersonController.personOrgChart(login:Option[String]?=None)
 
-GET         /matrix/                               controllers.MatrixTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /matrix/:id                            controllers.MatrixTeamController.id( id:Long, p:Int ?= 0 )
+GET         /matrix/                                 controllers.MatrixTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /matrix/:id                              controllers.MatrixTeamController.id( id:Long, p:Int ?= 0 )
 
-GET         /cc/                                   controllers.CostCenterController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /cc/cc/:id                             controllers.CostCenterController.id( id:Long,p:Int ?= 0 )
-GET         /cc/function/:id                       controllers.CostCenterController.function( id:Long,p:Int ?= 0 )
-GET         /cc/profit/:id                         controllers.CostCenterController.profit( id:Long,p:Int ?= 0 )
-GET         /cc/admin/import                       controllers.CostCenterController.importFile
-POST        /cc/admin/import                       controllers.CostCenterController.doImport
+GET         /cc/                                     controllers.CostCenterController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /cc/cc/:id                               controllers.CostCenterController.id( id:Long,p:Int ?= 0 )
+GET         /cc/function/:id                         controllers.CostCenterController.function( id:Long,p:Int ?= 0 )
+GET         /cc/profit/:id                           controllers.CostCenterController.profit( id:Long,p:Int ?= 0 )
+GET         /cc/admin/import                         controllers.CostCenterController.importFile
+POST        /cc/admin/import                         controllers.CostCenterController.doImport
 
-GET         /tag/                                  controllers.TagController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /tag/:tag                              controllers.TagController.id( tag:String, p:Int ?= 0 )
+GET         /tag/                                    controllers.TagController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /tag/:tag                                controllers.TagController.id( tag:String, p:Int ?= 0 )
 
-GET         /team/                                 controllers.TeamDescriptionController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /team/:tag                             controllers.TeamDescriptionController.id( tag:String, p:Int ?= 0 )
+GET         /team/                                   controllers.TeamDescriptionController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /team/:tag                               controllers.TeamDescriptionController.id( tag:String, p:Int ?= 0 )
 
 # the following are legacy URLs
-GET         /kudos/                                controllers.KudosController.topX( size:Int ?= 30, format: Option[String] = None)
-GET         /kudos/auth/:nonce/:cryptString        controllers.KudosController.authKudos(nonce:String, cryptString: String)
-GET         /kudos/genEmail                        controllers.KudosController.genKudosEmail()
+GET         /kudos/                                  controllers.KudosController.topX( size:Int ?= 30, format: Option[String] = None)
+GET         /kudos/auth/:nonce/:cryptString          controllers.KudosController.authKudos(nonce:String, cryptString: String)
+GET         /kudos/genEmail                          controllers.KudosController.genKudosEmail()
 # for debugging only
-GET         /kudos/genAuth/:toEncyrpt              controllers.KudosController.genKudos(toEncyrpt:String)
+GET         /kudos/genAuth/:toEncyrpt                controllers.KudosController.genKudos(toEncyrpt:String)
 
-GET         /shoutout/                             controllers.KudosController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /shoutout/:id                          controllers.KudosController.id( id:Long )
-GET         /shoutout/admin/auth                   controllers.KudosController.testAuth()
-GET         /shoutout/:id/reject                   controllers.KudosController.reject(id:Long, reject: Boolean ?= true )
+GET         /shoutout/                               controllers.KudosController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /shoutout/:id                            controllers.KudosController.id( id:Long )
+GET         /shoutout/admin/auth                     controllers.KudosController.testAuth()
+GET         /shoutout/:id/reject                     controllers.KudosController.reject(id:Long, reject: Boolean ?= true )
 
-GET         /OKR/                                  controllers.OKRController.topX(size: Int ?= 40, format: Option[String] ?= None)
-GET         /OKR/:login                            controllers.OKRController.login(login:String, quarter:Option[String] ?= None)
-GET         /OKR/:login/:id                        controllers.OKRController.byObjective(login:String, id:Long)
-POST        /OKR/:login/:id                        controllers.OKRController.byObjectiveUPD(login:String, id:Long)
-POST        /OKR/:login/:okr/:kr                   controllers.OKRController.byObjectiveKRUPD(login:String, okr:Long, kr:Long)
-POST        /OKR/:login/:okr/kr/new                controllers.OKRController.newKR(login:String, okr:Long)
-POST        /OKR/:login/new/obj/                   controllers.OKRController.newObjective(login:String, quarter:Option[String] ?= None )
+GET         /OKR/                                    controllers.OKRController.topX(size: Int ?= 40, format: Option[String] ?= None)
+GET         /OKR/:login                              controllers.OKRController.login(login:String, quarter:Option[String] ?= None)
+GET         /OKR/:login/:id                          controllers.OKRController.byObjective(login:String, id:Long)
+POST        /OKR/:login/:id                          controllers.OKRController.byObjectiveUPD(login:String, id:Long)
+POST        /OKR/:login/:okr/:kr                     controllers.OKRController.byObjectiveKRUPD(login:String, okr:Long, kr:Long)
+POST        /OKR/:login/:okr/kr/new                  controllers.OKRController.newKR(login:String, okr:Long)
+POST        /OKR/:login/new/obj/                     controllers.OKRController.newObjective(login:String, quarter:Option[String] ?= None )
 
-GET         /OKR/:login/:id/complete               controllers.OKRController.completeObjective(login:String, id:Long)
-GET         /OKR/:login/:id/uncomplete             controllers.OKRController.unCompleteObjective(login:String, id:Long)
-GET         /OKR/:login/:okr/:kr/complete          controllers.OKRController.completeKR(login:String, okr:Long, kr:Long)
-GET         /OKR/:login/:okr/:kr/uncomplete        controllers.OKRController.unCompleteKR(login:String, okr:Long, kr:Long)
-GET         /OKR/:login/:okr/:kr/delete            controllers.OKRController.deleteKR(login:String, okr:Long, kr:Long)
+GET         /OKR/:login/:id/complete                 controllers.OKRController.completeObjective(login:String, id:Long)
+GET         /OKR/:login/:id/uncomplete               controllers.OKRController.unCompleteObjective(login:String, id:Long)
+GET         /OKR/:login/:okr/:kr/complete            controllers.OKRController.completeKR(login:String, okr:Long, kr:Long)
+GET         /OKR/:login/:okr/:kr/uncomplete          controllers.OKRController.unCompleteKR(login:String, okr:Long, kr:Long)
+GET         /OKR/:login/:okr/:kr/delete              controllers.OKRController.deleteKR(login:String, okr:Long, kr:Long)
 ###
 #
 # Product URLs
 #
-GET         /track/                                controllers.ProductTrackController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /track/:id                             controllers.ProductTrackController.id( id:Int, p:Int ?= 0)
+GET         /track/                                  controllers.ProductTrackController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /track/:id                               controllers.ProductTrackController.id( id:Int, p:Int ?= 0)
 
-GET         /feature/                              controllers.ProductFeatureController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /feature/:id                           controllers.ProductFeatureController.id( id:Int, p:Int ?= 0)
-GET         /feature/admin/import                  controllers.ProductFeatureController.importFile
-POST        /feature/admin/import                  controllers.ProductFeatureController.doImport
-
-
-GET         /stage/                                controllers.StageController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /stage/:id                             controllers.StageController.id( id:Int, p:Int ?= 0)
+GET         /feature/                                controllers.ProductFeatureController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /feature/:id                             controllers.ProductFeatureController.id( id:Int, p:Int ?= 0)
+GET         /feature/admin/import                    controllers.ProductFeatureController.importFile
+POST        /feature/admin/import                    controllers.ProductFeatureController.doImport
 
 
-GET         /rteam/                                controllers.ResourceTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /rteam/:id                             controllers.ResourceTeamController.id( id:Int, p:Int ?= 0)
+GET         /stage/                                  controllers.StageController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /stage/:id                               controllers.StageController.id( id:Int, p:Int ?= 0)
 
-GET         /rpool/                                controllers.ResourcePoolController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /rpool/:id                             controllers.ResourcePoolController.id( id:Int, p:Int ?= 0)
 
-GET         /mclient/                              controllers.ManagedClientController.search( p:Int ?= 0, search: Option[String] ?= None)
-GET         /mclient/:id                           controllers.ManagedClientController.id( id:Int, p:Int ?= 0)
+GET         /rteam/                                  controllers.ResourceTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /rteam/:id                               controllers.ResourceTeamController.id( id:Int, p:Int ?= 0)
 
+GET         /rpool/                                  controllers.ResourcePoolController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /rpool/:id                               controllers.ResourcePoolController.id( id:Int, p:Int ?= 0)
+
+GET         /mclient/                                controllers.ManagedClientController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /mclient/:id                             controllers.ManagedClientController.id( id:Int, p:Int ?= 0)
+
+## Auth URLs
+GET         /auth/user/:login                        controllers.AuthController.userroles(login:String)
+GET         /auth/role/                              controllers.AuthController.roleSearch( p:Int ?= 0, search: Option[String] ?= None)
+GET         /auth/role/:id                           controllers.AuthController.role(id:Long, p:Int ?= 0)
+POST        /auth/role/:id/newUSER                   controllers.AuthController.newUserRole(id:Long)
+POST        /auth/role/:id/newPERM                   controllers.AuthController.newRolePermission(id:Long)
+POST        /auth/role/new                           controllers.AuthController.newRole
+GET         /auth/permission/                        controllers.AuthController.permissionSearch( p:Int ?= 0, search: Option[String] ?= None)
+GET         /auth/permission/:id                     controllers.AuthController.permission( id:Long )
+POST        /auth/permission/new                     controllers.AuthController.newPermission
 
 ## Test URLS. ignore em
-GET         /td                                    controllers.HomeController.todo
-GET         /test/empUpDown/:login                 controllers.HomeController.mgrUpDown(login:String)
+GET         /td                                      controllers.HomeController.todo
+GET         /test/empUpDown/:login                   controllers.HomeController.mgrUpDown(login:String)
 
 
 # Map static resources from the /public folder to the /assets URL path
 
-GET         /assets/*file                          controllers.Assets.at(file)
-GET         /versionedAssets/*file                 controllers.Assets.versioned(file)
-GET         /webjars/*file                         controllers.WebJarAssets.at(file)
+GET         /assets/*file                            controllers.Assets.at(file)
+GET         /versionedAssets/*file                   controllers.Assets.versioned(file)
+GET         /webjars/*file                           controllers.WebJarAssets.at(file)

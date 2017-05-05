@@ -1,0 +1,82 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import offline.Tables.EmprelationsRow
+@import offline.Tables.AuthpreferenceRow
+@import people.EmpRelationsRowUtils._
+
+@import jdk.nashorn.internal.ir.annotations.Ignore
+@import offline.Tables.AuthroleRow
+@(login:String, emp:EmprelationsRow,
+    userRolez:Map[Long,AuthroleRow],
+    allPrefs:Map[Long,AuthroleRow])(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+
+@import helper._
+
+    @implicitFieldConstructor = {
+        FieldConstructor(twitterBootstrapInput.f)
+    }
+
+@main("Self Service - User Roles") {
+
+    <!-- Begin page content -->
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Self Service for @emp.fullName - Roles</h2>
+
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="col-xs-12">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Role</th>
+                                    <th>Disabled</th>
+                                    <th>Enabled</th>
+                                </tr>
+                            </thead>
+                            @allPrefs.toSeq.sortBy(_._2.role).map { pref =>
+                            <tr>
+                                <td>@pref._2.role</td>
+                                <td>@userRolez.get(pref._1).map { ignore =>
+                                  <a href="@routes.UserController.enabledisable(login,pref._2.id,enable=false)">Remove It</a>
+                                }.getOrElse{
+                                    <i class="fa fa-check-square-o" title="Role Disabled"></i>
+
+                                } </td>
+                                <td>@userRolez.get(pref._1).map { ignore =>
+                                <i class="fa fa-check-square-o" title="Role Enabled"></i>
+                                }.getOrElse{
+                                    <a href="@routes.UserController.enabledisable(login,pref._2.id,enable=true)">Enable It</a>
+                                }</td>
+
+                            </tr>
+                            }
+                        </table>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+}

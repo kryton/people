@@ -20,6 +20,7 @@ package controllers
 import java.nio.file.Path
 import javax.inject._
 
+import models.auth.{UserPrefRepo, UserRepo}
 import models.people._
 import offline.Tables.{CostcenterRow, FunctionalareaRow, ProfitcenterRow}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -40,8 +41,7 @@ class UserController @Inject()
 (
   protected val dbConfigProvider: DatabaseConfigProvider,
   employeeRepo: EmployeeRepo,
-  userRepo: UserRepo,
-
+  userPrefRepo: UserPrefRepo,
   user: User
 )(implicit
   ec: ExecutionContext,
@@ -63,8 +63,8 @@ class UserController @Inject()
             case true =>
               (for{
                 e <- employeeRepo.findByLogin(actualUser)
-                uprefz <- userRepo.userPrefs(actualUser).map( list => list.map{ u => u._2.id -> u._2}.toMap)
-                prefz <- userRepo.allPrefs.map{ list => list.map { u => u.id -> u}.toMap }
+                uprefz <- userPrefRepo.userPrefs(actualUser).map( list => list.map{ u => u._2.id -> u._2}.toMap)
+                prefz <- userPrefRepo.allPrefs.map{ list => list.map { u => u.id -> u}.toMap }
               } yield(e,uprefz, prefz)).map{ x=>
                 x._1 match {
                   case Some(emp) => Ok(views.html.prefs.updatePrefs(actualUser, emp, x._2, x._3 ))
@@ -80,20 +80,21 @@ class UserController @Inject()
       }
     }
   }
+
   def enabledisable(login:String, pref:Long, enable:Boolean) = LDAPAuthAction {
 
     Action.async { implicit request =>
       user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map {
         case true =>
           //val enableIt = enable.getOrElse(false)
-          userRepo.findPref(pref).map{
+          userPrefRepo.findPref(pref).map{
             case Some(preference) =>
               if (enable) {
-                userRepo.enablePref(login, pref).map { result =>
+                userPrefRepo.enablePref(login, pref).map { result =>
                   Redirect(routes.UserController.prefs(login)).addingToSession(preference.code -> "Y")
                 }
               } else {
-                userRepo.disablePref(login, pref).map { result =>
+                userPrefRepo.disablePref(login, pref).map { result =>
                   Redirect(routes.UserController.prefs(login)).removingFromSession(preference.code)
                 }
               }
@@ -104,6 +105,5 @@ class UserController @Inject()
       }.flatMap(identity)
     }
   }
-
 }
 

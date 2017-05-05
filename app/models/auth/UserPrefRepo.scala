@@ -15,12 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package models.people
+package models.auth
 
 import javax.inject.Inject
 
-import offline.Tables
-import offline.Tables.Authuserpreference
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import slick.basic.DatabaseConfig
@@ -34,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class UserRepo @Inject()(@NamedDatabase("default")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class UserPrefRepo @Inject()(@NamedDatabase("default")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db: JdbcBackend#DatabaseDef = dbConfig.db
   import offline.Tables._

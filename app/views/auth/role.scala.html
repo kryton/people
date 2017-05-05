@@ -1,0 +1,243 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import util.Page
+@import offline.Tables.AuthroleRow
+@import offline.Tables.AuthuserRow
+@import offline.Tables.AuthpermissionRow
+@import offline.Tables.AuthrolepermissionRow
+@import offline.Tables.EmprelationsRow
+@import people.EmpRelationsRowUtils._
+
+@(      id:Long,
+        role:AuthroleRow,
+        users:Page[(AuthuserRow,EmprelationsRow)],
+        permissions:Seq[(AuthrolepermissionRow,AuthpermissionRow)],
+        canEdit:Boolean,
+        formPermission: Form[forms.AuthRolePermissionForm.Data],
+        remainingPermissions:Seq[AuthpermissionRow],
+        formUser: Form[forms.AuthUserRoleForm.Data]
+)(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        messages: Messages,
+        ldap: util.LDAP)
+
+
+@main(s"Role ${role.role}!") {
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Details</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+
+                @role.role
+<br/>
+                    @role.description.map { x =>
+                    <pre>@x</pre>
+                      @if( role.isadmin) {
+                          <b>ADMIN ROLE</b>
+                      }
+                    }
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Users
+                  @if(canEdit) {
+                      <a id="newUser"><i class="fa fa-plus" title="Add user to this Role"></i></a>
+                  }</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                <div class="row">
+
+                @Option(users.items).filterNot(_.isEmpty).map { results =>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="table table-responsive">
+                                    <thead>
+                                        <tr><th>Login</th>
+                                            <th>Name</th>
+                                        </tr>
+                                    </thead>
+
+                        @results.map { item =>
+                            <tr><td >@item._2.login</td>
+                                <td>@item._2.fullName</td>
+                            </tr>
+                        }
+                            </table>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+                </div>
+                <div class="row">
+                    @users.prev.map { x =>
+                        <a href="@routes.AuthController.role(id,x)">... prev ...</a>
+                    }
+                    @users.next.map { x =>
+                        <a href="@routes.AuthController.role(id,x)">... next ...</a>
+                    }
+
+                </div>
+            </div>
+            </div> <!-- x_content -->
+            @if(canEdit) {
+              <div id="addNewUser" class="modal fade">
+                  <div class="modal-dialog">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                              <h4 class="modal-title">Add a new User to the Role</h4>
+                          </div>
+                          @helper.form( action = helper.CSRF(routes.AuthController.newUserRole(id))) {
+                              <div class="modal-body">
+                                  @helper.inputText(formUser("login"), '_label -> "login", 'placeholder -> "login", 'class -> "form-control" )
+                                  <input type="hidden" name="roleId" value="@id" />
+
+                                  <p>Do you want to save changes you made to document before closing?</p>
+                                  <p class="text-warning"><small>If you don't save, your changes will be lost.</small></p>
+                              </div>
+                              <div class="modal-footer">
+                                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                  <button type="submit" class="btn btn-primary">Save changes</button>
+                              </div>
+                          }
+                      </div>
+                  </div>
+              </div>
+            }
+        </div ><!-- x_panel -->
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><a href="@routes.AuthController.permissionSearch()">Permissions</a>
+                  @if(canEdit) {
+                      @if(remainingPermissions.nonEmpty) {
+                          <a id="newPerm"><i class="fa fa-plus" title="Add new Permission"></i></a>
+                      }
+                  }</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+                <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                    <div class="row">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <table class="table table-responsive">
+                                        <thead>
+                                            <tr><th>Permission</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        @permissions.map{ item =>
+                                            <tr><td><a href="@routes.AuthController.permission(item._2.id)">@item._2.permission</a></td>
+                                                <td>@item._2.description.map{ x => @x}</td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- x_content -->
+            @if(canEdit) {
+              <div id="addNewPermission" class="modal fade">
+                  <div class="modal-dialog">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                              <h4 class="modal-title">Add a new Permission to the role</h4>
+                          </div>
+                          @helper.form( action = helper.CSRF(routes.AuthController.newRolePermission(id))) {
+                              <div class="modal-body">
+                                  @helper.select(formPermission("permissionId"),options=remainingPermissions.map( p => p.id.toString -> p.permission))
+                                  <input type="hidden" name="roleId" value="@id" />
+
+                                  <p>Do you want to save changes you made to document before closing?</p>
+                                  <p class="text-warning"><small>If you don't save, your changes will be lost.</small></p>
+                              </div>
+                              <div class="modal-footer">
+                                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                  <button type="submit" class="btn btn-primary">Save changes</button>
+                              </div>
+                          }
+                      </div>
+                  </div>
+              </div>
+
+            }
+        </div ><!-- x_panel -->
+
+
+    </div ><!-- col -->
+</div> <!-- row -->
+@if(canEdit) {
+  <script nonce="PMAN" type="text/javascript">
+  <!--
+  window.onload = function () {
+      //turn to inline mode
+      //$.fn.editable.defaults.mode = 'inline';
+      $(document).ready(function() {
+          $('.ROLEEDIT').editable({
+              params: function(params) {
+                  //originally params contain pk, name and value
+                  params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                  return params;
+                  }
+                  });
+          $("#newUser").click( function() {
+                      $("#addNewUser").modal('show');
+              });
+          $("#newPerm").click( function() {
+                      $("#addNewPermission").modal('show');
+              });
+      });
+  }
+  -->
+  </script>
+}
+}

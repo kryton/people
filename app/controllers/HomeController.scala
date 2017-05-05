@@ -22,6 +22,7 @@ import javax.inject._
 
 import com.typesafe.config.ConfigFactory
 import forms.LoginForm
+import models.auth.UserPrefRepo
 import models.people._
 import models.product.{ProductFeatureRepo, ProductTrackRepo}
 import offline.Tables.{EmphistoryRow, EmprelationsRow, KudostoRow}
@@ -46,19 +47,19 @@ import slick.jdbc.JdbcProfile
 @Singleton
 class HomeController @Inject()
   (
-   protected val dbConfigProvider: DatabaseConfigProvider,
-   @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
-   productTrackRepo: ProductTrackRepo,
-   resourcePoolRepo: ResourcePoolRepo,
-   officeRepo: OfficeRepo,
-   employeeRepo: EmployeeRepo,
-   teamDescriptionRepo: TeamDescriptionRepo,
-   productFeatureRepo: ProductFeatureRepo,
-   resourcePoolTeamRepo: ResourcePoolTeamRepo,
-   kudosToRepo: KudosToRepo,
-   empHistoryRepo: EmpHistoryRepo,
-   userRepo: UserRepo,
-   user: User
+    protected val dbConfigProvider: DatabaseConfigProvider,
+    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+    productTrackRepo: ProductTrackRepo,
+    resourcePoolRepo: ResourcePoolRepo,
+    officeRepo: OfficeRepo,
+    employeeRepo: EmployeeRepo,
+    teamDescriptionRepo: TeamDescriptionRepo,
+    productFeatureRepo: ProductFeatureRepo,
+    resourcePoolTeamRepo: ResourcePoolTeamRepo,
+    kudosToRepo: KudosToRepo,
+    empHistoryRepo: EmpHistoryRepo,
+    userRepo: UserPrefRepo,
+    user: User
   )(implicit ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
