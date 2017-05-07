@@ -56,6 +56,7 @@ class ProductFeatureController @Inject()
 
    productFeatureRepo: ProductFeatureRepo,
    resourcePoolRepo: ResourcePoolRepo,
+   featureFlagRepo: FeatureFlagRepo,
    user: User
 
   )(implicit
@@ -92,28 +93,44 @@ class ProductFeatureController @Inject()
 
   def id( id:Int, page:Int): Action[AnyContent] = Action.async{ implicit request =>
 
-    productFeatureRepo.find(id).map {
-      case Some(pf) =>
-        val tracks = productFeatureRepo.findTracksByFeature(id)
-        val flags = productFeatureRepo.findFeatureFlagsByFeature(id)
-        val stage = stageRepo.find(pf.stageid)
-        val rteams = productFeatureRepo.findResourceTeams(id)
-        val managedClients: Future[Seq[(ManagedclientRow,ManagedclientproductfeatureRow)]] = productFeatureRepo.findByManagedClients(id)
-        val projects = projectRepo.findByFeatureEx(id)
+    (for{
+      u <- user.isAdmin(LDAPAuth.getUser())
+      pf <- productFeatureRepo.find(id)
+    } yield (u,pf)).map { xf =>
+      xf._2 match {
 
-        (for {
-          t <- tracks
-          f <- flags
-          s <- stage
-          r <- rteams
-          m <- managedClients
-          p <- projects
-        } yield(t,f,s,r,m,p))
-        .map { x =>
-          Ok(views.html.product.productFeature.id( id, pf, x._1, x._2, x._3, x._4, x._5, x._6 ) )
-        }
+        case Some(pf) =>
+          val tracks = productFeatureRepo.findTracksByFeature(id)
+          val flags = productFeatureRepo.findFeatureFlagsByFeature(id)
+          val stage = stageRepo.find(pf.stageid)
+          val rteams = productFeatureRepo.findResourceTeams(id)
+          val managedClients: Future[Seq[(ManagedclientRow, ManagedclientproductfeatureRow)]] = productFeatureRepo.findByManagedClients(id)
+          val projects = projectRepo.findByFeatureEx(id)
 
-      case None => Future.successful(NotFound(views.html.page_404("Login not found")))
+          (for {
+            t <- tracks
+            f <- flags
+            s <- stage
+            r <- rteams
+            m <- managedClients
+            p <- projects
+            mc <- managedClientRepo.all
+            ff <- featureFlagRepo.all
+          } yield (t, f, s, r, m, p,mc,ff))
+            .map { x =>
+              val canEdit = xf._1
+              val mcs: Seq[(String, String)] = x._7.map{ p => p.id.toString -> p.name}
+              val ffs = x._8.map{ p=> p.id.toString -> p.name}
+
+              Ok(views.html.product.productFeature.id(id, pf, x._1, x._2, x._3, x._4, x._5, x._6, canEdit,
+                forms.ManagedClientProductFeatureForm.form,
+              forms.ProductFeatureFlagForm.form,
+                mcs,
+                ffs))
+            }
+
+        case None => Future.successful(NotFound(views.html.page_404("Login not found")))
+      }
     }.flatMap(identity)
   }
 
@@ -395,6 +412,73 @@ class ProductFeatureController @Inject()
     //val outFilename = s"resourceBreakdown".replaceAll(",|!","_")
     f.deleteOnExit()
     f
+  }
+
+  def newMCProductFeature(featureId:Int ) = Action.async { implicit request =>
+    (for{
+      role <- productFeatureRepo.find(featureId)
+      u <- user.isAdmin(LDAPAuth.getUser())
+    } yield ( role, u)).map { resp =>
+      val canEdit = resp._2
+      val roleO = resp._1
+      roleO match {
+        case Some(role) =>
+          if (canEdit) {
+            forms.ManagedClientProductFeatureForm.form.bindFromRequest.fold(
+              form => {
+                Future.successful(Redirect(routes.ProductFeatureController.id(featureId)))
+              },
+              data => {
+                val mcId = data.managedClientId.toInt
+                managedClientRepo.find(mcId).map{
+                  case Some(perm) =>
+                    val newObj = Tables.ManagedclientproductfeatureRow(id = 0, productfeatureid = data.featureId, managedclientid = mcId, allocation = data.allocation)
+                    productFeatureRepo.insert(newObj).map { o =>
+                      Redirect(routes.ProductFeatureController.id(featureId))
+                    }
+                  case None => Future.successful( NotFound(views.html.page_404("Managed client not found")))
+                }.flatMap(identity)
+              }
+            )
+          } else {
+            Future.successful(Unauthorized(views.html.page_403("No Permission")))
+          }
+        case None =>  Future.successful(NotFound(views.html.page_404("Managed Client not found")))
+      }
+    }.flatMap(identity)
+  }
+  def newProductFeatureFlag(featureId:Int ) = Action.async { implicit request =>
+    (for{
+      role <- productFeatureRepo.find(featureId)
+      u <- user.isAdmin(LDAPAuth.getUser())
+    } yield ( role, u)).map { resp =>
+      val canEdit = resp._2
+      val roleO = resp._1
+      roleO match {
+        case Some(role) =>
+          if (canEdit) {
+            forms.ProductFeatureFlagForm.form.bindFromRequest.fold(
+              form => {
+                Future.successful(Redirect(routes.ProductFeatureController.id(featureId)))
+              },
+              data => {
+                val ffId = data.featureFlagId.toInt
+                featureFlagRepo.find(ffId).map{
+                  case Some(perm) =>
+                    val newObj = Tables.ProductfeatureflagRow(id = 0, productfeatureid = data.featureId, featureflagid = ffId)
+                    productFeatureRepo.insert(newObj).map { o =>
+                      Redirect(routes.ProductFeatureController.id(featureId))
+                    }
+                  case None => Future.successful( NotFound(views.html.page_404("Feature Type not found")))
+                }.flatMap(identity)
+              }
+            )
+          } else {
+            Future.successful(Unauthorized(views.html.page_403("No Permission")))
+          }
+        case None =>  Future.successful(NotFound(views.html.page_404("Feature Type not found")))
+      }
+    }.flatMap(identity)
   }
 }
 

@@ -37,10 +37,17 @@
         stage: Option[StageRow],
         rteams:Seq[( ResourceteamproductfeatureRow, ResourceteamRow)],
         managedClients:Seq[(ManagedclientRow,ManagedclientproductfeatureRow)],
-        projects:Seq[(ProjectRow, Option[StatuscolorRow], Seq[(ResourceteamprojectRow,ResourceteamRow)], Seq[(ProjectdependencyRow, ProjectRow)])]
+        projects:Seq[(ProjectRow, Option[StatuscolorRow], Seq[(ResourceteamprojectRow,ResourceteamRow)], Seq[(ProjectdependencyRow, ProjectRow)])],
+        canEdit:Boolean,
+        mcForm: Form[forms.ManagedClientProductFeatureForm.Data],
+        ffForm: Form[forms.ProductFeatureFlagForm.Data],
+        mcs: Seq[(String, String)],
+        ffs: Seq[(String,String)]
+
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
+        messages: Messages,
         ldap: util.LDAP)
 
 
@@ -110,7 +117,9 @@
                                 </li>
                             </div><!-- list-group -->
                             <div class="list-group">
-                                <h4 class="list-group-item-heading">Feature Type</h4>
+                                <h4 class="list-group-item-heading">Feature Type @if(canEdit) {
+                                    <a id="newFT"><i class="fa fa-plus" title="Add new Feature Type"></i></a>
+                                }</h4>
                                 <li class="list-group-item">
                                 <table class="table-responsive table table-striped">
                                     <thead>
@@ -130,7 +139,9 @@
                             </div><!-- list-group -->
                             @if(productFeature.iscid.getOrElse(false)) {
                                 <div class="list-group">
-                                    <h4 class="list-group-item-heading">Managed Clients</h4>
+                                    <h4 class="list-group-item-heading">Managed Clients @if( canEdit) {
+                                        <a id="newMC"><i class="fa fa-plus" title="Add new Managed Client"></i></a>
+                                    }</h4>
                                     <li class="list-group-item">
                                         <table class="table-responsive table table-striped">
                                             <thead>
@@ -249,6 +260,81 @@
 
     </div ><!-- col -->
 </div> <!-- row -->
+    @if(canEdit) {
+        <div id="addNewFeature" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Add a new Feature Type</h4>
+                    </div>
+                    @helper.form(action = helper.CSRF(routes.ProductFeatureController.newProductFeatureFlag(id))) {
 
+                        <div class="modal-body">
+                            <input type="hidden" name="featureId" value="@id" />
+                            @helper.select(ffForm("featureFlagId"), options = ffs, '_label -> "Feature Type", 'class -> "form-control")
+                            <p>Do you want to save changes you made to document before closing?</p>
+                            <p class="text-warning"><small>
+                                If you don't save, your changes will be lost.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+        <div id="addNewMC" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Add a new Managed Client</h4>
+                    </div>
+                    @helper.form(action = helper.CSRF(routes.ProductFeatureController.newMCProductFeature(id))) {
+
+                        <div class="modal-body">
+                            <input type="hidden" name="featureId" value="@id" />
+                            @helper.select(mcForm("managedClientId"), options = mcs, '_label -> "Managed Client", 'class -> "form-control")
+                            @helper.inputText(mcForm("allocation"), '_label -> "Allocation 1.00 = 100%", 'placeholder -> "Allocation", 'class -> "form-control")
+
+                            <p>Do you want to save changes you made to document before closing?</p>
+                            <p class="text-warning"><small>
+                                If you don't save, your changes will be lost.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+        <script nonce="PMAN">
+            <!--
+            window.onload = function () {
+                 //turn to inline mode
+                 //$.fn.editable.defaults.mode = 'inline';
+                 $(document).ready(function() {
+                     $('.ROLEEDIT').editable({
+                         params: function(params) {
+                             //originally params contain pk, name and value
+                             params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                             return params;
+                             }
+                             });
+                     $("#newFT").click( function() {
+                                 $("#addNewFeature").modal('show');
+                         });
+                     $("#newMC").click( function() {
+                                 $("#addNewMC").modal('show');
+                         });
+                 });
+             }
+            -->
+        </script>
+    }
 }
-

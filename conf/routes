@@ -82,6 +82,9 @@ GET         /track/:id                               controllers.ProductTrackCon
 
 GET         /feature/                                controllers.ProductFeatureController.search( p:Int ?= 0, search: Option[String] ?= None)
 GET         /feature/:id                             controllers.ProductFeatureController.id( id:Int, p:Int ?= 0)
+POST        /feature/:id/newMC                       controllers.ProductFeatureController.newMCProductFeature(id:Int)
+POST        /feature/:id/newFF                       controllers.ProductFeatureController.newProductFeatureFlag(id:Int)
+
 GET         /feature/admin/import                    controllers.ProductFeatureController.importFile
 POST        /feature/admin/import                    controllers.ProductFeatureController.doImport
 GET         /feature/:id/breakdown                   controllers.ProductFeatureController.doBreakdown(id:Int)

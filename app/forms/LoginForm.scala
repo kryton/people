@@ -82,3 +82,24 @@ object KudosForm{
   case class Data(from: String, to: String, message: String)
 
 }
+
+object ManagedClientProductFeatureForm {
+  val form = Form(
+    mapping(
+      "featureId" -> number,
+      "managedClientId" -> nonEmptyText,
+      "allocation" -> bigDecimal
+    )(Data.apply)(Data.unapply)
+  )
+  case class Data(featureId:Int, managedClientId:String, allocation:BigDecimal )
+}
+
+object ProductFeatureFlagForm {
+  val form = Form(
+    mapping(
+      "featureId" -> number,
+      "featureFlagId" -> nonEmptyText
+    )(Data.apply)(Data.unapply)
+  )
+  case class Data(featureId:Int, featureFlagId:String )
+}

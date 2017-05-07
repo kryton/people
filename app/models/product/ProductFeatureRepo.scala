@@ -270,9 +270,13 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
     .run(Resourceteamproductfeature returning Resourceteamproductfeature.map(_.id) += rtpf)
     .map(id => rtpf.copy(id = id))
 
-  protected def insert(mcpf: ManagedclientproductfeatureRow): Future[ManagedclientproductfeatureRow] = db
+  def insert(mcpf: ManagedclientproductfeatureRow): Future[ManagedclientproductfeatureRow] = db
     .run(Managedclientproductfeature returning Managedclientproductfeature.map(_.id) += mcpf)
     .map(id => mcpf.copy(id = id))
+
+  def insert(pff: ProductfeatureflagRow): Future[ProductfeatureflagRow] = db
+    .run(Productfeatureflag returning Productfeatureflag.map(_.id) += pff)
+    .map(id => pff.copy(id = id))
 
   protected def deleteResourcesForFeature(featureId: Int): Future[Boolean] =
     db.run(Resourceteamproductfeature.filter(_.productfeatureid === featureId).delete) map {  _ > 0  }

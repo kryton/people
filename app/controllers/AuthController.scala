@@ -255,6 +255,7 @@ class AuthController @Inject()
       }
     }.flatMap(identity)
   }
+
   def newRolePermission(roleId:Long ) = Action.async { implicit request =>
     (for{
       role <- roleRepo.find(roleId)
