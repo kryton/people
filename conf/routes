@@ -84,6 +84,8 @@ GET         /feature/                                controllers.ProductFeatureC
 GET         /feature/:id                             controllers.ProductFeatureController.id( id:Int, p:Int ?= 0)
 GET         /feature/admin/import                    controllers.ProductFeatureController.importFile
 POST        /feature/admin/import                    controllers.ProductFeatureController.doImport
+GET         /feature/:id/breakdown                   controllers.ProductFeatureController.doBreakdown(id:Int)
+GET         /product/breakdown                       controllers.ProductFeatureController.doFullBreakdown(format:Option[String]?=None)
 
 
 GET         /stage/                                  controllers.StageController.search( p:Int ?= 0, search: Option[String] ?= None)
@@ -94,6 +96,7 @@ GET         /rteam/                                  controllers.ResourceTeamCon
 GET         /rteam/:id                               controllers.ResourceTeamController.id( id:Int, p:Int ?= 0)
 
 GET         /rpool/                                  controllers.ResourcePoolController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /rpool/breakdown                         controllers.ResourcePoolController.doFullBreakdown(format:Option[String]?=None)
 GET         /rpool/:id                               controllers.ResourcePoolController.id( id:Int, p:Int ?= 0)
 
 GET         /mclient/                                controllers.ManagedClientController.search( p:Int ?= 0, search: Option[String] ?= None)

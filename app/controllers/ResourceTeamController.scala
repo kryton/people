@@ -58,6 +58,7 @@ class ResourceTeamController @Inject()
     positionTypeRepo: PositionTypeRepo,
     matrixTeamRepo: MatrixTeamRepo,
     matrixTeamMemberRepo: MatrixTeamMemberRepo,
+    officeRepo:OfficeRepo,
     ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
@@ -78,7 +79,7 @@ class ResourceTeamController @Inject()
 
 
   def search( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
-    val pageSize =20
+    val pageSize =40
       search match {
         case None => resourceTeamRepo.allEx.map{ pt => Ok(views.html.product.team.search( Page(pt,page,pageSize),search)) }
         case Some(searchString) => resourceTeamRepo.searchEx(searchString).map{ emps =>
@@ -118,8 +119,9 @@ class ResourceTeamController @Inject()
           t <- teamMembers
           ts <- teamDevStats
           td <- teamDetails
+          teamSummary <- resourceTeamRepo.getTeamSummaryByVendorCountry( rtId)
           isAdmin <- user.isAdmin( LDAPAuth.getUser())
-        } yield (f,t,ts,td,isAdmin )).map { x =>
+        } yield (f,t,ts,td,isAdmin, teamSummary )).map { x =>
           val tMembers: Set[(offline.Tables.EmprelationsRow, Boolean)] = x._2
          /*
           x._3.foreach{ e =>
@@ -129,7 +131,7 @@ class ResourceTeamController @Inject()
           val prodTeamDet: (Int,EfficencyMonth) = x._3
             .foldLeft( (0,EfficencyMonth(0, 0, 0 ,0, 0))) ((z:(Int,EfficencyMonth), i) => (z._1 +1,z._2.add( i._3)) )
 
-          Ok(views.html.product.team.id( rtId, rtRP, Page(x._1,page, pageSize = 20), tMembers, prodTeamDet, x._4, x._5 ) )
+          Ok(views.html.product.team.id( rtId, rtRP, Page(x._1,page, pageSize = 20), tMembers, prodTeamDet, x._4, x._5, x._6 ) )
         }
 
       case None => Future.successful(NotFound(views.html.page_404("Team not found")))

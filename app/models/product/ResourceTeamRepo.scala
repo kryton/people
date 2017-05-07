@@ -20,7 +20,7 @@ package models.product
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-import models.people.{MatrixTeamMemberRepo, TeamDescriptionRepo}
+import models.people.{MatrixTeamMemberRepo, OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import projectdb.Tables
@@ -82,6 +82,50 @@ class ResourceTeamRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
   def searchEx(term:String) :Future[Seq[(Tables.ResourceteamRow, Option[ResourcepoolRow])]]= {
     db.run(Resourceteam.filter(_.name startsWith term)
       .joinLeft(Resourcepool).on(_.resourcepoolid === _.id).sortBy( x=>(x._2.map( y => y.name), x._1.name)).result)
+  }
+
+  def getTeamSummaryByVendorCountry(id:Int
+                                   )(implicit teamDescriptionRepo: TeamDescriptionRepo,
+                                            officeRepo:OfficeRepo,
+                                            positionTypeRepo: PositionTypeRepo): Future[ Seq[(String, Boolean, Option[String], String, Int)]] = {
+    import models.people.EmpRelationsRowUtils._
+    find(id).map {
+      case None => Future.successful(Seq.empty)
+
+      case Some(rt) =>
+        val xyz: Future[ Seq[(String, Boolean, Option[String], String, Int)]] = rt.pplteamname match {
+        case None => Future.successful( Seq.empty)
+        case Some(teamName) =>
+          val summary: Future[Seq[(String, Boolean, Option[String], String, Int)]] = teamDescriptionRepo.findTeamMembers(teamName).map { emps =>
+            val line: Future[Seq[(String, Boolean, Option[String], String)]] = Future.sequence(emps.toSeq.map { emp =>
+              (for {
+                o <- officeRepo.find(emp.officeid.getOrElse(0))
+                p <- positionTypeRepo.find(emp.position)
+              } yield (o, p)).map { x =>
+                val officeCountry = x._1 match {
+                  case Some(oc) => oc.country
+                  case None => None
+                }
+                val pt = x._2 match {
+                  case Some(p) => p.positiontype
+                  case None => "UNKNOWN"
+                }
+                (emp.agency, emp.isContractor, officeCountry, pt)
+              }
+            })
+            val tally: Future[ Seq[(String, Boolean, Option[String], String, Int)]] = line.map { (seq: Seq[(String, Boolean, Option[String], String)]) =>
+              seq.groupBy(p => p).map { sumLine =>
+                (sumLine._1._1, sumLine._1._2, sumLine._1._3, sumLine._1._4, sumLine._2.size)
+              }.toSeq
+            }
+
+            tally
+          }.flatMap(identity)
+          summary
+      }
+      xyz
+    }.flatMap(identity)
+
   }
 
   def getDevStatsForTeam(id:Int)(implicit teamDescriptionRepo: TeamDescriptionRepo,matrixTeamMemberRepo:MatrixTeamMemberRepo):Future[Seq[(EmprelationsRow, Int, EfficencyMonth)]]  = {

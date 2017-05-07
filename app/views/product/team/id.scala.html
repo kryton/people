@@ -30,7 +30,8 @@
         members:Set[(EmprelationsRow,Boolean )],
         stats: (Int, models.product.EfficencyMonth),
         teamDetails: Seq[(offline.Tables.EmprelationsRow, String, Option[java.sql.Date])],
-        isAdmin:Boolean
+        isAdmin:Boolean,
+        teamMakeup: Seq[_ <: (String, Boolean, Option[String], String, Int)]
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
@@ -82,6 +83,48 @@
                                     <td align="right">@stats._2.t9</td>
                                     <td align="right">@stats._2.t12</td>
                                 </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- x_panel -->
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Stats for Team Members</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+                <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <table class="table table-responsive">
+                                <thead>
+                                    <tr>
+                                        <th>Employee/Agency</th>
+                                        <th>Country</th>
+                                        <th>Position</th>
+                                        <th align="right">#</th>
+
+                                    </tr></thead>
+                                @teamMakeup.sortBy(p=>(p._2,p._1)).map { line =>
+                                <tr>
+                                    <td>@if(line._2) {
+
+                                        @line._1
+                                    } else {
+                                        Employee
+                                    }</td>
+                                    <td>@line._3</td>
+                                    <td>@line._4</td>
+                                    <td align="right">@line._5</td>
+                                </tr>
+                                }
                             </table>
                         </div>
                     </div>
@@ -208,7 +251,12 @@
 
                         @results.map { item =>
                             <tr><td align="right">@item._1.ordering</td>
-                                <td><a href="@routes.ProductFeatureController.id(item._1.id)">@item._1.name</a></td>
+                                <td>@if(item._1.isactive.getOrElse(false)) {
+                                    <a href="@routes.ProductFeatureController.id(item._1.id)">@item._1.name</a>
+                                } else {
+                                    <a href="@routes.ProductFeatureController.id(item._1.id)"><strike>@item._1.name</strike></a>
+                                }
+                                </td>
                                 <td>@if(item._1.isactive.getOrElse(false)) {
                                     <i class="fa fa-check" aria-hidden="true"></i>
                                 }</td>

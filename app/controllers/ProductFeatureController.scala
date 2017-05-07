@@ -17,20 +17,31 @@
 
 package controllers
 
+import java.io.FileOutputStream
 import java.nio.file.Path
+import java.sql.Date
+import java.time.format.DateTimeFormatter
 import javax.inject._
 
-import models.people.{EmployeeRepo, ResourcePoolRepo}
+import com.typesafe.config.ConfigFactory
+import models.people.{OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel.{Row, Sheet, Workbook}
+
+//import models.people.{EmployeeRepo}
 import models.product._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.db.NamedDatabase
+import play.utils.Conversions
+import projectdb.Tables
 import projectdb.Tables._
 import slick.jdbc.JdbcProfile
 import util.importFile.{ProjectMPPImport, ProjectXLSImport, SAPImport}
 import util.{LDAP, Page, User}
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -54,6 +65,9 @@ class ProductFeatureController @Inject()
     managedClientRepo: ManagedClientRepo,
     projectRepo: ProjectRepo,
     projectDependencyRepo: ProjectDependencyRepo,
+    teamDescriptionRepo: TeamDescriptionRepo,
+    officeRepo: OfficeRepo,
+    postionTypeRepo: PositionTypeRepo,
     ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
@@ -135,5 +149,252 @@ class ProductFeatureController @Inject()
       }.flatMap(identity)
     }
 
+    def doBreakdown(id:Int) = Action.async { implicit request =>
+      productFeatureRepo.find(id).map {
+        case Some(pf) =>
+          (for {
+            p <- projectRepo.breakDownFeature(id)
+          } yield p ).map { x =>
+
+            val minX: Date = x._2.flatMap { p => p._3.keys }.minBy(_.getTime)
+            val maxX: Date = x._2.flatMap { p => p._3.keys }.maxBy(_.getTime)
+            val monthRange: Seq[Date] = util.Conversions.monthRange(minX, maxX)
+
+            val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM-YYYY")
+
+            Ok(views.html.product.productFeature.breakout(id, pf, x._1, x._2, monthRange, dateFormat))
+          }
+
+        case None => Future.successful(NotFound(views.html.page_404("Feature not found")))
+      }.flatMap(identity)
+    }
+  def doFullBreakdown(format: Option[String] = None) = Action.async { implicit request =>
+    productFeatureRepo.all.map{ (features: Seq[ProductfeatureRow]) =>
+      val breakdown: Future[Seq[(String, Seq[(Boolean, String, Double)], String, Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Int, Map[Date, Double])])]] = Future.sequence( features.filter(_.isactive.getOrElse(false)).map{ feature =>
+        (for{
+          mc <- productFeatureRepo.findByManagedClients(feature.id )
+         // flags <- productFeatureRepo.findFeatureFlagsByFeature(feature.id)
+          track <- productFeatureRepo.findTracksByFeature(feature.id)
+          breakdown <- projectRepo.breakDownFeature(feature.id).map( _._1 )
+        } yield (mc, /*flags, */ track, breakdown )).map { (result: (
+          Seq[(ManagedclientRow, ManagedclientproductfeatureRow)],
+          /*  Seq[(FeatureflagRow, ProductfeatureflagRow)], */
+            Seq[(ProducttrackRow, ProducttrackfeatureRow)],
+            Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Int, Map[Date, Double])])) =>
+          val mc: Seq[(Boolean, String, Double)] = result._1 match {
+            case Nil => Seq((false, "NONE", 1.0))
+            case mcs => mcs.map(p => (p._1.ismanaged.getOrElse(false), p._1.name, p._2.allocation.toDouble))
+          }
+        /*
+          val ff: Seq[(Boolean, String, Double)] = result._2 match {
+            case Nil => Seq((false, "None", 1.0))
+            case ffs => ffs.map(p => (false, p._1.name, 1.0 / ffs.size))
+          }
+          */
+          val pt: Seq[(Boolean, String, Double)] = result._2 match {
+            case Nil => Seq((false, "None", 1.0))
+            case pts => pts.map(p => (false, p._1.name, p._2.allocation.toDouble))
+          }
+          val line = if (feature.iscid.getOrElse(false)) {
+            ("CID", mc, feature.name, result._3)
+          } else {
+            if (feature.isanchor.getOrElse(false)) {
+              ("ANCHOR", pt, feature.name, result._3)
+            } else {
+              ("PRAGMATIC", pt, feature.name, result._3)
+            }
+          }
+          line
+        }
+      })
+
+      val featureResult: Future[(Map[(String, Boolean, String), Map[Either[ResourceteamRow, ResourcepoolRow], Map[Date, Double]]])]
+         = breakdown.map { lines =>
+        val dates: Seq[Date] = lines.flatMap(r => r._4.flatMap(_._3.keys))
+        val minX: Date = dates.minBy(_.getTime)
+        val maxX: Date = dates.maxBy(_.getTime)
+        val monthRange: Seq[Date] = util.Conversions.monthRange(minX, maxX)
+
+        val allocatedTally: Seq[(String, Boolean, String, Double, String, Iterable[(Either[ResourceteamRow, ResourcepoolRow], Double, Seq[(Date, Double)])])] = lines.map{ (line: (String, Seq[(Boolean, String, Double)], String, Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Int, Map[Date, Double])])) =>
+          val resDTFull: Iterable[(Either[ResourceteamRow, ResourcepoolRow], Int, Seq[(Date, Double)])] = line._4.map{ rtDates =>
+            val adjDates = monthRange.map{ dt =>
+              rtDates._3.get(dt) match {
+                case Some(al) => (dt,al)
+                case None => (dt,0.0)
+              }
+            }
+            val rRP:Either[ResourceteamRow,ResourcepoolRow] = rtDates._1._2 match {
+              case None => Left(rtDates._1._1)
+              case Some(rp) =>Right(rp)
+            }
+            (rRP,  rtDates._2, adjDates )
+          }
+          (line._1,line._2, line._3, resDTFull)
+        }.flatMap { (fullLine: (String, Seq[(Boolean, String, Double)], String, Iterable[(Either[ResourceteamRow, ResourcepoolRow], Int, Seq[(Date, Double)])])) =>
+          val total = Math.max(fullLine._2.map(_._3).sum,0.0000001)
+          fullLine._2.map { allocLine =>
+            val percentage = allocLine._3/total
+            val numbersAlloc = fullLine._4.map{ rtB =>
+              val adj = rtB._3.map{ dtD => (dtD._1, dtD._2*percentage)}
+              (rtB._1, rtB._2*percentage, adj)
+            }
+
+            (fullLine._1,  allocLine._1, allocLine._2, allocLine._3, fullLine._3, numbersAlloc )
+          }
+        }
+        // summary grouped by type(CID/Anchor/pragmattic), Managed(y/n), sub-type(eg. client, Software/Branded), team breakdown
+        val summaryAllocation: Map[(String, Boolean, String), Map[Either[ResourceteamRow, ResourcepoolRow], Map[Date, Double]]] = allocatedTally.groupBy(p => (p._1,p._2,p._3) ).map{ l =>
+          val total = l._2.flatMap(_._6).groupBy(_._1).map { rt =>
+            val datesT: Map[Date, Double] = rt._2.flatMap{ _._3}.groupBy(_._1).map{ x => (x._1,x._2.map(_._2).sum) }
+            (rt._1,datesT )
+          }
+          (l._1, total)
+        }
+        summaryAllocation
+      }
+      val resourcePoolBreakDown: Future[Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[(String, Boolean, Option[String], String, Int)])]] = resourceTeamRepo.allEx.map{ rtOs =>
+        val teamOrPool: Seq[Either[ResourceteamRow, ResourcepoolRow]] = rtOs.map{ rtO =>
+          rtO._2 match {
+            case Some(rp) => Right(rp)
+            case None => Left(rtO._1)
+          }
+        }
+        Future.sequence(teamOrPool.groupBy(p => p).keys.map {
+          case x@Left(team) => resourceTeamRepo.getTeamSummaryByVendorCountry(team.id).map{ res => (x,res)}
+          case x@Right(pool) =>resourcePoolRepo.getTeamSummaryByVendorCountry(pool.id).map{ res => (x,res)}
+        }.toSeq)
+      }.flatMap(identity)
+
+      for {
+        f<- featureResult
+        r<- resourcePoolBreakDown
+      } yield ( f,r)
+
+      //featureResult
+
+    }.flatMap(identity).map { tally =>
+
+      val summary: Map[(String, Boolean, String), Map[ Either[ResourceteamRow, ResourcepoolRow], Map[Date, Double]]] = tally._1
+      val resourcePool = tally._2
+      val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM-YYYY")
+      val months: Seq[Date] = summary.flatMap{ x => x._2.flatMap{ y => y._2.keys}}.toSet.toSeq//
+      val monthsLimit: Seq[Date] = months.sortBy(_.getTime).slice(0,15) //16 dates = 5Q
+      if ( format.getOrElse("html").equalsIgnoreCase("XLS")) {
+        Ok.sendFile(doFullBreakdownXLS(summary, resourcePool,monthsLimit, dateFormat))
+          .as("application/vnd.ms-excel")
+          .withHeaders(("Access-Control-Allow-Origin", "*"),
+            ("Content-Disposition", s"attachment; filename=ProductResourceList.xls"))
+      } else {
+        Ok(views.html.product.fullBreakdown(monthsLimit, summary, dateFormat))
+      }
+
+    }
+  }
+
+  def doFullBreakdownXLS( featuresSummary: Map[(String, Boolean, String), Map[ Either[ResourceteamRow, ResourcepoolRow], Map[Date, Double]]],
+    resources:Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[(String, Boolean, Option[String], String, Int)])],
+    monthsLimit: Seq[Date],
+    dateFormat: DateTimeFormatter):java.io.File = {
+    val wb: Workbook = new HSSFWorkbook()
+
+    val featureSheet: Sheet = wb.createSheet("Feature Analysis")
+    val featureHeader:Row = featureSheet.createRow(0)
+    val cellStyle = wb.createCellStyle
+    val createHelper = wb.getCreationHelper
+    cellStyle.setDataFormat( createHelper.createDataFormat().getFormat("mmm-yy"))
+
+    featureHeader.createCell(0).setCellValue("Type")
+    featureHeader.createCell(1).setCellValue("Sub-Type")
+    featureHeader.createCell(2).setCellValue("Detail")
+    featureHeader.createCell(3).setCellValue("Pool/Team")
+    featureHeader.createCell(4).setCellValue("Month")
+    featureHeader.createCell(5).setCellValue("DevDays")
+
+    val allowableDates = monthsLimit.toSet
+
+    val featureSum2 = featuresSummary.flatMap{ line =>
+      line._2.flatMap{ line2 =>
+        line2._2.filter( p => allowableDates.contains(p._1)) .map{ line3 =>
+          ( line._1._1, line._1._2, line._1._3, line2._1, line3._1, line3._2 )
+        }
+      }
+    }.toSeq
+    for (rowNum <- featureSum2.indices) {
+      val row = featureSum2(rowNum)
+      val r = featureSheet.createRow(rowNum+1)
+      val resourceName = row._4 match {
+        case Left(x) => x.name
+        case Right(x) => x.name
+      }
+
+      if (row._1.equalsIgnoreCase("CID")) {
+        r.createCell(0).setCellValue(row._1)
+        if (row._2) {
+          r.createCell(1).setCellValue("Managed")
+        } else {
+          r.createCell(1).setCellValue("Other")
+        }
+      } else {
+        r.createCell(0).setCellValue("ROADMAP")
+        r.createCell(1).setCellValue(row._1)
+      }
+
+      r.createCell(2).setCellValue(row._3)
+      r.createCell(3).setCellValue(resourceName)
+      val dateCell = r.createCell(4)
+      dateCell.setCellValue(row._5)
+      dateCell.setCellStyle(cellStyle)
+
+      r.createCell(5).setCellValue(row._6)
+    }
+
+    val resourceSheet: Sheet = wb.createSheet("Resource Breakdown")
+    val resourceHeader: Row = resourceSheet.createRow(0)
+
+    resourceHeader.createCell(0).setCellValue("Pool/Team")
+    resourceHeader.createCell(1).setCellValue("Employee/Vendor")
+    resourceHeader.createCell(2).setCellValue("Country")
+    resourceHeader.createCell(3).setCellValue("Position Type")
+    resourceHeader.createCell(4).setCellValue("#")
+
+    val result2: Seq[(Either[ResourceteamRow, ResourcepoolRow], String, Boolean, Option[String], String, Int)] = resources.flatMap { x =>
+      x._2.map { line =>
+        (x._1, line._1, line._2, line._3, line._4, line._5)
+      }
+    }
+
+    for (rowNum <- result2.indices) {
+      val r: Row = resourceSheet.createRow(rowNum + 1)
+      val ( teamPool:Either[ResourceteamRow,ResourcepoolRow],
+      vendor:String,
+      contractor:Boolean,
+      country:Option[String],
+      positionType:String,
+      numberResources:Int) = result2(rowNum)
+      val name = teamPool match {
+        case Left(x) => x.name
+        case Right(x) => x.name
+      }
+      r.createCell(0).setCellValue(name)
+      if (contractor) {
+        r.createCell(1).setCellValue(vendor)
+      } else {
+        r.createCell(1).setCellValue("Employee")
+      }
+      r.createCell(2).setCellValue(country.getOrElse("-"))
+      r.createCell(3).setCellValue(positionType)
+      r.createCell(4).setCellValue(numberResources)
+    }
+
+    val tmpDir = ConfigFactory.load.getString("scenario.tempdir")
+    val f = java.io.File.createTempFile("resourceFeatureBreakdown-",".xls",new java.io.File(tmpDir))
+    val os = new FileOutputStream(f)
+    wb.write(os)
+    wb.close()
+    os.close()
+    //val outFilename = s"resourceBreakdown".replaceAll(",|!","_")
+    f.deleteOnExit()
+    f
+  }
 }
 

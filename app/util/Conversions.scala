@@ -20,9 +20,11 @@ package util
 import java.sql.Date
 import java.util.Calendar
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Days}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.Logger
+
+import scala.annotation.tailrec
 
 /**
   * Created by iholsman on 4/15/2017.
@@ -215,6 +217,52 @@ object Conversions {
 
         }
     }
+  }
+
+  def monthRange(from:Date, to:Date): Seq[Date] = {
+    @tailrec
+    def monthRange(from: DateTime, to: DateTime, acc: Seq[DateTime]): Seq[DateTime] = {
+      val fromEOM = from.dayOfMonth().withMaximumValue()
+      val fromSOM = from.dayOfMonth().withMinimumValue()
+      if (to.isAfter(from)) {
+        monthRange(from.plusMonths(1).dayOfMonth().withMinimumValue(), to, acc ++ Seq(fromSOM))
+      } else {
+        acc
+      }
+    }
+
+    val fromDT = new DateTime(from.getTime)
+    val toDT = new DateTime(to.getTime)
+    val res = monthRange(fromDT, toDT, Seq.empty).map {
+      x => new java.sql.Date(x.getMillis)
+    }
+    res
+  }
+  def explodeDateRange( from:Date, to:Date ): (Int, Seq[(Date, Int)]) = {
+    @tailrec
+    def explodeDateRange(from: DateTime, to: DateTime, acc: Seq[(DateTime, Int)]): Seq[(DateTime, Int)] = {
+      val fromEOM = from.dayOfMonth().withMaximumValue()
+      val fromSOM = from.dayOfMonth().withMinimumValue()
+      if (to.isAfter(from)) {
+        val days = if (to.isAfter(fromEOM)) {
+          fromEOM.dayOfMonth().get() - from.dayOfMonth().get()
+        } else {
+          to.dayOfMonth().get() - from.dayOfMonth().get()
+        }
+        explodeDateRange(from.plusMonths(1).dayOfMonth().withMinimumValue(), to, acc ++ Seq((fromSOM, days + 1)))
+      } else {
+        acc
+      }
+    }
+
+    val fromDT = new DateTime(from.getTime)
+    val toDT = new DateTime(to.getTime)
+    val res = explodeDateRange(fromDT, toDT, Seq.empty).map {
+      x => (new java.sql.Date(x._1.getMillis), x._2)
+    }
+    val diff = Days.daysBetween(fromDT, toDT).getDays
+    (diff, res)
+
   }
 
 }

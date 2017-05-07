@@ -17,6 +17,7 @@
 
 package models.product
 
+import java.sql.Date
 import javax.inject.Inject
 
 import play.api.Logger
@@ -100,7 +101,6 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
         .result
     }
   }
-
 
   def repopulate( featureId:Int, projects:Seq[ProjectImport])(implicit projectDependencyRepo: ProjectDependencyRepo) :Future[(Iterable[Option[ResourceteamprojectRow]], Seq[Seq[Option[Tables.ProjectdependencyRow]]])] ={
 
@@ -220,4 +220,82 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
   protected def deleteResourcesForProject(projectId: Int): Future[Boolean] =
     db.run(Resourceteamproject.filter(_.projectid === projectId).delete) map {  _ > 0  }
 
+
+  def breakDownFeature(featureId:Int): Future[(Iterable[((ResourceteamRow,Option[ResourcepoolRow]), Int, Map[Date, Double])], Iterable[(ProjectRow, Int, Map[Date, Double])])] = {
+
+    (for {
+     // p <-  this.findByFeatureEx(featureId )
+      p2 <- db.run(
+        Project
+          .filter(_.productfeatureid === featureId)
+          .join(Resourceteamproject).on(_.id === _.projectid)
+          .join(Resourceteam).on(_._2.resourceteamid === _.id)
+          .joinLeft(Resourcepool).on(_._2.resourcepoolid === _.id)
+        .result
+      ).map{  res =>
+        res.map{ line =>
+          (line._1._1._1, line._1._1._2, (line._1._2, line._2))
+        }.groupBy( _._1)
+      }
+    } yield  p2  )
+      .map { x =>
+        val projectsEx: Map[ProjectRow, Seq[(ProjectRow, ResourceteamprojectRow, (ResourceteamRow, Option[ResourcepoolRow]))]] = x.filter(_._1.isactive)
+        val byMonth: Iterable[(ProjectRow, Seq[(ResourceteamprojectRow, (ResourceteamRow,Option[ResourcepoolRow]))], (Int, Seq[(Date, Int)]))] = projectsEx.map { p =>
+          val reduced: Seq[(ResourceteamprojectRow, (ResourceteamRow,Option[ResourcepoolRow]))] =p._2.map{ l =>
+            (l._2,l._3)
+          }
+          if (p._1.started.nonEmpty && p._1.finished.nonEmpty) {
+            (p._1, reduced, util.Conversions.explodeDateRange(p._1.started.get, p._1.finished.get))
+          } else {
+            (p._1,reduced, (0, Seq.empty))
+          }
+        }
+
+        val byResources: Iterable[(ProjectRow, Seq[( (ResourceteamRow,Option[ResourcepoolRow]), (Int, Seq[(Date, Double)]))], (Int, Seq[(Date, Int)]))] = byMonth.map { p =>
+          val featureByMonth = p._2.map { res =>
+            val featureSize = res._1.featuresize
+            val totalDays: Double = if (p._3._1 < 1) 0.00001 else p._3._1
+            val daysBreakout: Seq[(Date, Int)] = p._3._2
+            val ratio: Double = 1.0 * featureSize / totalDays
+            (res._2, (featureSize, daysBreakout.map { d => (d._1, d._2 * ratio) }))
+          }
+          (p._1, featureByMonth, p._3)
+        }
+        val byTeam: Iterable[((ResourceteamRow,Option[ResourcepoolRow]), Int, Map[Date, Double])] = byResources.flatMap { proj =>
+          proj._2.map { res =>
+            res
+          }
+        }.groupBy(_._1).map { teamDetail =>
+          val team = teamDetail._1
+          val p2: Iterable[(Int, Seq[(Date, Double)])] = teamDetail._2.map { y =>y._2 }
+          val p2_total = p2.map(_._1).sum
+          val p2_agg: Map[Date, Double] = p2.flatMap { p3 =>
+            p3._2
+          }.groupBy(_._1).map { p4 =>
+            (p4._1, p4._2.map {
+              _._2
+            }.sum)
+          }
+          (team, p2_total, p2_agg)
+        }
+        val byProject: Iterable[(ProjectRow, Int, Map[Date, Double])] = byResources.flatMap { proj =>
+          proj._2.map { res =>
+            (proj._1, res._2)
+          }
+        }.groupBy(_._1).map { projDetail =>
+          val project = projDetail._1
+          val p2: Iterable[(Int, Seq[(Date, Double)])] = projDetail._2.map { y => y._2}
+          val p2_total = p2.map(_._1).sum
+          val p2_agg: Map[Date, Double] = p2.flatMap { p3 =>
+            p3._2
+          }.groupBy(_._1).map { p4 =>
+            (p4._1, p4._2.map {
+              _._2
+            }.sum)
+          }
+          (project, p2_total, p2_agg)
+        }
+        (byTeam, byProject)
+      }
+  }
 }

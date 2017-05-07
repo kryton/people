@@ -17,6 +17,7 @@
 
 package models.product
 
+import java.sql.Date
 import javax.inject.Inject
 
 import offline.Tables.Emprelations
