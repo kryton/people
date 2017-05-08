@@ -28,8 +28,8 @@ trait Tables {
     prs => import prs._
     EmpefficiencyRow.tupled((<<[Long], <<[Int], <<?[scala.math.BigDecimal]))
   }
-  /** Table description of table empefficiency. Objects of this class serve as prototypes for rows in queries. */
-  class Empefficiency(_tableTag: Tag) extends profile.api.Table[EmpefficiencyRow](_tableTag, Some("project_db"), "empefficiency") {
+  /** Table description of table EmpEfficiency. Objects of this class serve as prototypes for rows in queries. */
+  class Empefficiency(_tableTag: Tag) extends profile.api.Table[EmpefficiencyRow](_tableTag, Some("project_db"), "EmpEfficiency") {
     def * = (id, month, efficiency) <> (EmpefficiencyRow.tupled, EmpefficiencyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(month), efficiency).shaped.<>({r=>import r._; _1.map(_=> EmpefficiencyRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -428,8 +428,8 @@ trait Tables {
     prs => import prs._
     ProjectdependencyRow.tupled((<<[Long], <<[Int], <<[Int]))
   }
-  /** Table description of table projectdependency. Objects of this class serve as prototypes for rows in queries. */
-  class Projectdependency(_tableTag: Tag) extends profile.api.Table[ProjectdependencyRow](_tableTag, Some("project_db"), "projectdependency") {
+  /** Table description of table ProjectDependency. Objects of this class serve as prototypes for rows in queries. */
+  class Projectdependency(_tableTag: Tag) extends profile.api.Table[ProjectdependencyRow](_tableTag, Some("project_db"), "ProjectDependency") {
     def * = (id, fromproject, toproject) <> (ProjectdependencyRow.tupled, ProjectdependencyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(fromproject), Rep.Some(toproject)).shaped.<>({r=>import r._; _1.map(_=> ProjectdependencyRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -799,8 +799,8 @@ trait Tables {
     prs => import prs._
     ResourceteamprojectRow.tupled((<<[Int], <<[Int], <<[Int], <<[Int], <<[Int], <<?[scala.math.BigDecimal]))
   }
-  /** Table description of table resourceteamproject. Objects of this class serve as prototypes for rows in queries. */
-  class Resourceteamproject(_tableTag: Tag) extends profile.api.Table[ResourceteamprojectRow](_tableTag, Some("project_db"), "resourceteamproject") {
+  /** Table description of table ResourceTeamProject. Objects of this class serve as prototypes for rows in queries. */
+  class Resourceteamproject(_tableTag: Tag) extends profile.api.Table[ResourceteamprojectRow](_tableTag, Some("project_db"), "ResourceTeamProject") {
     def * = (id, featuresize, maxdevs, resourceteamid, projectid, featuresizeremaining) <> (ResourceteamprojectRow.tupled, ResourceteamprojectRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(featuresize), Rep.Some(maxdevs), Rep.Some(resourceteamid), Rep.Some(projectid), featuresizeremaining).shaped.<>({r=>import r._; _1.map(_=> ResourceteamprojectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
