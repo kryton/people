@@ -23,7 +23,8 @@
         resourcePool:ResourcepoolRow,
         byPool: (Int, EfficencyMonth),
         teamMakeup:Seq[(String, Boolean, Option[String], String, Int)],
-        teams:Page[(ResourceteamRow, (Int, EfficencyMonth))]
+        teams:Page[(ResourceteamRow, (Int, EfficencyMonth))],
+        isAdmin:Boolean
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
@@ -71,43 +72,47 @@
                 </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->
-        <div class="x_panel">
-            <div class="x_title">
-                <h2>Resource Breakdown</h2>
-                <ul class="nav navbar-right panel_toolbox">
-                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
-                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
-                </ul>
-                <div class="clearfix"></div>
-            </div>
-                <!-- x_title -->
-            <div class="x_content">
-                <div class="container">
-                    <table class="table table-responsive">
-                        <thead>
-                            <tr>
-                                <th>Employee/Agency</th>
-                                <th>Country</th>
-                                <th>Position</th>
-                                <th align="right">#</th>
-
-                            </tr></thead>
-                        @teamMakeup.sortBy(p=>(p._2,p._1, p._4, p._3 )).map { line =>
-                            <tr>
-                                <td>@if(line._2) {
-                                    @line._1
-                                } else {
-                                    Employee
-                                }</td>
-                                <td>@line._3</td>
-                                <td>@line._4</td>
-                                <td align="right">@line._5</td>
-                            </tr>
-                        }
-                    </table>
+        @if(isAdmin) {
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Resource Breakdown - Admin Only</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
                 </div>
-            </div> <!-- x_content -->
-        </div ><!-- x_panel -->
+
+                    <!-- x_title -->
+                <div class="x_content">
+                    <div class="container">
+                        <table class="table table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>Employee/Agency</th>
+                                    <th>Country</th>
+                                    <th>Position</th>
+                                    <th align="right">#</th>
+
+                                </tr></thead>
+                            @teamMakeup.sortBy(p => (p._2, p._1, p._4, p._3)).map { line =>
+                                <tr>
+                                    <td>@if(line._2) {
+                                        @line._1
+                                    } else {
+                                        Employee
+                                    }</td>
+                                    <td>@line._3</td>
+                                    <td>@line._4</td>
+                                    <td align="right">@line._5</td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div> <!-- x_content -->
+            </div >
+                <!-- x_panel -->
+        }
 
         <div class="x_panel">
             <div class="x_title">

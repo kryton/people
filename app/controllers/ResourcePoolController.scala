@@ -91,14 +91,17 @@ class ResourcePoolController @Inject()
 
     resourcePoolRepo.find(rpId).map {
       case Some(rp) =>
-        val teams: Future[Seq[(ResourceteamRow, Seq[(EmprelationsRow, Int, EfficencyMonth)],
-                          Seq[(String, Boolean, Option[String], String, Int)])]] = resourceTeamRepo.findInPool( rp.id).map{
+        val teams: Future[Seq[(ResourceteamRow,
+          Seq[(EmprelationsRow, Int, EfficencyMonth)],
+          Seq[(String, Boolean, Option[String], String, Int)],
+          Boolean)]] = resourceTeamRepo.findInPool( rp.id).map{
           (teamS: Seq[ResourceteamRow]) => Future.sequence( teamS.map { team:ResourceteamRow =>
             (for{
               dsX <- resourceTeamRepo.getDevStatsForTeam(team.id)//.map{ ds => (team, ds) }
               ctX <- resourceTeamRepo.getTeamSummaryByVendorCountry(team.id)
-            } yield (dsX,ctX)).map{ x=>
-              (team,x._1, x._2)
+              isAdmin <- user.isAdmin( LDAPAuth.getUser())
+            } yield (dsX,ctX, isAdmin)).map{ x=>
+              (team,x._1, x._2, x._3)
             }
           })
         }.flatMap(identity)
@@ -107,7 +110,11 @@ class ResourcePoolController @Inject()
           t <- teams
         } yield t)
         .map { x:Seq[(ResourceteamRow, Seq[(EmprelationsRow, Int, EfficencyMonth)],
-          Seq[(String, Boolean, Option[String], String, Int)])] =>
+          Seq[(String, Boolean, Option[String], String, Int)],Boolean)] =>
+          val isAdmin:Boolean  = x.headOption match {
+            case None => false
+            case Some(rec) => rec._4
+          }
           val byTeam: Seq[(ResourceteamRow, (Int, EfficencyMonth))] = x.map{ tE => ( tE._1, tE._2
             .foldLeft( (0,EfficencyMonth(0, 0, 0 ,0, 0))) ((z:(Int,EfficencyMonth), i) => (z._1 +1,z._2.add( i._3))  ))
           }
@@ -124,7 +131,8 @@ class ResourcePoolController @Inject()
             (line2._1._1, line2._1._2, line2._1._3, line2._1._4, line2._2.map(_._5).sum )
           }.toSeq
 
-          Ok(views.html.product.pool.id( rpId, rp, byPool, sum, Page( byTeam,page, pageSize = 20)) )
+
+          Ok(views.html.product.pool.id( rpId, rp, byPool, sum, Page( byTeam,page, pageSize = 20), isAdmin) )
         }
 
       case None => Future.successful(NotFound(views.html.page_404("Team not found")))
