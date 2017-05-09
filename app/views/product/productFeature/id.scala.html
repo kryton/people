@@ -51,7 +51,11 @@
         ldap: util.LDAP)
 
 
-@main(s"Product Feature ${productFeature.name}!") {
+@main(styles=Html("""
+<link href='"""+ routes.WebJarAssets.at(webJarAssets.locate("/vendors/switchery/dist/switchery.min.css"))+"""' rel="stylesheet">
+"""), scripts = Html("""
+<script src='"""+routes.WebJarAssets.at(webJarAssets.locate("/vendors/switchery/dist/switchery.min.js"))+"""' type="text/javascript"></script>
+"""),title=s"Product Feature ${productFeature.name}!") {
 
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
@@ -77,22 +81,54 @@
                             Finish: @productFeature.finish.map{ x=> @x}<br/>
                             Active:
                             @if(productFeature.isactive.getOrElse(false)) {
-                                <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                              @if(canEdit) {
+                                <a href='@routes.ProductFeatureController.updCheck(id,"active","N")'><i class="fa fa-check-square-o" aria-hidden="true"></i></a>
+                              } else {
+                              <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                              }
                             } else {
+                              @if(canEdit) {
+                                  <a href='@routes.ProductFeatureController.updCheck(id,"active","Y")'>  <i class="fa fa-square-o" aria-hidden="true"></i></a>
+                              } else {
                                 <i class="fa fa-square-o" aria-hidden="true"></i>
+                              }
                             }<br/>
                             CID:
                             @if(productFeature.iscid.getOrElse(false)) {
+                              @if(canEdit) {
+                                <a href='@routes.ProductFeatureController.updCheck(id,"cid","N")'>
+                                <i class="fa fa-check-square-o" aria-hidden="true"></i></a>
+                              } else {
                                 <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                              }
                             } else {
+                              @if(canEdit) {
+                                  <a href='@routes.ProductFeatureController.updCheck(id,"cid","Y")'>
                                 <i class="fa fa-square-o" aria-hidden="true"></i>
+                              </a>
+                              }else {
+                                <i class="fa fa-square-o" aria-hidden="true"></i>
+                              }
+
                             }<br/>
 
                             Anchor:
                             @if(productFeature.isanchor.getOrElse(false)) {
+                              @if(canEdit) {
+                                  <a href='@routes.ProductFeatureController.updCheck(id,"anchor","N")'>
+                                    <i class="fa fa-check-square-o" aria-hidden="true"></i></a>
+                              } else {
                                 <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                              }
+
                             } else {
+                              @if(canEdit) {
+                                    <a href='@routes.ProductFeatureController.updCheck(id,"anchor","Y")'>
+                                  <i class="fa fa-square-o" aria-hidden="true"></i></a>
+                              } else {
                                 <i class="fa fa-square-o" aria-hidden="true"></i>
+                              }
+
                             }<br/>
 
                         </div>
@@ -314,7 +350,7 @@
             </div>
         </div>
         <script nonce="PMAN">
-            <!--
+            <!--      
             window.onload = function () {
                  //turn to inline mode
                  //$.fn.editable.defaults.mode = 'inline';

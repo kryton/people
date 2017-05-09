@@ -18,7 +18,9 @@
 @import projectdb.Tables.ProducttrackRow
 @import projectdb.Tables.ProductfeatureRow
 @(page: util.Page[ProductfeatureRow],
-        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+        searchTerm:Option[String],
+        filterType:String="All"
+)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
 
 
 @main("Product Features") {
@@ -26,7 +28,10 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Features</h2>
+                <h2>Features <a href="@routes.ProductFeatureController.search(search = searchTerm)">All</a>
+                    <a href="@routes.ProductFeatureController.searchCID(search = searchTerm)">CID</a>
+                    <a href="@routes.ProductFeatureController.searchAnchor(search = searchTerm)">Anchor</a>
+                </h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                     </li>
@@ -88,13 +93,32 @@
 
                     <div class="row">
 
-
-                @page.prev.map { x =>
-                    <a href="@routes.ProductFeatureController.search(x,searchTerm)">... prev ...</a>
-                }
-                @page.next.map { x =>
-                    <a href="@routes.ProductFeatureController.search(x,searchTerm)">... next ...</a>
-                }
+@if( filterType == "All") {
+    @page.prev.map { x =>
+        <a href="@routes.ProductFeatureController.search(x, searchTerm)">... prev ...</a>
+    }
+    @page.next.map { x =>
+        <a href="@routes.ProductFeatureController.search(x, searchTerm)">... next ...</a>
+    }
+} else {
+    @if(filterType == "CID") {
+        @page.prev.map { x =>
+            <a href="@routes.ProductFeatureController.searchCID(x, searchTerm)">... prev ...</a>
+        }
+        @page.next.map { x =>
+            <a href="@routes.ProductFeatureController.searchCID(x, searchTerm)">... next ...</a>
+        }
+    } else {
+        @if(filterType == "Anchor") {
+            @page.prev.map { x =>
+                <a href="@routes.ProductFeatureController.searchAnchor(x, searchTerm)">... prev ...</a>
+            }
+            @page.next.map { x =>
+                <a href="@routes.ProductFeatureController.searchAnchor(x, searchTerm)">... next ...</a>
+            }
+        }
+    }
+}
 
                </div>
                 </div>

@@ -90,9 +90,43 @@ class ProductFeatureController @Inject()
         }
       }
   }
+  def searchCID( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
+    val pageSize = 20
+      search match {
+        case None => productFeatureRepo.all.map{ pt =>
+          val ptFilter = pt.filter(_.iscid.getOrElse(false))
+          Ok(views.html.product.productFeature.search( Page(ptFilter,page, pageSize=pageSize),search,"CID"))
+        }
+        case Some(searchString) => productFeatureRepo.search(searchString).map{ emps =>
+          val ptFilter = emps.filter(_.iscid.getOrElse(false))
+          if (ptFilter.size == 1 ) {
+            Redirect(routes.ProductFeatureController.id( ptFilter.head.id))
+          } else {
+            Ok(views.html.product.productFeature.search(Page(ptFilter,page,pageSize=pageSize), search,"CID"))
+          }
+        }
+      }
+  }
+  def searchAnchor( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
+    val pageSize = 20
+      search match {
+        case None => productFeatureRepo.all.map{ pt =>
+          val ptFilter = pt.filter(_.isanchor.getOrElse(false))
+          Ok(views.html.product.productFeature.search( Page(ptFilter, page, pageSize=pageSize),search,"Anchor"))
+        }
+        case Some(searchString) => productFeatureRepo.search(searchString).map{ emps =>
+          val ptFilter = emps.filter(_.isanchor.getOrElse(false))
+          if (ptFilter.size == 1 ) {
+            Redirect(routes.ProductFeatureController.id( ptFilter.head.id))
+          } else {
+            Ok(views.html.product.productFeature.search(Page(ptFilter, page, pageSize=pageSize), search,"Anchor"))
+          }
+        }
+      }
+  }
+
 
   def id( id:Int, page:Int): Action[AnyContent] = Action.async{ implicit request =>
-
     (for{
       u <- user.isAdmin(LDAPAuth.getUser())
       pf <- productFeatureRepo.find(id)
@@ -479,6 +513,37 @@ class ProductFeatureController @Inject()
         case None =>  Future.successful(NotFound(views.html.page_404("Feature Type not found")))
       }
     }.flatMap(identity)
+  }
+
+  def updCheck(featureId:Int, checkType:String, enable:String) = LDAPAuthAction {
+    Action.async { implicit request =>
+      val enableFlag: Boolean = enable.equalsIgnoreCase("Y")
+      (for {
+        u <- user.isAdmin(LDAPAuth.getUser())
+        pf <- productFeatureRepo.find(featureId)
+      } yield (u, pf)).map { x =>
+        if (x._1) {
+          x._2 match {
+            case Some(pf) =>
+              val upd: Future[Boolean] = checkType.toLowerCase match {
+                case "cid" => productFeatureRepo.update(featureId, pf.copy(iscid = Some(enableFlag)))
+                case "anchor" => productFeatureRepo.update(featureId, pf.copy(isanchor = Some(enableFlag)))
+                case "active" => productFeatureRepo.update(featureId, pf.copy(isactive = Some(enableFlag)))
+                case _ => Future.successful(false)
+              }
+              upd.map { res =>
+                Redirect(routes.ProductFeatureController.id(featureId))
+              }
+            case None => Future.successful(NotFound("Feature Not Found"))
+          }
+        } else {
+          Future.successful(Unauthorized(views.html.page_403("Unauthorized")))
+        }
+
+      }.flatMap(identity)
+
+      //Future(Ok(""))
+    }
   }
 }
 
