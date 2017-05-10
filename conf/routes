@@ -102,6 +102,7 @@ GET         /rteam/                                         controllers.Resource
 GET         /rteam/:id                                      controllers.ResourceTeamController.id( id:Int, p:Int ?= 0)
 
 GET         /rpool/                                         controllers.ResourcePoolController.search( p:Int ?= 0, search: Option[String] ?= None)
+POST        /rpool/new                                      controllers.ResourcePoolController.newRP
 GET         /rpool/breakdown                                controllers.ResourcePoolController.doFullBreakdown(format:Option[String]?=None)
 GET         /rpool/:id                                      controllers.ResourcePoolController.id( id:Int, p:Int ?= 0)
 
