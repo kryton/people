@@ -24,6 +24,8 @@
 @import projectdb.Tables.ResourceteamproductfeatureRow
 @import offline.Tables.EmprelationsRow
 @import people.EmpRelationsRowUtils._
+@import models.product.TeamSummary
+
 @(      id:Int,
         resourceTeam:(ResourceteamRow,Option[ResourcepoolRow]),
         features:Page[(ProductfeatureRow, ResourceteamproductfeatureRow, Seq[(ProducttrackRow, ProducttrackfeatureRow)])],
@@ -31,9 +33,11 @@
         stats: (Int, models.product.EfficencyMonth),
         teamDetails: Seq[(offline.Tables.EmprelationsRow, String, Option[java.sql.Date])],
         isAdmin:Boolean,
-        teamMakeup: Seq[_ <: (String, Boolean, Option[String], String, Int)]
+        teamMakeup: Seq[TeamSummary],
+        rpoolLookup: Seq[(Int,String)]
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
+          messages: Messages,
         request: Request[_],
         ldap: util.LDAP)
 
@@ -51,7 +55,29 @@
     <div class="col-xs-12">
         <div class="x_panel">
             <div class="x_title">
+              @if(isAdmin) {
+              <h2><span class="RPEDIT editable editable-click" data-type="text" data-pk="@id"
+               data-name="name" data-title="Name"
+               data-url="@routes.ResourceTeamController.updateRT(id)">@resourceTeam._1.name</span>
+               (<span class="RPEDITCOMBO editable editable-click" data-type="select" data-pk="@id"
+                data-name="pool" data-title="Pool"
+                data-url="@routes.ResourceTeamController.updateRTPool(id)">@resourceTeam._2.map{ rp =>
+                @rp.name
+              }.getOrElse {
+                -None-
+              }</span>) Ordering: <span class="RPEDIT editable editable-click" data-type="text" data-pk="@id"
+               data-name="name" data-title="Name"
+               data-url="@routes.ResourceTeamController.updateRT(id)">@resourceTeam._1.ordering</span>
+               MS Project Match: <span class="RPEDIT editable editable-click" data-type="text" data-pk="@id"
+                data-name="msprojectname" data-title="MS Project Name"
+                data-url="@routes.ResourceTeamController.updateRT(id)">@resourceTeam._1.msprojectname</span>
+                Team Name used in people tool: <span class="RPEDIT editable editable-click" data-type="text" data-pk="@id"
+                 data-name="pplteamname" data-title="Team name in People tool"
+                 data-url="@routes.ResourceTeamController.updateRT(id)">@resourceTeam._1.pplteamname</span>
+            </h2>
+              }else {
                 <h2>Stats for @resourceTeam._1.name @poolLink( resourceTeam._2) </h2>
+              }
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
                     <li><a class="close-link"><i class="fa fa-close"></i></a></li>
@@ -89,9 +115,10 @@
                 </div>
             </div>
         </div><!-- x_panel -->
+@if(isAdmin) {
         <div class="x_panel">
             <div class="x_title">
-                <h2>Stats for Team Members</h2>
+                <h2>Stats for Team Members - ADMIN Only</h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
                     <li><a class="close-link"><i class="fa fa-close"></i></a></li>
@@ -109,20 +136,22 @@
                                         <th>Employee/Agency</th>
                                         <th>Country</th>
                                         <th>Position</th>
+                                        <th>PE?</th>
                                         <th align="right">#</th>
 
                                     </tr></thead>
-                                @teamMakeup.sortBy(p=>(p._2,p._1)).map { line =>
+                                @teamMakeup.sortBy(p=>(p.isContractor,p.agency)).map { line =>
                                 <tr>
-                                    <td>@if(line._2) {
+                                    <td>@if(line.isContractor) {
 
-                                        @line._1
+                                        @line.agency
                                     } else {
                                         Employee
                                     }</td>
-                                    <td>@line._3</td>
-                                    <td>@line._4</td>
-                                    <td align="right">@line._5</td>
+                                    <td>@line.country</td>
+                                    <td>@line.positionType</td>
+                                    <td>@line.isPE</td>
+                                    <td align="right">@line.tally</td>
                                 </tr>
                                 }
                             </table>
@@ -131,7 +160,7 @@
                 </div>
             </div>
         </div><!-- x_panel -->
-
+}
 
         <div class="x_panel">
             <div class="x_title">
@@ -308,6 +337,37 @@
 
     </div ><!-- col -->
 </div> <!-- row -->
+@if(isAdmin) {
+  <script nonce="PMAN" type="text/javascript">
+  <!--
+  window.onload = function () {
+      //turn to inline mode
+      $.fn.editable.defaults.mode = 'inline';
+      $(document).ready(function() {
+          $('.RPEDIT').editable({
+              params: function(params) {
+                  //originally params contain pk, name and value
+                  params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                  return params;
+              }
+          });
+          $('.RPEDITCOMBO').editable({
+            params: function(params) {
+                //originally params contain pk, name and value
+                params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                return params;
+            },
+            value: @resourceTeam._2.map{ x => @x.id }.getOrElse(0),
+            source: [
 
+                 @Html(rpoolLookup.map{ line =>s"{ value: ${line._1}, text: '${line._2}'}"}.mkString(","))
+
+            ]
+          });
+      });
+  }
+  -->
+  </script>
 }
 
+}

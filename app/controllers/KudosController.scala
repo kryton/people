@@ -298,16 +298,21 @@ class KudosController @Inject()
   def topX( size:Int, format:Option[String]) = Action.async { implicit request =>
     kudosToRepo.latest(size).map { seq =>
       seq.map { line =>
-        KudosExt(fromLogin = line._1.fromperson,
-          toLogin = line._1.toperson,
-          fromPerson = Some(line._2.fullName),
-          toPerson = line._3 match {
-            case Some(to) => Some(to.fullName)
+        val theKudos = line._1
+        val fromEmp = line._3
+        val toEmp = line._2
+        KudosExt(fromLogin = theKudos.fromperson,
+          fromPerson = fromEmp match {
+            case Some(from) =>Some(from.fullName)
             case None => None
           },
-          dateAdded = line._1.dateadded,
-          feedback = line._1.feedback,
-          headShotFrom = routes.HeadshotController.headShot(line._1.fromperson).url,
+          headShotFrom = routes.HeadshotController.headShot(theKudos.fromperson).url,
+          toLogin = line._1.toperson,
+
+          toPerson = Some(toEmp.fullName),
+          dateAdded = theKudos.dateadded,
+          feedback = theKudos.feedback,
+
           headShotTo = routes.HeadshotController.headShot(line._1.toperson).url
         )
       }
@@ -364,14 +369,16 @@ class KudosController @Inject()
   // TODO REVERT THIS BACK
   implicit val KudosExtWrites = new Writes[KudosExt] {
     def writes( k : KudosExt ): JsObject = Json.obj(
-      "toLogin" -> k.fromLogin,
-      "fromLogin" -> k.toLogin,
-      "toPerson" -> k.fromPerson,
-      "fromPerson" -> k.toPerson,
-      "dateAdded"-> k.dateAdded,
-      "feedback" -> k.feedback,
+      "fromLogin" -> k.fromLogin,
+      "fromPerson" -> k.fromPerson,
       "headshotFrom" -> k.headShotFrom,
-      "headshotTo" -> k.headShotTo
+
+      "toLogin" -> k.toLogin,
+      "toPerson" -> k.toPerson,
+      "headshotTo" -> k.headShotTo,
+
+      "dateAdded"-> k.dateAdded,
+      "feedback" -> k.feedback
     )
   }
 

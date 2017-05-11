@@ -26,13 +26,16 @@
         features:Page[((ProductfeatureRow,
                 ManagedclientproductfeatureRow),
                 Seq[(ProducttrackRow,ProducttrackfeatureRow)])
-                ])(implicit  webJarAssets: WebJarAssets,
+                ],
+        canEdit:Boolean
+)(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
+        messages: Messages,
         ldap: util.LDAP)
 
 
-@main(s"Stage ${mc.name}!") {
+@main(s"Managed Client ${mc.name}!") {
 
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
@@ -48,7 +51,30 @@
             <!-- x_title -->
             <div class="x_content">
                 <div class="container">
+                  @if(canEdit) {
+                  <span class="MCEDIT editable editable-click" data-type="text" data-pk="@mc.id"
+                        data-name="name" data-title="Name"
+                        data-url="@routes.ManagedClientController.updateMC(mc.id)">@mc.name</span>
+                        @if(mc.ismanaged.getOrElse(false)) {
+                          - <strong>Managed Client</strong> (<a href="@routes.ManagedClientController.updCheck(mc.id,"managed","N")">Convert to Unmanaged</a>)
+                        } else {
+                          Unmanaged (<a href="@routes.ManagedClientController.updCheck(mc.id,"managed","Y")">Convert to Managed</a>)
+                        }
+                        <br/>
+                        Abbreviation found in MS Project:<span class="MCEDIT editable editable-click" data-type="text" data-pk="@mc.id"
+                              data-name="msprojectname" data-title="Name in MS Project"
+                              data-url="@routes.ManagedClientController.updateMC(mc.id)">@mc.msprojectname.getOrElse("")</span> (For matching the project name to a client. please be careful.)
+                  } else {
                     @mc.name
+                    @if(mc.ismanaged.getOrElse(false)) {
+                      - <strong>Managed Client</strong>
+                    }
+                  }
+
+
+
+
+
                 </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->
@@ -82,7 +108,13 @@
 
                         @results.map { item =>
                             <tr><td align="right">@item._1._1.ordering</td>
-                                <td><a href="@routes.ProductFeatureController.id(item._1._1.id)">@item._1._1.name</a></td>
+                                <td>@if( item._1._1.isactive.getOrElse(false)) {
+                                    <a href="@routes.ProductFeatureController.id(item._1._1.id)">@item._1._1.name</a>
+                                }else {
+                                    <a href="@routes.ProductFeatureController.id(item._1._1.id)"><strike>@item._1._1.name</strike></a>
+
+                                }
+                                </td>
                                 <td>@if(item._1._1.isanchor.getOrElse(false)) {
                                     <i class="fa fa-anchor" aria-hidden="true"></i>
                                 }</td>
@@ -102,20 +134,18 @@
                                 </td>
                             </tr>
                         }
-
-                                </table>
+                            </table>
                             </div>
-
                         </div>
                     </div>
                 }
                 </div>
                 <div class="row">
                     @features.prev.map { x =>
-                        <a href="@routes.StageController.id(id,x)">... prev ...</a>
+                        <a href="@routes.ManagedClientController.id(id,x)">... prev ...</a>
                     }
                     @features.next.map { x =>
-                        <a href="@routes.StageController.id(id,x)">... next ...</a>
+                        <a href="@routes.ManagedClientController.id(id,x)">... next ...</a>
                     }
 
                 </div>
@@ -126,6 +156,25 @@
 
     </div ><!-- col -->
 </div> <!-- row -->
+@if(canEdit) {
+  <script nonce="PMAN" type="text/javascript">
+  <!--
+  window.onload = function () {
+      //turn to inline mode
+      $.fn.editable.defaults.mode = 'inline';
+      $(document).ready(function() {
+          $('.MCEDIT').editable({
+              params: function(params) {
+                  //originally params contain pk, name and value
+                  params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                  return params;
+                  }
+                  });
 
+      });
+
+  }
+  -->
+  </script>
 }
-
+}

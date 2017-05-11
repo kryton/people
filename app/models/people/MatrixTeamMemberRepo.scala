@@ -56,6 +56,11 @@ class MatrixTeamMemberRepo @Inject()(@NamedDatabase("default")  protected val db
                 .filter(_._2.login.toLowerCase === login.toLowerCase).result
     ).map{ x => x.nonEmpty }
 
+  def getPETeamMembers:Future[Seq[(MatrixteamRow,MatrixteammemberRow)]] =
+    db.run( Matrixteam.filter(_.ispe)
+        .join(Matrixteammember).on(_.id === _.matrixteammemberid).result)
+
+
  def findLoginByMatrixTeam(teamId:Long):Future[Seq[EmprelationsRow]]= {
     val qry = (Emprelations join Matrixteammember on ( _.login.toLowerCase === _.login.toLowerCase))
       .filter( _._2.matrixteammemberid === teamId)

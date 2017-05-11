@@ -19,10 +19,11 @@
 @import projectdb.Tables.ResourceteamRow
 @import projectdb.Tables.ResourcepoolRow
 @import models.product.EfficencyMonth
+@import models.product.TeamSummary
 @(      id:Int,
         resourcePool:ResourcepoolRow,
         byPool: (Int, EfficencyMonth),
-        teamMakeup:Seq[(String, Boolean, Option[String], String, Int)],
+        teamMakeup:Seq[TeamSummary],
         teams:Page[(ResourceteamRow, (Int, EfficencyMonth))],
         isAdmin:Boolean
 )(implicit  webJarAssets: WebJarAssets,
@@ -37,7 +38,14 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Details</h2>
+                <h2>Details @if(isAdmin) {
+                  - <span class="RPEDIT editable editable-click" data-type="text" data-pk="@id"
+                   data-name="name" data-title="Name"
+                   data-url="@routes.ResourcePoolController.updateRP(id)">@resourcePool.name</span>
+                   Ordering: <span class="RPEDIT editable editable-click" data-type="text" data-pk="@id"
+                    data-name="ordering" data-title="Ordering"
+                    data-url="@routes.ResourcePoolController.updateRP(id)">@resourcePool.ordering</span>
+                }</h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
                     <li><a class="close-link"><i class="fa fa-close"></i></a></li>
@@ -47,6 +55,8 @@
             <!-- x_title -->
             <div class="x_content">
                 <div class="container">
+
+                  <div class="row">
                     <table class="table table-responsive">
                         <thead>
                             <tr>
@@ -60,7 +70,7 @@
                             </tr>
                         </thead>
                         <tr>
-                            <td>@resourcePool.name</td>
+                            <td>   @resourcePool.name</td>
                             <td align="right">@byPool._1</td>
                             <td align="right">@byPool._2.t0</td>
                             <td align="right">@byPool._2.t3</td>
@@ -69,6 +79,7 @@
                             <td align="right">@byPool._2.t12</td>
                         </tr>
                     </table>
+                  </div>
                 </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->
@@ -92,19 +103,21 @@
                                     <th>Employee/Agency</th>
                                     <th>Country</th>
                                     <th>Position</th>
+                                    <th>is PE?</th>
                                     <th align="right">#</th>
 
                                 </tr></thead>
-                            @teamMakeup.sortBy(p => (p._2, p._1, p._4, p._3)).map { line =>
+                            @teamMakeup.sortBy(p => (p.isContractor, p.agency, p.positionType, p.country)).map { line =>
                                 <tr>
-                                    <td>@if(line._2) {
-                                        @line._1
+                                    <td>@if(line.isContractor) {
+                                        @line.agency
                                     } else {
                                         Employee
                                     }</td>
-                                    <td>@line._3</td>
-                                    <td>@line._4</td>
-                                    <td align="right">@line._5</td>
+                                    <td>@line.country</td>
+                                    <td>@line.positionType</td>
+                                    <td>@line.isPE</td>
+                                    <td align="right">@line.tally</td>
                                 </tr>
                             }
                         </table>
@@ -180,6 +193,23 @@
 
     </div ><!-- col -->
 </div> <!-- row -->
-
+@if(isAdmin) {
+  <script nonce="PMAN" type="text/javascript">
+  <!--
+  window.onload = function () {
+      //turn to inline mode
+      $.fn.editable.defaults.mode = 'inline';
+      $(document).ready(function() {
+          $('.RPEDIT').editable({
+              params: function(params) {
+                  //originally params contain pk, name and value
+                  params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                  return params;
+              }
+          });
+      });
+  }
+  -->
+  </script>
 }
-
+}

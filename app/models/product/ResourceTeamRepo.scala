@@ -84,46 +84,58 @@ class ResourceTeamRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
       .joinLeft(Resourcepool).on(_.resourcepoolid === _.id).sortBy( x=>(x._2.map( y => y.name), x._1.name)).result)
   }
 
+
   def getTeamSummaryByVendorCountry(id:Int
                                    )(implicit teamDescriptionRepo: TeamDescriptionRepo,
-                                            officeRepo:OfficeRepo,
-                                            positionTypeRepo: PositionTypeRepo): Future[ Seq[(String, Boolean, Option[String], String, Int)]] = {
+                                            officeRepo:OfficeRepo, matrixTeamMemberRepo:MatrixTeamMemberRepo,
+                                            positionTypeRepo: PositionTypeRepo): Future[ Seq[TeamSummary]] = {
     import models.people.EmpRelationsRowUtils._
-    find(id).map {
-      case None => Future.successful(Seq.empty)
 
-      case Some(rt) =>
-        val xyz: Future[ Seq[(String, Boolean, Option[String], String, Int)]] = rt.pplteamname match {
-        case None => Future.successful( Seq.empty)
-        case Some(teamName) =>
-          val summary: Future[Seq[(String, Boolean, Option[String], String, Int)]] = teamDescriptionRepo.findTeamMembers(teamName).map { emps =>
-            val line: Future[Seq[(String, Boolean, Option[String], String)]] = Future.sequence(emps.toSeq.map { emp =>
-              (for {
-                o <- officeRepo.find(emp.officeid.getOrElse(0))
-                p <- positionTypeRepo.find(emp.position)
-              } yield (o, p)).map { x =>
-                val officeCountry = x._1 match {
-                  case Some(oc) => oc.country
-                  case None => None
-                }
-                val pt = x._2 match {
-                  case Some(p) => p.positiontype
-                  case None => "UNKNOWN"
-                }
-                (emp.agency, emp.isContractor, officeCountry, pt)
-              }
-            })
-            val tally: Future[ Seq[(String, Boolean, Option[String], String, Int)]] = line.map { (seq: Seq[(String, Boolean, Option[String], String)]) =>
-              seq.groupBy(p => p).map { sumLine =>
-                (sumLine._1._1, sumLine._1._2, sumLine._1._3, sumLine._1._4, sumLine._2.size)
-              }.toSeq
-            }
+    (for{
+      rt <- find(id)
+      mt <- matrixTeamMemberRepo.getPETeamMembers.map{ x => x.map{ _._2.login.toLowerCase}.toSet }
+    } yield (rt,mt)).map { x=>
+      x._1 match {
+        case None => Future.successful(Seq.empty)
 
-            tally
-          }.flatMap(identity)
-          summary
+        case Some(rt) =>
+          val peTeam = x._2
+          rt.pplteamname match {
+            case None => Future.successful(Seq.empty)
+            case Some(teamName) =>
+              val summary: Future[Seq[TeamSummary]] = teamDescriptionRepo.findTeamMembers(teamName).map { emps =>
+                val line: Future[Seq[TeamSummary]] = Future.sequence(emps.toSeq.map { emp =>
+                  (for {
+                    o <- officeRepo.find(emp.officeid.getOrElse(0))
+                    p <- positionTypeRepo.find(emp.position)
+                  } yield (o, p)).map { x =>
+                    val officeCountry = x._1 match {
+                      case Some(oc) => oc.country
+                      case None => None
+                    }
+                    val pt = x._2 match {
+                      case Some(p) => p.positiontype
+                      case None => "UNKNOWN"
+                    }
+                    TeamSummary(emp.agency, isContractor = emp.isContractor,
+                      country = officeCountry,
+                      positionType = pt,
+                      isPE = peTeam.contains(emp.login.toLowerCase),
+                      tally = 1)
+                  }
+                })
+                val tally: Future[Seq[TeamSummary]] = line.map { (seq: Seq[TeamSummary]) =>
+                  seq.groupBy(p => p).map { sumLine =>
+                    val newTally = sumLine._2.map(_.tally).sum
+                    sumLine._1.copy(tally = newTally)
+                  }.toSeq
+                }
+
+                tally
+              }.flatMap(identity)
+              summary
+          }
       }
-      xyz
     }.flatMap(identity)
 
   }
@@ -207,3 +219,4 @@ case class EfficencyMonth( t0:BigDecimal, t3:BigDecimal, t6:BigDecimal, t9:BigDe
   }
 
 }
+case class TeamSummary(agency:String, isContractor:Boolean, country:Option[String], positionType:String, isPE:Boolean=false, tally:Int)

@@ -20,13 +20,12 @@
 <div class="navbar nav_title" style="border: 0;">
     @request.session.get("speciallogo").map { x =>
         @if(x.equals("true")) {
-          <!--  <img src="/assets/images/cornifycorn.gif" width="52" height="51" border="0" alt="Cornify" /> -->
-            <a href="@routes.HomeController.index()" class="site_title fa-binocularsX">&nbsp;</a>
+            <a href="@routes.PersonController.ceo()" class="site_title fa-binocularsX">&nbsp;</a>
         } else {
-        <a href="@routes.HomeController.index()" class="site_title"><i class="fa fa-binoculars"></i> <span>People!</span></a>
+            <a href="@routes.PersonController.ceo()" class="site_title"><i class="fa fa-binoculars"></i> <span>People!</span></a>
         }
     }.getOrElse{
-        <a href="@routes.HomeController.index()" class="site_title"><i class="fa fa-binoculars"></i> <span>People!</span></a>
+        <a href="@routes.PersonController.ceo()" class="site_title"><i class="fa fa-binoculars"></i> <span>People!</span></a>
     }
 
 </div>

@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 import javax.inject._
 
 import com.typesafe.config.ConfigFactory
-import models.people.{OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
+import models.people.{MatrixTeamMemberRepo, OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.{Row, Sheet, Workbook}
 
@@ -69,6 +69,7 @@ class ProductFeatureController @Inject()
     teamDescriptionRepo: TeamDescriptionRepo,
     officeRepo: OfficeRepo,
     postionTypeRepo: PositionTypeRepo,
+    matrixTeamMemberRepo: MatrixTeamMemberRepo,
     ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
@@ -303,7 +304,7 @@ class ProductFeatureController @Inject()
         }
         summaryAllocation
       }
-      val resourcePoolBreakDown: Future[Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[(String, Boolean, Option[String], String, Int)])]] = resourceTeamRepo.allEx.map{ rtOs =>
+      val resourcePoolBreakDown: Future[Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[TeamSummary])]] = resourceTeamRepo.allEx.map{ rtOs =>
         val teamOrPool: Seq[Either[ResourceteamRow, ResourcepoolRow]] = rtOs.map{ rtO =>
           rtO._2 match {
             case Some(rp) => Right(rp)
@@ -343,7 +344,7 @@ class ProductFeatureController @Inject()
   }
 
   def doFullBreakdownXLS( featuresSummary: Map[(String, Boolean, String), Map[ Either[ResourceteamRow, ResourcepoolRow], Map[Date, Double]]],
-    resources:Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[(String, Boolean, Option[String], String, Int)])],
+    resources:Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[TeamSummary])],
     monthsLimit: Seq[Date],
     dateFormat: DateTimeFormatter):java.io.File = {
     val wb: Workbook = new HSSFWorkbook()
@@ -406,35 +407,33 @@ class ProductFeatureController @Inject()
     resourceHeader.createCell(1).setCellValue("Employee/Vendor")
     resourceHeader.createCell(2).setCellValue("Country")
     resourceHeader.createCell(3).setCellValue("Position Type")
-    resourceHeader.createCell(4).setCellValue("#")
+    resourceHeader.createCell(4).setCellValue("isPE?")
+    resourceHeader.createCell(5).setCellValue("#")
 
-    val result2: Seq[(Either[ResourceteamRow, ResourcepoolRow], String, Boolean, Option[String], String, Int)] = resources.flatMap { x =>
+    val result2: Seq[(Either[ResourceteamRow, ResourcepoolRow], TeamSummary)] = resources.flatMap { x =>
       x._2.map { line =>
-        (x._1, line._1, line._2, line._3, line._4, line._5)
+        (x._1, line)
       }
     }
 
     for (rowNum <- result2.indices) {
       val r: Row = resourceSheet.createRow(rowNum + 1)
       val ( teamPool:Either[ResourceteamRow,ResourcepoolRow],
-      vendor:String,
-      contractor:Boolean,
-      country:Option[String],
-      positionType:String,
-      numberResources:Int) = result2(rowNum)
+      teamSummary:TeamSummary) = result2(rowNum)
       val name = teamPool match {
         case Left(x) => x.name
         case Right(x) => x.name
       }
       r.createCell(0).setCellValue(name)
-      if (contractor) {
-        r.createCell(1).setCellValue(vendor)
+      if (teamSummary.isContractor) {
+        r.createCell(1).setCellValue(teamSummary.agency)
       } else {
         r.createCell(1).setCellValue("Employee")
       }
-      r.createCell(2).setCellValue(country.getOrElse("-"))
-      r.createCell(3).setCellValue(positionType)
-      r.createCell(4).setCellValue(numberResources)
+      r.createCell(2).setCellValue(teamSummary.country.getOrElse("-"))
+      r.createCell(3).setCellValue(teamSummary.positionType)
+      r.createCell(4).setCellValue(teamSummary.isPE)
+      r.createCell(5).setCellValue(teamSummary.tally)
     }
 
     val tmpDir = ConfigFactory.load.getString("scenario.tempdir")
@@ -481,6 +480,7 @@ class ProductFeatureController @Inject()
       }
     }.flatMap(identity)
   }
+
   def newProductFeatureFlag(featureId:Int ) = Action.async { implicit request =>
     (for{
       role <- productFeatureRepo.find(featureId)
@@ -541,8 +541,6 @@ class ProductFeatureController @Inject()
         }
 
       }.flatMap(identity)
-
-      //Future(Ok(""))
     }
   }
 }

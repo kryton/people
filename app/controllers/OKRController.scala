@@ -47,7 +47,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class OKRController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   resourcePoolRepo: ResourcePoolRepo,
    employeeRepo: EmployeeRepo,
    empBioRepo: EmpBioRepo,
    teamDescriptionRepo: TeamDescriptionRepo,
@@ -293,6 +292,7 @@ class OKRController @Inject()
     request.body.asFormUrlEncoded match {
       case None =>Future.successful( NotFound("No Fields"))
       case Some((keys: Map[String, Seq[String]])) =>
+        // TODO Fix this so it's a single for{ .. } yield instead of future[future]
         user.isOwnerManagerOrAdmin(login,LDAPAuth.getUser()).map { canEdit =>
           if (canEdit) {
             okrObjectiveRepo.findKR(login, okr, kr ).map {

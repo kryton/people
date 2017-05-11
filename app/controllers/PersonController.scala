@@ -48,7 +48,6 @@ class PersonController @Inject()
    protected val dbConfigProvider: DatabaseConfigProvider,
    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
-   resourcePoolRepo: ResourcePoolRepo,
    //officeRepo: OfficeRepo,
    employeeRepo: EmployeeRepo,
    empBioRepo: EmpBioRepo,
@@ -108,6 +107,13 @@ class PersonController @Inject()
           }
         }
       }
+  }
+
+  def ceo = Action.async{ implicit  request =>
+    employeeRepo.findCEO().map{
+      case Some(emp) => Redirect(routes.PersonController.id( emp.login))
+      case None => Redirect(routes.HomeController.index())
+    }
   }
 
   def id( login:String): Action[AnyContent] = Action.async{ implicit request =>

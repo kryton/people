@@ -19,7 +19,7 @@ package models.product
 
 import javax.inject.Inject
 
-import models.people.{OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
+import models.people.{MatrixTeamMemberRepo, OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import projectdb.Tables
@@ -66,16 +66,21 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
 
   def getTeamSummaryByVendorCountry(id: Int
                                    )(implicit teamDescriptionRepo: TeamDescriptionRepo,
-                                     officeRepo: OfficeRepo,
-                                     positionTypeRepo: PositionTypeRepo): Future[Seq[(String, Boolean, Option[String], String, Int)]] = {
+                                     officeRepo: OfficeRepo, matrixTeamMemberRepo:MatrixTeamMemberRepo,
+                                     positionTypeRepo: PositionTypeRepo): Future[Seq[TeamSummary]] = {
     import models.people.EmpRelationsRowUtils._
-    findTeams(id).map { rtS =>
-      val teamResult: Future[Seq[Seq[(String, Boolean, Option[String], String, Int)]]] = Future.sequence(rtS.map { (rt: ResourceteamRow) =>
-        val xyz: Future[Seq[(String, Boolean, Option[String], String, Int)]] = rt.pplteamname match {
+    (for{
+      m <- matrixTeamMemberRepo.getPETeamMembers.map{x=> x.map(_._2.login.toLowerCase).toSet}
+      f <- findTeams(id)
+    } yield(f,m)).map{ x =>
+      val rtS = x._1
+      val peTeam = x._2
+      val teamResult: Future[Seq[Seq[TeamSummary]]] = Future.sequence(rtS.map { (rt: ResourceteamRow) =>
+        val xyz: Future[Seq[TeamSummary]] = rt.pplteamname match {
           case None => Future.successful(Seq.empty)
           case Some(teamName) =>
-            val summary: Future[Seq[(String, Boolean, Option[String], String, Int)]] = teamDescriptionRepo.findTeamMembers(teamName).map { emps =>
-              val line: Future[Seq[(String, Boolean, Option[String], String)]] = Future.sequence(emps.toSeq.map { emp =>
+            val summary: Future[Seq[TeamSummary]] = teamDescriptionRepo.findTeamMembers(teamName).map { emps =>
+              val line: Future[Seq[TeamSummary]] = Future.sequence(emps.toSeq.map { emp =>
                 (for {
                   o <- officeRepo.find(emp.officeid.getOrElse(0))
                   p <- positionTypeRepo.find(emp.position)
@@ -88,12 +93,15 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
                     case Some(p) => p.positiontype
                     case None => "UNKNOWN"
                   }
-                  (emp.agency, emp.isContractor, officeCountry, pt)
+                  //  TODO fix PE
+                  TeamSummary(emp.agency, isContractor = emp.isContractor, officeCountry, pt, isPE = peTeam.contains(emp.login.toLowerCase), tally = 1)
                 }
               })
-              val tally: Future[Seq[(String, Boolean, Option[String], String, Int)]] = line.map { (seq: Seq[(String, Boolean, Option[String], String)]) =>
+              val tally: Future[Seq[TeamSummary]] = line.map { (seq: Seq[TeamSummary]) =>
                 seq.groupBy(p => p).map { sumLine =>
-                  (sumLine._1._1, sumLine._1._2, sumLine._1._3, sumLine._1._4, sumLine._2.size)
+                  val newTally: Int = sumLine._2.map{ x => x.tally}.sum
+                  sumLine._1.copy(tally = newTally)
+                 // (sumLine._1._1, sumLine._1._2, sumLine._1._3, sumLine._1._4, sumLine._2.size)
                 }.toSeq
               }
 
@@ -103,15 +111,18 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
         }
         xyz
       })
-      val summary2: Future[Seq[(String, Boolean, Option[String], String, Int)]] = teamResult.map { (sseq: Seq[Seq[(String, Boolean, Option[String], String, Int)]]) =>
-        sseq.flatten.groupBy(p => (p._1, p._2, p._3, p._4)).map { p =>
-          (p._1._1, p._1._2, p._1._3, p._1._4, p._2.map {
-            _._5
-          }.sum)
+      val summary2: Future[Seq[TeamSummary]] = teamResult.map { (sseq: Seq[Seq[TeamSummary]]) =>
+        sseq.flatten.groupBy(p => (p.agency, p.isContractor, p.country, p.positionType, p.isPE))
+          .map { p =>
+            TeamSummary(agency = p._1._1,
+              isContractor =  p._1._2,
+              country = p._1._3,
+              positionType =  p._1._4,
+              isPE = p._1._5,
+              tally = p._2.map (     _.tally ) .sum)
         }.toSeq
       }
       summary2
     }.flatMap(identity)
-
   }
 }

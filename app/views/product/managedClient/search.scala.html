@@ -18,7 +18,9 @@
 @import projectdb.Tables.ProducttrackRow
 @import projectdb.Tables.ManagedclientRow
 @(page: util.Page[ManagedclientRow],
-        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+        searchTerm:Option[String],
+        isAdmin:Boolean,
+        rpForm: Form[forms.ManagedClientForm.Data])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, messages: Messages, request: Request[_], ldap: util.LDAP )
 
 
 @main("Managed Clients") {
@@ -26,7 +28,9 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Managed Clients</h2>
+                <h2>CID Clients@if( isAdmin ) {
+                    <a id="newMC"><i class="fa fa-plus" title="Add a new Managed Client"></i></a>
+                }</h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                     </li>
@@ -38,15 +42,46 @@
             </div>
             <div class="x_content">
             @Option(page.items).filterNot(_.isEmpty).map { results =>
-                <div class="container">
+                <tr class="container">
+<table class="table table-striped">
+    <thead><tr>
+        <th>Managed?</th>
+        <th>Name</th>
+        @if(isAdmin) {
+            <th>Action</th>
+        }
+        </tr>
+    </thead>
 
                     @results.map { mtm =>
-                        <div class="row">
-                            <div class="col-sm-12">
+                        <tr>
+                            <td>
+                                @if(isAdmin) {
+                                  @if(mtm.ismanaged.getOrElse(false)) {
+                                  <a href='@routes.ManagedClientController.updCheck(mtm.id,"managed","N")'><i class="fa fa-check-square-o" aria-hidden="true"></i></a>
+                                  } else {
+                                  <a href='@routes.ManagedClientController.updCheck(mtm.id,"managed","Y")'><i class="fa fa-square-o" aria-hidden="true"></i></a>
+                                  }
+
+                                } else {
+                                    @if(mtm.ismanaged.getOrElse(false)) {
+                                        <i class="fa fa-check-square-o" ></i>
+                                    } else {
+                                        <i class="fa fa-square-o"></i>
+                                    }
+                                }
+                            </td>
+                            <td>
                                 <a href="@routes.ManagedClientController.id(mtm.id)">@mtm.name</a>
-                            </div>
-                    </div>
+                            </td>
+                            @if(isAdmin) {
+                                <td>
+                                  <a href="@routes.ManagedClientController.deleteMC(mtm.id)"><i class="fa fa-eraser" title="Delete this client, if no features are assigned"></i></a>
+                                </td>
+                            }
+                    </tr>
                     }
+</table>
 
                <div class="row">
 
@@ -65,4 +100,47 @@
         </div>
     </div>
 </div>
+@if(isAdmin) {
+    <div id="addNewMC" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Add a new Managed Client</h4>
+                </div>
+                @helper.form(action = helper.CSRF(routes.ManagedClientController.newMC)) {
+
+                    <div class="modal-body">
+                        <input type="hidden" name="poolsize" value="0" />
+
+                        @helper.inputText(rpForm("name"), '_label -> "Name", '_placeholder -> "Name of the client", 'class -> "form-control")
+                        @helper.inputText(rpForm("msprojectname"), '_label -> "Name/Abbrev in MS Project file", '_placeholder -> "Abbreviation", 'class -> "form-control")
+                        @helper.checkbox(rpForm("isManaged"), '_label -> "Managed Client?",  '_help ->"Check if this is a managed client")
+                        <p>Do you want to save changes you made to document before closing?</p>
+                        <p class="text-warning"><small>
+                            If you don't save, your changes will be lost.</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <script nonce="PMAN">
+<!--
+window.onload = function () {
+     //turn to inline mode
+     //$.fn.editable.defaults.mode = 'inline';
+     $(document).ready(function() {
+         $("#newMC").click( function() {
+                     $("#addNewMC").modal('show');
+             });
+
+     });
+ }
+-->
+</script>
+}
 }

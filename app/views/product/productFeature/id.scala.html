@@ -349,28 +349,29 @@
                 </div>
             </div>
         </div>
-        <script nonce="PMAN">
-            <!--      
-            window.onload = function () {
-                 //turn to inline mode
-                 //$.fn.editable.defaults.mode = 'inline';
-                 $(document).ready(function() {
-                     $('.ROLEEDIT').editable({
-                         params: function(params) {
-                             //originally params contain pk, name and value
-                             params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
-                             return params;
-                             }
-                             });
-                     $("#newFT").click( function() {
-                                 $("#addNewFeature").modal('show');
-                         });
-                     $("#newMC").click( function() {
-                                 $("#addNewMC").modal('show');
-                         });
+
+<script nonce="PMAN">
+    <!--
+    window.onload = function () {
+         //turn to inline mode
+         //$.fn.editable.defaults.mode = 'inline';
+         $(document).ready(function() {
+             $('.ROLEEDIT').editable({
+                 params: function(params) {
+                     //originally params contain pk, name and value
+                     params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                     return params;
+                     }
+                     });
+             $("#newFT").click( function() {
+                         $("#addNewFeature").modal('show');
                  });
-             }
-            -->
-        </script>
+             $("#newMC").click( function() {
+                         $("#addNewMC").modal('show');
+                 });
+         });
+     }
+    -->
+</script>
     }
 }

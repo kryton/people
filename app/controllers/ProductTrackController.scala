@@ -45,7 +45,6 @@ class ProductTrackController @Inject()
    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
    productFeatureRepo: ProductFeatureRepo,
-   resourcePoolRepo: ResourcePoolRepo,
    user: User
 
   )(implicit
@@ -57,7 +56,6 @@ class ProductTrackController @Inject()
     ldap:LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
 
- // implicit val ldap: LDAP = new LDAP
   /**
     * Create an Action to render an HTML page.
     *

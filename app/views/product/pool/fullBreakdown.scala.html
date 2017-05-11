@@ -22,7 +22,8 @@
 @import projectdb.Tables.ResourcepoolRow
 @import projectdb.Tables.ProjectRow
 @import java.time.format.DateTimeFormatter
-@(      breakdown:Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[(String, Boolean, Option[String], String, Int)])]
+@import models.product.TeamSummary
+@(      breakdown:Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[TeamSummary])]
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
@@ -49,9 +50,10 @@
                             <thead>
                                 <tr>
                                     <th >Pool/Team</th>
-                                    <th>A</th>
-                                    <th>B</th>
-                                    <th>C</th>
+                                    <th>Agency/Employee</th>
+                                    <th>Country</th>
+                                    <th>Position Type</th>
+                                    <th>PE?</th>
                                     <th>#</th>
 
 
@@ -60,7 +62,7 @@
                             <tbody>
                                 @breakdown.map { line =>
                                   <tr>
-                                      <td colspan="5">@if(line._1.isLeft) {
+                                      <td colspan="6">@if(line._1.isLeft) {
                                           @line._1.left.get.name
                                       } else {
                                           @line._1.right.get.name
@@ -70,14 +72,15 @@
                                   @line._2.map { line2 =>
                                   <tr>
                                       <td>&nbsp;</td>
-                                      <td>@if(line2._2) {
-                                          @line2._1
+                                      <td>@if(line2.isContractor) {
+                                          @line2.agency
                                       } else {
                                           Employee
                                       }</td>
-                                      <td>@line2._3</td>
-                                      <td>@line2._4</td>
-                                      <td>@line2._5</td>
+                                      <td>@line2.country</td>
+                                      <td>@line2.positionType</td>
+                                      <td>@line2.isPE</td>
+                                      <td>@line2.tally</td>
                                   </tr>
 
                                   }

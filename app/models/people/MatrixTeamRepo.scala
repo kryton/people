@@ -48,6 +48,7 @@ class MatrixTeamRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
     }.sortBy(_.name).result
   }
 
+
   def all: Future[Seq[MatrixteamRow]] = db.run{
     Matrixteam.sortBy(_.name.toLowerCase).result
   }

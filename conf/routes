@@ -16,6 +16,7 @@ GET         /headshot/:login/edit                           controllers.Headshot
 POST        /headshot/:login/edit                           controllers.HeadshotController.headShotUpdate(login)
 
 GET         /person/                                        controllers.PersonController.search(p: Int ?= 0, search: Option[String] ?= None )
+GET         /person/ceo                                     controllers.PersonController.ceo
 
 GET         /person/autocomplete                            controllers.PersonController.personAutoComplete( q:Option[String] ?= None)
 GET         /person/:login                                  controllers.PersonController.id(login:String)
@@ -100,14 +101,24 @@ GET         /stage/:id                                      controllers.StageCon
 
 GET         /rteam/                                         controllers.ResourceTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
 GET         /rteam/:id                                      controllers.ResourceTeamController.id( id:Int, p:Int ?= 0)
+POST        /rteam/:id                                      controllers.ResourceTeamController.updateRT(id:Int)
+POST        /rteam/:id/poolUPD                                      controllers.ResourceTeamController.updateRTPool(id:Int)
 
 GET         /rpool/                                         controllers.ResourcePoolController.search( p:Int ?= 0, search: Option[String] ?= None)
 POST        /rpool/new                                      controllers.ResourcePoolController.newRP
 GET         /rpool/breakdown                                controllers.ResourcePoolController.doFullBreakdown(format:Option[String]?=None)
 GET         /rpool/:id                                      controllers.ResourcePoolController.id( id:Int, p:Int ?= 0)
+GET         /rpool/:id/delete                               controllers.ResourcePoolController.deleteRP( id:Int)
+POST        /rpool/:id                                      controllers.ResourcePoolController.updateRP( id: Int)
 
 GET         /mclient/                                       controllers.ManagedClientController.search( p:Int ?= 0, search: Option[String] ?= None)
+POST        /mclient/new                                    controllers.ManagedClientController.newMC
 GET         /mclient/:id                                    controllers.ManagedClientController.id( id:Int, p:Int ?= 0)
+GET         /mclient/:id/updCheck/:checkType/:enable        controllers.ManagedClientController.updCheck(id:Int, checkType:String, enable:String)
+GET         /mclient/:id/delete                             controllers.ManagedClientController.deleteMC(id:Int)
+POST        /mclient/:id                                    controllers.ManagedClientController.updateMC(id:Int)
+
+
 
 ## Auth URLs
 GET         /auth/user/:login                               controllers.AuthController.userroles(login:String)
@@ -119,10 +130,6 @@ POST        /auth/role/new                                  controllers.AuthCont
 GET         /auth/permission/                               controllers.AuthController.permissionSearch( p:Int ?= 0, search: Option[String] ?= None)
 GET         /auth/permission/:id                            controllers.AuthController.permission( id:Long )
 POST        /auth/permission/new                            controllers.AuthController.newPermission
-
-## Test URLS. ignore em
-GET         /td                                             controllers.HomeController.todo
-GET         /test/empUpDown/:login                          controllers.HomeController.mgrUpDown(login:String)
 
 
 # Map static resources from the /public folder to the /assets URL path

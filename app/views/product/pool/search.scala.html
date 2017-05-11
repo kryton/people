@@ -18,15 +18,22 @@
 @import projectdb.Tables.ResourceteamRow
 @import projectdb.Tables.ResourcepoolRow
 @(page: util.Page[ResourcepoolRow],
-        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
-
+        searchTerm:Option[String],
+        isAdmin:Boolean,
+        rpForm: Form[forms.ResourcePoolForm.Data]
+)(implicit  webJarAssets: WebJarAssets,
+            assets: AssetsFinder,
+            request: Request[_],
+            messages: Messages, ldap: util.LDAP )
 
 @main("Resource Pools") {
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Resource Pools</h2>
+                <h2>Resource Pools @if( isAdmin ) {
+                    <a id="newRP"><i class="fa fa-plus" title="Add new Resource Pool"></i></a>
+                }</h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                     </li>
@@ -39,15 +46,25 @@
             <div class="x_content">
             @Option(page.items).filterNot(_.isEmpty).map { results =>
                 <div class="container">
+                    <table class="table table-striped">
+                        <thead><th>PoolName</th>
+                        @if(isAdmin) {
+                            <th>Action</th>
+                        }
+                        </thead>
+
 
                     @results.map { mtm =>
-                        <div class="row">
-                            <div class="col-sm-12">
+                        <tr>
+                            <td>
                                 <a href="@routes.ResourcePoolController.id(mtm.id)">@mtm.name</a>
-
-                            </div>
-                    </div>
+                            </td>
+                            @if(isAdmin) {
+                                <td><a href="@routes.ResourcePoolController.deleteRP(mtm.id)"><i class="fa fa-eraser" title="Delete Pool (if empty)"></i></a></td>
+                            }
+                        </tr>
                     }
+                    </table>
 
                <div class="row">
 
@@ -66,4 +83,49 @@
         </div>
     </div>
 </div>
+
+    @if(isAdmin) {
+        <div id="addNewRP" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Add a new Resource Pool</h4>
+                    </div>
+                    @helper.form(action = helper.CSRF(routes.ResourcePoolController.newRP)) {
+
+                        <div class="modal-body">
+                            <input type="hidden" name="poolsize" value="0" />
+                          
+                            @helper.inputText(rpForm("name"), '_label -> "Name", 'class -> "form-control")
+                              @helper.inputText(rpForm("ordering"), '_label -> "Sort Ordering", 'class -> "form-control")
+                            <p>Do you want to save changes you made to document before closing?</p>
+                            <p class="text-warning"><small>
+                                If you don't save, your changes will be lost.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+        <script nonce="PMAN">
+    <!--
+    window.onload = function () {
+         //turn to inline mode
+         //$.fn.editable.defaults.mode = 'inline';
+         $(document).ready(function() {
+
+             $("#newRP").click( function() {
+                         $("#addNewRP").modal('show');
+                 });
+
+         });
+     }
+    -->
+</script>
+    }
 }

@@ -28,6 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * Created by iholsman on 3/26/2017.
   * All Rights reserved
   */
+/*
 
 class ResourcePoolTeamRepo @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
@@ -62,3 +63,4 @@ class ResourcePoolTeamRepo @Inject()(protected val dbConfigProvider: DatabaseCon
   def delete(id: Long) =
     db.run(Resourcepoolteam.filter(_.id === id).delete) map { _ > 0 }
 }
+*/

@@ -94,6 +94,18 @@ object ManagedClientProductFeatureForm {
   case class Data(featureId:Int, managedClientId:String, allocation:BigDecimal )
 }
 
+object ManagedClientForm {
+  val form = Form(
+    mapping(
+      "name" -> nonEmptyText,
+      "isManaged" -> boolean,
+      "msprojectname" -> optional(text)
+    )(Data.apply)(Data.unapply)
+  )
+  case class Data(name:String, isManaged:Boolean, msprojectname:Option[String] )
+}
+
+
 object ProductFeatureFlagForm {
   val form = Form(
     mapping(
@@ -102,4 +114,15 @@ object ProductFeatureFlagForm {
     )(Data.apply)(Data.unapply)
   )
   case class Data(featureId:Int, featureFlagId:String )
+}
+
+object ResourcePoolForm {
+  val form = Form(
+    mapping(
+      "name" -> nonEmptyText,
+      "ordering" -> number(min = 0),
+      "poolsize" -> number(min =0)
+    )(Data.apply)(Data.unapply)
+  )
+  case class Data(name:String, ordering:Int, poolsize:Int)
 }

@@ -42,7 +42,6 @@ class MatrixTeamController @Inject()
    protected val dbConfigProvider: DatabaseConfigProvider,
    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
-   resourcePoolRepo: ResourcePoolRepo,
    employeeRepo: EmployeeRepo,
    empBioRepo: EmpBioRepo,
    teamDescriptionRepo: TeamDescriptionRepo,

@@ -40,6 +40,14 @@ class ManagedClientRepo @Inject()(@NamedDatabase("projectdb")  protected val dbC
   import projectdb.Tables.profile.api._
 
   def find(id:Int):Future[Option[ManagedclientRow]] = db.run(Managedclient.filter(_.id === id).result.headOption)
+  def find(name:String):Future[Option[ManagedclientRow]] = db.run(Managedclient.filter(_.name.toLowerCase === name.toLowerCase).result.headOption)
+  def findMSProject(name:Option[String]):Future[Option[ManagedclientRow]] = {
+    name match {
+      case Some(n) => db.run(Managedclient.filter(_.msprojectname.toLowerCase === n.toLowerCase).result.headOption)
+      case None => Future.successful(None)
+    }
+  }
+
   def all = db.run(Managedclient.sortBy( _.name).result)
   def search(term:String) = db.run(Managedclient.filter(_.name startsWith term).sortBy( _.name).result)
 

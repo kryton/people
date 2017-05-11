@@ -50,12 +50,10 @@ class HomeController @Inject()
     protected val dbConfigProvider: DatabaseConfigProvider,
     @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
     productTrackRepo: ProductTrackRepo,
-    resourcePoolRepo: ResourcePoolRepo,
     officeRepo: OfficeRepo,
     employeeRepo: EmployeeRepo,
     teamDescriptionRepo: TeamDescriptionRepo,
     productFeatureRepo: ProductFeatureRepo,
-    resourcePoolTeamRepo: ResourcePoolTeamRepo,
     kudosToRepo: KudosToRepo,
     empHistoryRepo: EmpHistoryRepo,
     userRepo: UserPrefRepo,
@@ -68,28 +66,7 @@ class HomeController @Inject()
     ldap:LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
 
-  //implicit val ldap: LDAP = new LDAP
-  /**
-    * Create an Action to render an HTML page.
-    *
-    * The configuration in the `routes` file means that this method
-    * will be called when the application receives a `GET` request with
-    * a path of `/`.
-    */
-  def todo =  LDAPAuthAction {
-    Action.async(bodyParser = Action.parser) { implicit request =>
-      Logger.info(s"GetUser = ${request.attrs.get(LDAPAuthAttrs.UserName)}")
 
-      resourcePoolRepo.find(1).map { x: Option[projectdb.Tables.ResourcepoolRow] =>
-        x match {
-          case Some(y) => println(s"Foundit ${y.name}")
-            Ok("Ok")
-          case None => println("not found")
-            NotFound("Couldn't find it")
-        }
-      }
-    }
-  }
 
   def index = Action.async(bodyParser = Action.parser) {  implicit request =>
     val shoutouts: Future[Seq[(KudostoRow, EmprelationsRow, Option[EmprelationsRow])]] = kudosToRepo.latest(10)
@@ -113,24 +90,6 @@ class HomeController @Inject()
     }
   }
 
-  def mgrUpDown( login:String ) = Action.async{ implicit request =>
-    employeeRepo.findByLogin(login).map {
-      case Some(emp) =>
-        val res = employeeRepo.managementTreeUp(login).map {
-          managers =>
-            employeeRepo.managedBy(login).map {
-            reports => employeeRepo.managementTreeDown(login).map {fullTree =>
-                  Ok(views.html.test.empUpDown(login, emp, managers, reports, fullTree ) )
-            }
-          }
-        }.flatMap(identity)
-
-         res.flatMap(identity)
-
-    //    Ok(":")
-      case None => Future( NotFound("No Employee with that login") )
-    }.flatMap(identity)
-  }
 
   def login() = Action { implicit request =>
     Ok(views.html.login("Login", LoginForm.form)).withNewSession

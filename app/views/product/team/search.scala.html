@@ -18,7 +18,12 @@
 @import projectdb.Tables.ResourceteamRow
 @import projectdb.Tables.ResourcepoolRow
 @(page: util.Page[(ResourceteamRow,Option[ResourcepoolRow])],
-        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+        searchTerm:Option[String],
+        isAdmin:Boolean
+  )(implicit  webJarAssets: WebJarAssets,
+              messages: Messages,
+              assets: AssetsFinder,
+              request: Request[_], ldap: util.LDAP )
 
 
 @main("Resources") {
@@ -26,7 +31,7 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Resources</h2>
+                <h2>Resource Teams</h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                     </li>
@@ -39,18 +44,24 @@
             <div class="x_content">
             @Option(page.items).filterNot(_.isEmpty).map { results =>
                 <div class="container">
-
+                       <div class="row">
+                    <table class="table table-striped">
+                      <thead>
+                        <tr><th>Name</th><th>Pool</th>
+                        </tr>
+                      </thead>
                     @results.map { mtm =>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <a href="@routes.ResourceTeamController.id(mtm._1.id)">@mtm._1.name</a>
-                                @mtm._2.map { x =>
-                                    ( <a href="@routes.ResourcePoolController.id(x.id)">@x.name</a> )
-                                }
-                            </div>
-                    </div>
+                      <tr>
+                          <td><a href="@routes.ResourceTeamController.id(mtm._1.id)">@mtm._1.name</a></td>
+                          <td>@mtm._2.map { x =>
+                               <a href="@routes.ResourcePoolController.id(x.id)">@x.name</a>
+                            }.getOrElse{
+                              &nbsp;
+                            }</td>
+                      </tr>
                     }
-
+                  </table>
+                </div>
                <div class="row">
 
 

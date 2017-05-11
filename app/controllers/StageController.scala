@@ -41,7 +41,6 @@ class StageController @Inject()
    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
    productFeatureRepo: ProductFeatureRepo,
-   resourcePoolRepo: ResourcePoolRepo,
    stageRepo: StageRepo,
    user: User
 
