@@ -27,6 +27,7 @@ import com.typesafe.config.ConfigFactory
 import models.people.{MatrixTeamMemberRepo, OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.{Row, Sheet, Workbook}
+import play.api.Logger
 
 //import models.people.{EmployeeRepo}
 import models.product._
@@ -541,6 +542,76 @@ class ProductFeatureController @Inject()
         }
 
       }.flatMap(identity)
+    }
+  }
+
+
+
+  def deleteMCPF(featureId:Int, id:Int) = LDAPAuthAction {
+    Action.async{ implicit request =>
+      (for {
+        u <- user.isAdmin(LDAPAuth.getUser())
+        rec <- productFeatureRepo.findMCPF(featureId, id)
+      } yield (u, rec)).map { result =>
+
+        if ( result._1) {
+          result._2  match {
+            case Some( rec ) => productFeatureRepo.deleteMCPF(featureId,id).map{ r => Redirect(routes.ProductFeatureController.id(featureId))}
+            case None => Future.successful(NotFound("Managed client product feature record not found"))
+          }
+        } else {
+          Future.successful(Unauthorized(views.html.page_403("Unauthorized")))
+        }
+      }.flatMap(identity )
+    }
+  }
+
+  def updateMCPF(featureId:Int, id:Int) = LDAPAuthAction {
+    Action.async { implicit request =>
+      request.body.asFormUrlEncoded match {
+        case None => Future.successful(NotFound("No Fields"))
+        case Some((keys: Map[String, Seq[String]])) =>
+          (for {
+            u <- user.isAdmin(LDAPAuth.getUser())
+            rec <- productFeatureRepo.findMCPF(featureId, id)
+          } yield (u, rec)).map { result =>
+            val canEdit = result._1
+            val recO = result._2
+            if (canEdit) {
+              recO match {
+                case Some(rec) =>
+                  val fieldName: String = keys.getOrElse("name", Seq("x")).head.toLowerCase
+                  val valueSeq: Seq[String] = keys.getOrElse("value", Seq.empty)
+                  val res: Future[Result] = valueSeq.headOption match {
+                    case None => Future.successful(NotAcceptable("Missing value"))
+                    case Some(value) =>
+                      try {
+                        val updRec = fieldName match {
+                          case "allocation" => rec.copy(allocation = BigDecimal( value))
+                          case _ => rec
+                        }
+                        productFeatureRepo.update(featureId, id, updRec)
+                          .map { r =>
+                            if (r) {
+                              Ok("Updated")
+                            } else {
+                              NotFound("Invalid Value/Not Updated")
+                            }
+                          }
+                      } catch {
+                        case e:NumberFormatException => Future.successful(NotAcceptable("Invalid Number"))
+                        case e:Exception => Logger.error(e.getLocalizedMessage)
+                          Future.successful(NotAcceptable(e.getLocalizedMessage))
+                      }
+                  }
+                  res
+                case None => Future.successful(NotFound("Managed Client ProductFeature not found"))
+              }
+            } else {
+              Future.successful(Unauthorized(views.html.page_403("No Permission")))
+            }
+          }.flatMap(identity)
+      }
     }
   }
 }

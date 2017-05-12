@@ -183,14 +183,27 @@
                                             <thead>
                                                 <tr><th>Client</th>
                                                     <th align="right">Allocation</th>
+                                                    @if(canEdit) {
+                                                      <th>Action</th>
+                                                    }
                                                 </tr>
                                             </thead>
                                             @managedClients.map { mc =>
                                                 <tr>
                                                     <td><a href="@routes.ManagedClientController.id(mc._1.id)">@mc._1.name</a></td>
-                                                    <td align="right">@mc._2.allocation</td>
 
-                                                    @* <td align="right">@track._2.priority</td> *@
+                                                    @if(canEdit) {
+                                                          <td align="right">
+                                                            <span class="MCPFEDIT editable editable-click" data-type="text"  data-pk="@id"
+                                                             data-name="allocation" data-title="Allocation"
+                                                             data-url="@routes.ProductFeatureController.updateMCPF(id,mc._2.id)">@mc._2.allocation</span></td>
+                                                      <td><a href="@routes.ProductFeatureController.deleteMCPF(id,mc._2.id)"><i class="fa fa-eraser" title="Erase mapping" ></i></a></td>
+
+                                                    } else {
+                                                          <td align="right">@mc._2.allocation</td>
+                                                    }
+
+
                                                 </tr>
                                             }
                                         </table>
@@ -354,9 +367,10 @@
     <!--
     window.onload = function () {
          //turn to inline mode
-         //$.fn.editable.defaults.mode = 'inline';
+         $.fn.editable.defaults.mode = 'inline';
          $(document).ready(function() {
-             $('.ROLEEDIT').editable({
+             $('.MCPFEDIT').editable({
+
                  params: function(params) {
                      //originally params contain pk, name and value
                      params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");

@@ -87,8 +87,9 @@ GET         /feature/anchor                                 controllers.ProductF
 GET         /feature/:id                                    controllers.ProductFeatureController.id( id:Int, p:Int ?= 0)
 POST        /feature/:id/newMC                              controllers.ProductFeatureController.newMCProductFeature(id:Int)
 POST        /feature/:id/newFF                              controllers.ProductFeatureController.newProductFeatureFlag(id:Int)
+POST        /feature/:id/mc/:mcpf                           controllers.ProductFeatureController.updateMCPF(id:Int,mcpf:Int)
+GET         /feature/:id/mc/:mcpf/delete                    controllers.ProductFeatureController.deleteMCPF(id:Int,mcpf:Int)
 GET         /feature/:id/updCheck/:checkType/:enable        controllers.ProductFeatureController.updCheck(id:Int, checkType:String, enable:String)
-
 GET         /feature/admin/import                           controllers.ProductFeatureController.importFile
 POST        /feature/admin/import                           controllers.ProductFeatureController.doImport
 GET         /feature/:id/breakdown                          controllers.ProductFeatureController.doBreakdown(id:Int)
@@ -102,7 +103,7 @@ GET         /stage/:id                                      controllers.StageCon
 GET         /rteam/                                         controllers.ResourceTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
 GET         /rteam/:id                                      controllers.ResourceTeamController.id( id:Int, p:Int ?= 0)
 POST        /rteam/:id                                      controllers.ResourceTeamController.updateRT(id:Int)
-POST        /rteam/:id/poolUPD                                      controllers.ResourceTeamController.updateRTPool(id:Int)
+POST        /rteam/:id/poolUPD                              controllers.ResourceTeamController.updateRTPool(id:Int)
 
 GET         /rpool/                                         controllers.ResourcePoolController.search( p:Int ?= 0, search: Option[String] ?= None)
 POST        /rpool/new                                      controllers.ResourcePoolController.newRP
