@@ -18,6 +18,7 @@
 package controllers
 
 import java.sql.Date
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject._
 
@@ -249,6 +250,32 @@ class ResourceTeamController @Inject()
     }
   }
 
+  def doBreakdown(id:Int) = Action.async { implicit request =>
+    resourceTeamRepo.find(id).map {
+      case Some(pf) =>
+        (for {
+          p <- resourceTeamRepo.breakDownTeam(id)
+        } yield p ).map { x =>
 
+          val dates = x._1.flatMap{ p=> p._3.keys }
+
+          val monthRange: Seq[Date] = if ( dates.isEmpty) {
+            Seq.empty
+          } else {
+            val minX: Date = dates.minBy(_.getTime)
+            val maxX: Date = dates.maxBy(_.getTime)
+            util.Conversions.monthRange(minX, maxX)
+          }
+          val monthsLimit: Seq[Date] = monthRange.sortBy(_.getTime).slice(0,15) //16 dates = 5Q
+          //=  util.Conversions.monthRange(minX, maxX)
+
+          val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM-YYYY")
+
+          Ok(views.html.product.team.breakout(id, pf, x._1, monthsLimit, dateFormat))
+        }
+
+      case None => Future.successful(NotFound(views.html.page_404("Feature not found")))
+    }.flatMap(identity)
+  }
 }
 

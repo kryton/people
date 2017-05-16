@@ -238,12 +238,7 @@ class ProductFeatureController @Inject()
             case Nil => Seq((false, "NONE", 1.0))
             case mcs => mcs.map(p => (p._1.ismanaged.getOrElse(false), p._1.name, p._2.allocation.toDouble))
           }
-        /*
-          val ff: Seq[(Boolean, String, Double)] = result._2 match {
-            case Nil => Seq((false, "None", 1.0))
-            case ffs => ffs.map(p => (false, p._1.name, 1.0 / ffs.size))
-          }
-          */
+
           val pt: Seq[(Boolean, String, Double)] = result._2 match {
             case Nil => Seq((false, "None", 1.0))
             case pts => pts.map(p => (false, p._1.name, p._2.allocation.toDouble))

@@ -233,8 +233,9 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
           .joinLeft(Resourcepool).on(_._2.resourcepoolid === _.id)
         .result
       ).map{  res =>
-        res.map{ line =>
-          (line._1._1._1, line._1._1._2, (line._1._2, line._2))
+        res.map{ (line: (((ProjectRow,ResourceteamprojectRow), ResourceteamRow), Option[ResourcepoolRow])) =>
+          val x : (ProjectRow, ResourceteamprojectRow, (ResourceteamRow, Option[ResourcepoolRow])) = (line._1._1._1, line._1._1._2, (line._1._2, line._2))
+          x
         }.groupBy( _._1)
       }
     } yield  p2  )

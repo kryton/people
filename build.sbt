@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
   ws,
   // jdbc,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0-M2" % Test,
-  "com.typesafe.play" %% "play-slick" % "3.0.0-M4",
+  "com.typesafe.play" %% "play-slick" % "3.0.0-M5",
   //"com.typesafe.play" %% "play-slick-evolutions" % "3.0.0-M3",
   "com.typesafe.slick" %% "slick" % slickVersion,
   "com.typesafe.slick" %% "slick-codegen" % slickVersion,

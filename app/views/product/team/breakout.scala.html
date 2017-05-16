@@ -23,9 +23,8 @@
 @import projectdb.Tables.ProjectRow
 @import java.time.format.DateTimeFormatter
 @(      id:Int,
-        productFeature:ProductfeatureRow,
-        byTeam:Iterable[((ResourceteamRow,Option[ResourcepoolRow]), Int, Map[Date, Double])] ,
-        byProject:Iterable[(ProjectRow, Int, Map[Date, Double])],
+        team:ResourceteamRow,
+        byFeature:Iterable[(ProductfeatureRow, Int, Map[Date, Double])] ,
         monthRange:Seq[Date],
         dateFormat:DateTimeFormatter
 )(implicit  webJarAssets: WebJarAssets,
@@ -34,7 +33,7 @@
         ldap: util.LDAP)
 
 
-@main(s"Product Feature ${productFeature.name}!") {
+@main(s"Team ${team.name}!") {
 
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
@@ -50,39 +49,11 @@
             <!-- x_title -->
             <div class="x_content">
                 <div class="container">
+                    @if(byFeature.nonEmpty) {
                     <table class="table table-striped table-responsive">
                         <thead>
                             <tr>
-                            <th>Project</th>
-                                <th>Size</th>
-                            @monthRange.map { dt:java.sql.Date =>
-                                <th>@dt.toLocalDate.format(dateFormat)</th>
-                            }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @byProject.toSeq.sortBy(_._1.name).map { p =>
-                              <tr>
-                                  <td >@p._1.name</td>
-                                  <td>@p._2</td>
-                                  @monthRange.map { dt =>
-                                          <td>
-                                    @p._3.get(dt).map {value:Double =>
-                                      @value.formatted("%,.0f")
-                                    }.getOrElse {
-                                        &nbsp;
-                                    }
-                                          </td>
-                                  }
-                              </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <table class="table table-striped table-responsive">
-                        <thead>
-                            <tr>
-                            <th>Resource</th>
-                                <th>Pool</th>
+                            <th>Feature</th>
                             <th>Size</th>
                             @monthRange.map { dt:java.sql.Date =>
                                 <th>@dt.toLocalDate.format(dateFormat)</th>
@@ -90,12 +61,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @byTeam.toSeq.sortBy(_._1._1.name).map { p =>
+                            @byFeature.toSeq.sortBy(_._1.name.toLowerCase).map { p =>
                               <tr>
-                                  <td >@p._1._1.name</td>
-                                  <td>@p._1._2.map{ x=>
-                                    @x.name
-                                  }</td>
+                                  <td >@p._1.name</td>
+
                                   <td>@p._2</td>
                                   @monthRange.map { dt =>
                                           <td>
@@ -104,12 +73,15 @@
                                     }.getOrElse {
                                         &nbsp;
                                     }
-                                          </td>
+                                    </td>
                                   }
                               </tr>
                             }
                         </tbody>
                     </table>
+                    } else {
+                        No Work defined?
+                    }
                 </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->

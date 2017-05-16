@@ -23,7 +23,7 @@
 @import projectdb.Tables.ProjectRow
 @import java.time.format.DateTimeFormatter
 @(      id:Int,
-        team:ResourceteamRow,
+        pool:ResourcepoolRow,
         byFeature:Iterable[(ProductfeatureRow, Int, Map[Date, Double])] ,
         monthRange:Seq[Date],
         dateFormat:DateTimeFormatter
@@ -33,7 +33,7 @@
         ldap: util.LDAP)
 
 
-@main(s"Team ${team.name}!") {
+@main(s"Team ${pool.name}!") {
 
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
@@ -63,7 +63,7 @@
                         <tbody>
                             @byFeature.toSeq.sortBy(_._1.name.toLowerCase).map { p =>
                               <tr>
-                                  <td >@p._1.name</td>
+                                  <td ><a href="@routes.ProductFeatureController.id(p._1.id)">@p._1.name</a></td>
 
                                   <td>@p._2</td>
                                   @monthRange.map { dt =>
@@ -90,4 +90,3 @@
 </div> <!-- row -->
 
 }
-
