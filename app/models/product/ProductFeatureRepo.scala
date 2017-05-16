@@ -60,7 +60,7 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
       .sortBy(_._2.priority).result)
   }
 
-  def findByManagedClients( productFeatureId: Int): Future[Seq[(Tables.ManagedclientRow, Tables.ManagedclientproductfeatureRow)]] = {
+  def findManagedClientsForFeature(productFeatureId: Int): Future[Seq[(Tables.ManagedclientRow, Tables.ManagedclientproductfeatureRow)]] = {
     db.run(Managedclient.join(Managedclientproductfeature).on(_.id === _.managedclientid)
       .filter(_._2.productfeatureid === productFeatureId)
       .sortBy(_._1.name).result)
@@ -182,25 +182,28 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
 
             insert(newProducttrackFeatureRow).map{ newOne => Seq(newOne)}
           } else {
-            // TODO
+            // TODO - update priority & allocation ?
             Future.successful(pff)
           }
-          //Logger.info(s"PFRepo - Repoulate - Insert PFR2 ${feature.feature}(${feature.feature.size})")
+          //Logger.info(s"PFRepo - Repopulate - Insert PFR2 ${feature.feature}(${feature.feature.size})")
 
           if ( currentPF.iscid.getOrElse(false)) {
-            deleteMClientForFeature(currentPF.id).map { ignore =>
-              val searchStrings = mc.keys.flatten.map( _.toLowerCase )
-              val fName = currentPF.msprojectname.getOrElse("").toLowerCase
-              val m = searchStrings.filter( p =>  fName.contains(p))
-              if ( m.nonEmpty) {
-                val mc2 = mc.map{ x => x._1.getOrElse("").toLowerCase -> x._2   }
-                val alloc = BigDecimal( 1.0  / m.size )
-                m.foreach{ matchKey =>
-                  val mcV = mc2(matchKey)
-                  insert( ManagedclientproductfeatureRow(id=0,productfeatureid = currentPF.id,
-                    managedclientid = mcV.id,
-                    allocation = alloc ))
-
+            val searchStrings = mc.keys.flatten.map(_.toLowerCase)
+            val fName = currentPF.msprojectname.getOrElse("").toLowerCase
+            val m = searchStrings.filter( p =>  fName.contains(p))
+            // Logic/decision
+            // * If product already has allocations/clients then leave them be
+            findManagedClientsForFeature(currentPF.id ).map{ mcs =>
+              if ( mcs.isEmpty) {
+                if (m.nonEmpty) {
+                  val mc2 = mc.map{ x => x._1.getOrElse("").toLowerCase -> x._2   }
+                  val alloc = BigDecimal( 1.0  / m.size )
+                  m.foreach{ matchKey =>
+                    val mcV = mc2(matchKey)
+                    insert( ManagedclientproductfeatureRow(id=0,productfeatureid = currentPF.id,
+                      managedclientid = mcV.id,
+                      allocation = alloc ))
+                  }
                 }
               }
             }

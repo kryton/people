@@ -140,7 +140,7 @@ class ProductFeatureController @Inject()
           val flags = productFeatureRepo.findFeatureFlagsByFeature(id)
           val stage = stageRepo.find(pf.stageid)
           val rteams = productFeatureRepo.findResourceTeams(id)
-          val managedClients: Future[Seq[(ManagedclientRow, ManagedclientproductfeatureRow)]] = productFeatureRepo.findByManagedClients(id)
+          val managedClients: Future[Seq[(ManagedclientRow, ManagedclientproductfeatureRow)]] = productFeatureRepo.findManagedClientsForFeature(id)
           val projects = projectRepo.findByFeatureEx(id)
 
           (for {
@@ -225,7 +225,7 @@ class ProductFeatureController @Inject()
     productFeatureRepo.all.map{ (features: Seq[ProductfeatureRow]) =>
       val breakdown: Future[Seq[(String, Seq[(Boolean, String, Double)], String, Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Int, Map[Date, Double])])]] = Future.sequence( features.filter(_.isactive.getOrElse(false)).map{ feature =>
         (for{
-          mc <- productFeatureRepo.findByManagedClients(feature.id )
+          mc <- productFeatureRepo.findManagedClientsForFeature(feature.id )
          // flags <- productFeatureRepo.findFeatureFlagsByFeature(feature.id)
           track <- productFeatureRepo.findTracksByFeature(feature.id)
           breakdown <- projectRepo.breakDownFeature(feature.id).map( _._1 )
