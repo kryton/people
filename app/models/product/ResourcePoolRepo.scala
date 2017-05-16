@@ -43,9 +43,20 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
 
   def find(id: Int): Future[Option[ResourcepoolRow]] = db.run(Resourcepool.filter(_.id === id).result.headOption)
 
-  def all = db.run(Resourcepool.sortBy(_.ordering).result)
+  def all: Future[Seq[ResourcepoolRow]] = db.run(Resourcepool.sortBy(_.ordering).result)
+  def allPoolsTeams: Future[Set[Either[ResourceteamRow,ResourcepoolRow]]] = {
+    db.run(Resourceteam.joinLeft(Resourcepool).on(_.resourcepoolid === _.id).result).map{ seq =>
+      seq.map{ rtrp =>
+        rtrp._2 match {
+          case Some(rp) => Right(rp)
+          case None => Left(rtrp._1)
+        }
+      }.toSet
+    }
 
-  def search(term: String) = db.run(Resourcepool.filter(_.name startsWith term).sortBy(_.name).result)
+  }
+
+  def search(term: String):Future[Seq[ResourcepoolRow]] = db.run(Resourcepool.filter(_.name startsWith term).sortBy(_.name).result)
 
   def findTeams(id: Int): Future[Seq[Tables.ResourceteamRow]] = db.run(Resourceteam.filter(_.resourcepoolid === id).result)
 

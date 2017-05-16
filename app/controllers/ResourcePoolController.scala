@@ -355,5 +355,87 @@ class ResourcePoolController @Inject()
       case None => Future.successful(NotFound(views.html.page_404("Feature not found")))
     }.flatMap(identity)
   }
+
+  def rpBreakdown(format:Option[String]) = Action.async { implicit request =>
+    val resultSet: Future[(Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Int, Map[Date, Double])])], Seq[Date])] = resourcePoolRepo.allPoolsTeams.map { set =>
+      Future.sequence( set.map {
+        case rtrp@Left(rt) => resourceTeamRepo.breakDownTeam(rt.id).map { i => (rtrp, i) }
+        case rtrp@Right(rp) => resourcePoolRepo.breakDownPool(rp.id).map { i => (rtrp, i) }
+      })
+    }.flatMap(identity).map { set =>
+      val dates: Set[Date] = set.flatMap { d =>
+        d._2._1.flatMap{ p =>
+          p._3.keys
+        }
+      }
+      val monthRange = if( dates.isEmpty) {
+        Seq.empty[Date]
+      } else {
+        val minX = dates.minBy(_.getTime)
+        val maxX = dates.maxBy(_.getTime)
+        util.Conversions.monthRange(minX,maxX)
+      }
+      val monthsLimit = monthRange.sortBy(_.getTime).slice(0,15)
+      val setReduced: Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Int, Map[Date, Double])])] = set.map{ s =>
+        ( s._1, s._2._1 )
+      }
+      (setReduced,monthsLimit)
+    }
+    resultSet.map{ s =>
+
+      Ok.sendFile( rpBreakdownXLS(s._1,s._2))
+        .as("application/vnd.ms-excel")
+        .withHeaders(("Access-Control-Allow-Origin", "*"),
+          ("Content-Disposition", s"attachment; filename=ResourcePoolList.xls"))
+    }
+   // Future(Ok(""))
+  }
+
+
+  def rpBreakdownXLS(result:Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Int, Map[Date, Double])])],
+                     monthLimit:Seq[Date]):java.io.File = {
+    val wb: Workbook = new HSSFWorkbook()
+    val sheet: Sheet = wb.createSheet()
+    val headerRow: Row = sheet.createRow(0)
+    wb.setSheetName(0,"Resource Breakdown")
+    headerRow.createCell(0).setCellValue("Pool/Team")
+    headerRow.createCell(1).setCellValue("Feature")
+    headerRow.createCell(2).setCellValue("Month")
+    headerRow.createCell(3).setCellValue("#")
+
+    val monthSet = monthLimit.toSet
+    val result2: Seq[(Either[ResourceteamRow, ResourcepoolRow],ProductfeatureRow, Date,Double)] = result.flatMap { x =>
+      x._2.flatMap { line =>
+        line._3.filter( p=> monthSet.contains( p._1)).map{ d =>
+          (x._1, line._1, d._1,d._2)
+        }.toSeq
+      }.toSeq
+    }.toSeq
+
+    for (rowNum <- result2.indices) {
+      val r: Row = sheet.createRow(rowNum + 1)
+      val ( teamPool:Either[ResourceteamRow,ResourcepoolRow],
+            feature:ProductfeatureRow,
+            date:Date,
+          devDays:Double) = result2(rowNum)
+      val name = teamPool match {
+        case Left(x) => x.name
+        case Right(x) => x.name
+      }
+      r.createCell(0).setCellValue(name)
+      r.createCell(1).setCellValue(feature.name)
+
+      r.createCell(2).setCellValue(date)
+      r.createCell(3).setCellValue(devDays)
+    }
+    val tmpDir = ConfigFactory.load.getString("scenario.tempdir")
+    val f = java.io.File.createTempFile("resourcePoolBreakdown-",".xls",new java.io.File(tmpDir))
+    val os = new FileOutputStream(f)
+    wb.write(os)
+    wb.close()
+    os.close()
+    f.deleteOnExit()
+    f
+  }
 }
 
