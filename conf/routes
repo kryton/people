@@ -29,6 +29,9 @@ GET         /person/:login/matrix                           controllers.PersonCo
 GET         /person/id/:id                                  controllers.PersonController.personNumber(id:Long)
 GET         /person/admin/import                            controllers.PersonController.importFile
 POST        /person/admin/import                            controllers.PersonController.doImport
+GET         /person/admin/importDir                         controllers.PersonController.importFileDir
+GET         /person/admin/importFile/:filename              controllers.PersonController.doImportFile(filename:String)
+
 
 GET         /orgchart/hier                                  controllers.PersonController.personHierarchy(login:Option[String]?=None)
 GET         /orgchart                                       controllers.PersonController.personOrgChart(login:Option[String]?=None)

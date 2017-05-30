@@ -21,6 +21,7 @@ import java.io.File
 import java.nio.file.Path
 import javax.inject._
 
+import com.typesafe.config.ConfigFactory
 import models.people.EmpRelationsRowUtils._
 import models.people._
 import models.product.ProductTrackRepo
@@ -32,7 +33,7 @@ import play.api.i18n.I18nSupport
 import play.api.libs.json.{JsObject, Json, Writes}
 import play.api.mvc._
 import play.db.NamedDatabase
-import util.{LDAP, User}
+import util.{FileIO, LDAP, User}
 
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.JdbcProfile
@@ -65,10 +66,12 @@ class PersonController @Inject()
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
     webJarAssets: WebJarAssets,
-    assets: AssetsFinder
+    assets: AssetsFinder,
+    ldap: LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
 
-  implicit val ldap: LDAP = new LDAP
+ // implicit val ldap: LDAP = new LDAP
+  protected val sapImportDir: String = ConfigFactory.load().getString("offline.SAPImportDir")
   /**
     * Create an Action to render an HTML page.
     *
@@ -170,6 +173,23 @@ class PersonController @Inject()
       case false => Unauthorized(views.html.page_403(  "You don't have access to import SAP files"))
     }
   }
+
+  def importFileDir = Action.async{ implicit request =>
+    user.isAdmin(LDAPAuth.getUser()).map {
+      case true =>
+        val dir = new File(sapImportDir)
+        val files2:List[String] = if (dir.exists() && dir.isDirectory) {
+          dir.listFiles().filter(_.isFile).map(_.getName).filter(_.endsWith(".csv")).toList
+        } else {
+          List.empty
+        }
+        val files:List[String]=   files2.sorted(Ordering[String].reverse).take(20)
+
+        Ok(views.html.person.importFileInDir(files))
+      case false => Unauthorized(views.html.page_403(  "You don't have access to import SAP files"))
+    }
+  }
+
   def doImport = Action.async(parse.multipartFormData) { implicit request =>
     user.isAdmin(LDAPAuth.getUser()).map {
       case false => Future.successful(Unauthorized(views.html.page_403("You don't have access to import SAP files")) )
@@ -193,6 +213,47 @@ class PersonController @Inject()
           Future.successful(Redirect(routes.PersonController.importFile()).flashing(
             "error" -> "Missing file"))
         }
+    }.flatMap(identity)
+  }
+
+
+  // WARNING - this could possibly do more secure filename checking, but
+  // a. it's in a Docker container
+  // b. it's 'admin only'
+ def doImportFile(filename:String) = Action.async { implicit request =>
+    user.isAdmin(LDAPAuth.getUser()).map {
+      case false => Future.successful(Unauthorized(views.html.page_403("You don't have access to import SAP files")) )
+      case true =>
+        val file = new java.io.File(sapImportDir,filename)
+        val canonical = file.getCanonicalPath
+      /*
+        if (!FileIO.isInSecureDir(file.toPath) && !System.getProperty("os.name").startsWith("Windows")) {
+          Logger.error(s"Insecure directory $canonical")
+          Future.successful(Redirect(routes.PersonController.importFileDir()).flashing( "error" -> "unable to read file"))
+        } else {
+        */
+          if ( canonical.startsWith(sapImportDir) && file.canRead && file.isFile && file.exists()) {
+
+            //request.body.file("importFile").map { picture =>
+            //  val filename = picture.filename
+            val path: Path = file.toPath
+
+            SAPImport.importFile(path).map {
+              employees =>
+                SAPImport.validate(employees) match {
+                  case Nil => employeeRepo.repopulate(employees).map { x =>
+                    Future.successful(Ok(views.html.person.importFileResult(x._1.toList.sortBy(_.login), x._2, x._3.toList)))
+                  }
+                  case x: Seq[String] => Future.successful(Future.successful(InternalServerError(s"Failed to Validate:\n ${x.mkString("\n")}")))
+
+                }
+            }.flatMap(identity).flatMap(identity)
+          } else {
+            Logger.error(s"Unable to import file $canonical $filename")
+            Future.successful(Redirect(routes.PersonController.importFileDir()).flashing(
+              "error" -> "unable to read file"))
+          }
+      //  }
     }.flatMap(identity)
   }
 
