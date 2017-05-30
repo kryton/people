@@ -42,5 +42,5 @@ RUN         rm /root/target/universal/stage/bin/*.bat
 WORKDIR     /root
 #ENTRYPOINT  target/universal/stage/bin/$(ls target/universal/stage/bin)
 ENTRYPOINT  ./play
-VOLUME      ["/pic/cache","/pic/source","/pic/user-upload","/pic/tmp","/logs"]
+VOLUME      ["/pic/cache","/pic/source","/pic/user-upload","/pic/tmp","/logs","/pic/xfer"]
 EXPOSE      9000 9443
