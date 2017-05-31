@@ -36,7 +36,7 @@ class Jira(hostname:String, user:String, password:String)(implicit ws:WSClient, 
     ws.url(url).withRequestTimeout(defaultTimeout)
       .withAuth(user, password, WSAuthScheme.BASIC)
       .withFollowRedirects(true)
-      .withHeaders("Accept" -> "application/json")
+      .withHttpHeaders("Accept" -> "application/json")
   }
   def projects = {
     buildRequest("project").get.map{ response =>
