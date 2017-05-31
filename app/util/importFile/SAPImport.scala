@@ -26,6 +26,7 @@ import java.util.Calendar
 
 import models.people.{CostCenterRepo, EmpHistoryRepo, OfficeRepo, PositionTypeRepo}
 import offline.Tables.{EmphistoryRow, EmprelationsRow}
+import play.api.Logger
 import util.Conversions
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -200,6 +201,9 @@ object SAPImport {
                 c <- ccRowF
                 o <- officeF
               } yield (c, o)).map { z =>
+                if ( empRecord.login.get.equalsIgnoreCase("mhalls")) {
+                  Logger.info("Here")
+                }
                 val empRel: EmprelationsRow = EmprelationsRow(empRecord.personNumber,
                   empRecord.login.get.toLowerCase,
                   empRecord.firstName,

@@ -50,6 +50,7 @@ class OfficeRepo @Inject()( @NamedDatabase("default")  protected val dbConfigPro
       .filter(_.country === country || country.isEmpty)
       .filter(_.street === street || street.isEmpty)
       .filter(_.pobox === POBox || POBox.isEmpty)
+      .filter(_.region === region || region.isEmpty)
       .filter(_.zipcode === zipcode || zipcode.isEmpty)
 
     db.run(qry.result.headOption).map{
