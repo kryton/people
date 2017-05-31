@@ -6,6 +6,10 @@ organization := "com.zilbo"
 
 version := "1.0-SNAPSHOT"
 
+val slickVersion = "3.2.0"
+
+resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
+
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.8"
@@ -16,7 +20,7 @@ libraryDependencies ++= Seq(
   ws,
   // jdbc,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0-M2" % Test,
-  "com.typesafe.play" %% "play-slick" % "3.0.0-M5",
+  "com.typesafe.play" %% "play-slick" % "3.0.0-RC1",
   //"com.typesafe.play" %% "play-slick-evolutions" % "3.0.0-M3",
   "com.typesafe.slick" %% "slick" % slickVersion,
   "com.typesafe.slick" %% "slick-codegen" % slickVersion,
@@ -49,7 +53,6 @@ libraryDependencies ++= Seq(
   //"org.webjars" % "jquery-ui" % "1.12.1"
 
 )
-val slickVersion = "3.2.0"
 
 slickGenerate := {
   import java.io.File
