@@ -18,6 +18,7 @@ lazy val slickGenerate = taskKey[Seq[File]]("slick code generation from an exist
 libraryDependencies ++= Seq(
   filters,
   ws,
+  guice,
   // jdbc,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0-M2" % Test,
   "com.typesafe.play" %% "play-slick" % "3.0.0-RC1",
