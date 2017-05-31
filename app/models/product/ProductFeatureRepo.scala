@@ -50,7 +50,7 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
     db.run(Productfeature.sortBy( _.ordering).result)
 
   def search(searchString:String): Future[Seq[ProductfeatureRow]] = db.run{
-    Productfeature.filter { m =>  m.name like  "%"+searchString+"%"    }.sortBy(_.ordering).result
+    Productfeature.filter { m =>  m.name like  "%%%s".format(searchString)+"%"    }.sortBy(_.ordering).result
   }
 
   def findByProductTrack( productTrackId: Int): Future[Seq[(Tables.ProductfeatureRow, Tables.ProducttrackfeatureRow)]] = {
