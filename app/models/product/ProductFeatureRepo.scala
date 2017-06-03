@@ -101,7 +101,7 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
     db.run(Productfeature.filter(_.id === id).update( pt.copy(id = id))) map { _ > 0 }
   }
 
-  def delete(id: Int) =
+  def delete(id: Int): Future[Boolean] =
     db.run(Productfeature.filter(_.id === id).delete) map { _ > 0 }
 
   def repopulate( features:Seq[FeatureImport])(
@@ -239,10 +239,11 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
       }.flatMap(identity)
     })
 
-    val deletes = (for{
-      oldF <- oldMSFL
-      newF <- newFeatures
-    } yield (oldF,newF)).map { x =>
+    val dodeletes = (for{
+        oldF <- oldMSFL
+        newF <- newFeatures
+        } yield (oldF,newF)
+      ).map { x =>
       val o: Map[String, ProductfeatureRow] = x._1.map { nn => nn.msprojectname.getOrElse("") -> nn}.toMap
       val n: Map[String, ProductfeatureRow] = x._2.map { nn => nn.msprojectname.getOrElse("") -> nn}.toMap
 
@@ -258,8 +259,10 @@ class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val db
           delete(deleteId).map( x=> x)
         }
       }
+      x._2
     }
-    newFeatures
+    dodeletes
+   // newFeatures
 
   }
 

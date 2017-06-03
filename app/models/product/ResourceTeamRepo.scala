@@ -281,16 +281,29 @@ class ResourceTeamRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
       }
   }
 
-  def insert(rt: ResourceteamRow) = db
+  def roadMap(id:Int): Future[Seq[(ResourceteamRow, ResourceteamprojectRow, ProjectRow, ProductfeatureRow)]] = {
+    val qry = Resourceteam.filter(_.id === id)
+        .join(Resourceteamproject).on(_.id === _.resourceteamid)
+        .join( Project).on(_._2.projectid === _.id).filter(_._2.isactive)
+        .join( Productfeature).on( _._2.productfeatureid === _.id )
+          .filter( _._2.isactive)
+    db.run(qry.result).map { x =>
+      x.map { row =>
+        (row._1._1._1, row._1._1._2, row._1._2, row._2)
+      }
+    }
+  }
+
+  def insert(rt: ResourceteamRow): Future[ResourceteamRow] = db
     .run(Resourceteam returning Resourceteam.map(_.id) += rt)
     .map(id => rt.copy(id = id))
 
 
-  def update(id: Int, rt:ResourceteamRow) = {
+  def update(id: Int, rt:ResourceteamRow): Future[Boolean] = {
     db.run(Resourceteam.filter(_.id === id).update( rt.copy(id = id))) map { _ > 0 }
   }
 
-  def delete(id: Int) =
+  def delete(id: Int): Future[Boolean] =
     db.run(Resourceteam.filter(_.id === id).delete) map { _ > 0 }
 }
 

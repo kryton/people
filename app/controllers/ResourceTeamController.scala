@@ -105,6 +105,84 @@ class ResourceTeamController @Inject()
       }
   }
 
+  def roadmap(rtId:Int) = Action.async { implicit request =>
+    (for {
+      rt <- resourceTeamRepo.find(rtId)
+      r <-  resourceTeamRepo.roadMap(rtId)
+      t <- resourceTeamRepo.getDevStatsForTeam(rtId)
+      slack <- resourcePoolRepo.quarterSlack
+
+    } yield (rt,r,t,slack) ).map{ x =>
+      x._1 match {
+        case Some(rt) =>
+          val slack1: Map[Int, BigDecimal] = x._4.map{ line => line.ordering -> line.efficiency.getOrElse(BigDecimal(1.0))}.toMap
+          val slack: Map[Int, BigDecimal] = (1 to 5).map{ l => l->slack1.getOrElse(l,BigDecimal(1.0))}.toMap
+
+          val features: Seq[(ResourceteamRow, ResourceteamprojectRow, ProjectRow, ProductfeatureRow)] = x._2
+          val sizes: Seq[(Int, Option[ProductfeatureRow], BigDecimal, BigDecimal)] = features.map{ line =>
+            (line._4.ordering, Some(line._4), line._2.featuresizeremaining.getOrElse(BigDecimal(line._2.featuresize)), BigDecimal(0)  )
+          }.filter( p => p._3 > 0 ).sortBy(_._1)
+
+          val t: Option[ProductfeatureRow] = None
+
+          val cumSize = sizes.scanLeft( (0, t, BigDecimal(0), BigDecimal(0))   )( (b,z) => ( z._1, z._2, z._3, b._4 + z._3)).drop(1)
+
+
+          val emps = x._3
+          val prodTeamDet: (Int,EfficencyMonth) = emps
+            .foldLeft( (0,EfficencyMonth(0, 0, 0 ,0, 0))) ((z:(Int,EfficencyMonth), i) => (z._1 +1,z._2.add( i._3)))
+          // 3 months * 20 days/month * a bit of slack to allow unforseen
+          val devDaysPerQ: (BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal) = (
+            prodTeamDet._2.t0 * 3 * 20 * slack.getOrElse(1,BigDecimal(1.0)),
+            prodTeamDet._2.t3 * 3 * 20 * slack.getOrElse(2,BigDecimal(1.0)),
+            prodTeamDet._2.t6 * 3 * 20 * slack.getOrElse(3,BigDecimal(1.0)),
+            prodTeamDet._2.t9 * 3 * 20 * slack.getOrElse(4,BigDecimal(1.0)),
+            prodTeamDet._2.t12* 3 * 20 * slack.getOrElse(5,BigDecimal(1.0))
+          )
+          val cumDaysPerQ = (
+            devDaysPerQ._1,
+            devDaysPerQ._1 + devDaysPerQ._2,
+            devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3,
+            devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3 + devDaysPerQ._4,
+            devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3 + devDaysPerQ._4 + devDaysPerQ._5
+          )
+
+          val cumSize2:Seq[(Int, ProductfeatureRow, BigDecimal, BigDecimal,String)] = cumSize.map{ line =>
+            val s = line._2 match {
+              case Some(pf) => pf.name
+              case None => "-None-"
+            }
+            val q = if ( line._4 < cumDaysPerQ._1 ) {
+              "Q-now"
+            } else {
+              if ( line._4 < cumDaysPerQ._2) {
+                "Q+1"
+              } else {
+                if ( line._4 < cumDaysPerQ._3) {
+                  "Q+2"
+                } else {
+                  if ( line._4 < cumDaysPerQ._4) {
+                    "Q+3"
+                  } else {
+                    if ( line._4 < cumDaysPerQ._5 ) {
+                      "Q+4"
+                    } else {
+                        "Q++"
+                    }
+                  }
+                }
+              }
+            }
+            (line._1, line._2.get, line._3, line._4,q)
+          }
+
+          Ok(views.html.product.team.roadmap(rtId, rt, prodTeamDet,devDaysPerQ, cumSize2,slack))
+        case None => NotFound(views.html.page_404(  "Team not found"))
+      }
+    }
+
+  }
+
 
   def id(rtId:Int, page:Int): Action[AnyContent] = Action.async{ implicit request =>
 

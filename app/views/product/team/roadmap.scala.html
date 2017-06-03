@@ -1,0 +1,127 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import projectdb.Tables.ProductfeatureRow
+@import util.Page
+@import java.sql.Date
+@import projectdb.Tables.ResourceteamRow
+@import projectdb.Tables.ResourcepoolRow
+@import projectdb.Tables.ProjectRow
+@import java.time.format.DateTimeFormatter
+@import models.product.EfficencyMonth
+@(      id:Int,
+        team:ResourceteamRow,
+        prodTeamDet: (Int, EfficencyMonth),
+        devDaysPerQ: (BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal),
+        sizes:Seq[(Int, ProductfeatureRow, BigDecimal, BigDecimal,String)],
+        slack: Map[Int, BigDecimal]
+)(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        ldap: util.LDAP)
+
+
+@main(s"Team ${team.name}!") {
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Details</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!-- x_title -->
+            <div class="x_content">
+                <div class="container">
+                    <div class="row">
+                        <table class="table table-striped">
+                            <tr>
+                                <th>Quarter</th>
+                                <td align="right">Now / t+0</td>
+                                <td align="right">t+3</td>
+                                <td align="right">t+6</td>
+                                <td align="right">t+9</td>
+                                <td align="right">t+12</td>
+                            </tr>
+                            <tr>
+                                <td>Effective Developers available for Roadmap (@prodTeamDet._1 people)</td>
+                                <td align="right">@prodTeamDet._2.t0</td>
+                                <td align="right">@prodTeamDet._2.t3</td>
+                                <td align="right">@prodTeamDet._2.t6</td>
+                                <td align="right">@prodTeamDet._2.t9</td>
+                                <td align="right">@prodTeamDet._2.t12</td>
+                            </tr>
+                            <tr>
+                                <td colspan="1">Allocate at</td>
+                                @slack.keys.toSeq.sorted.map { sl =>
+                                    <td align="right">@slack(sl).formatted("%.2f")%</td>
+
+                                }
+                            </tr>
+                            <tr>
+                                <td colspan="1">in DevDays/Q (allowing for slack)</td>
+                                <td align="right">@devDaysPerQ._1.formatted("%.0f")</td>
+                                <td align="right">@devDaysPerQ._2.formatted("%.0f")</td>
+                                <td align="right">@devDaysPerQ._3.formatted("%.0f")</td>
+                                <td align="right">@devDaysPerQ._4.formatted("%.0f")</td>
+                                <td align="right">@devDaysPerQ._5.formatted("%.0f")</td>
+                            </tr>
+                        </table>
+
+                    </div>
+                    <div class="row">
+                    @if(sizes.nonEmpty) {
+                    <table class="table table-striped table-responsive">
+                        <thead>
+                            <tr>
+                            <th>Priority</th>
+                            <th>Feature</th>
+                            <th>Size</th>
+                            <th>Cumulative</th>
+                            <th>Quarter</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @sizes.map { p =>
+                              <tr>
+                                  <td align="right">@p._1</td>
+                                  <td >@p._2.name</td>
+                                  <td align="right">@p._3.formatted("%.0f")</td>
+                                  <td align="right">@p._4.formatted("%.0f")</td>
+                                  <td>@p._5</td>
+                              </tr>
+                            }
+                        </tbody>
+                    </table>
+                    } else {
+                        No Work defined?
+                    }
+                    </div>
+                </div>
+            </div> <!-- x_content -->
+        </div ><!-- x_panel -->
+
+    </div ><!-- col -->
+</div> <!-- row -->
+
+}
+

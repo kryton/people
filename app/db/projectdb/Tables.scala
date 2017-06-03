@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Empefficiency.schema, Featureflag.schema, Managedclient.schema, Managedclientproductfeature.schema, PlayEvolutions.schema, Productfeature.schema, Productfeatureflag.schema, Producttrack.schema, Producttrackfeature.schema, Project.schema, Projectarea.schema, Projectdependency.schema, Projectfeature.schema, Projecthighlight.schema, Projectperson.schema, Projectpersontype.schema, Projectrelease.schema, Projectrole.schema, Resourcepool.schema, Resourceteam.schema, Resourceteamproductfeature.schema, Resourceteamproject.schema, Stage.schema, Statuscolor.schema, Statusupdate.schema, Systemrole.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Empefficiency.schema, Featureflag.schema, Managedclient.schema, Managedclientproductfeature.schema, PlayEvolutions.schema, Productfeature.schema, Productfeatureflag.schema, Producttrack.schema, Producttrackfeature.schema, Project.schema, Projectarea.schema, Projectdependency.schema, Projectfeature.schema, Projecthighlight.schema, Projectperson.schema, Projectpersontype.schema, Projectrelease.schema, Projectrole.schema, Resourcepool.schema, Resourceteam.schema, Resourceteamproductfeature.schema, Resourceteamproject.schema, Roadmapslack.schema, Stage.schema, Statuscolor.schema, Statusupdate.schema, Systemrole.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -825,6 +825,35 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Resourceteamproject */
   lazy val Resourceteamproject = new TableQuery(tag => new Resourceteamproject(tag))
+
+  /** Entity class storing rows of table Roadmapslack
+   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param ordering Database column ordering SqlType(INT)
+   *  @param efficiency Database column efficiency SqlType(DECIMAL), Default(None) */
+  final case class RoadmapslackRow(id: Long, ordering: Int, efficiency: Option[scala.math.BigDecimal] = None)
+  /** GetResult implicit for fetching RoadmapslackRow objects using plain SQL queries */
+  implicit def GetResultRoadmapslackRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Option[scala.math.BigDecimal]]): GR[RoadmapslackRow] = GR{
+    prs => import prs._
+    RoadmapslackRow.tupled((<<[Long], <<[Int], <<?[scala.math.BigDecimal]))
+  }
+  /** Table description of table RoadmapSlack. Objects of this class serve as prototypes for rows in queries. */
+  class Roadmapslack(_tableTag: Tag) extends profile.api.Table[RoadmapslackRow](_tableTag, Some("project_db"), "RoadmapSlack") {
+    def * = (id, ordering, efficiency) <> (RoadmapslackRow.tupled, RoadmapslackRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(ordering), efficiency).shaped.<>({r=>import r._; _1.map(_=> RoadmapslackRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column ordering SqlType(INT) */
+    val ordering: Rep[Int] = column[Int]("ordering")
+    /** Database column efficiency SqlType(DECIMAL), Default(None) */
+    val efficiency: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("efficiency", O.Default(None))
+
+    /** Uniqueness Index over (ordering) (database name ordering) */
+    val index1 = index("ordering", ordering, unique=true)
+  }
+  /** Collection-like TableQuery object for table Roadmapslack */
+  lazy val Roadmapslack = new TableQuery(tag => new Roadmapslack(tag))
 
   /** Entity class storing rows of table Stage
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey

@@ -52,9 +52,9 @@ class ResourcePoolController @Inject()
    protected val dbConfigProvider: DatabaseConfigProvider,
    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    resourcePoolRepo: ResourcePoolRepo,
-   resourceTeamRepo: ResourceTeamRepo,
    user: User
   )(implicit
+    resourceTeamRepo: ResourceTeamRepo,
     teamDescriptionRepo: TeamDescriptionRepo,
     matrixTeamMemberRepo: models.people.MatrixTeamMemberRepo,
     officeRepo:models.people.OfficeRepo,
@@ -104,37 +104,37 @@ class ResourcePoolController @Inject()
 
     resourcePoolRepo.find(rpId).map {
       case Some(rp) =>
-        val teams: Future[Seq[(ResourceteamRow,
+        /*
+        val teamsx: Future[Seq[(ResourceteamRow,
           Seq[(EmprelationsRow, Int, EfficencyMonth)],
-          Seq[TeamSummary],
-          Boolean)]] = resourceTeamRepo.findInPool( rp.id).map{
+          Seq[TeamSummary]
+          )]] = resourceTeamRepo.findInPool( rp.id).map{
           (teamS: Seq[ResourceteamRow]) => Future.sequence( teamS.map { team:ResourceteamRow =>
             (for{
               dsX <- resourceTeamRepo.getDevStatsForTeam(team.id)//.map{ ds => (team, ds) }
               ctX <- resourceTeamRepo.getTeamSummaryByVendorCountry(team.id)
-              isAdmin <- user.isAdmin( LDAPAuth.getUser())
-            } yield (dsX,ctX, isAdmin)).map{ x=>
-              (team,x._1, x._2, x._3)
+
+            } yield (dsX,ctX)).map{ x=>
+              (team,x._1, x._2)
             }
           })
         }.flatMap(identity)
+        */
 
         (for {
-          t <- teams
-        } yield t)
-        .map { x:Seq[(ResourceteamRow, Seq[(EmprelationsRow, Int, EfficencyMonth)],
-          Seq[TeamSummary],Boolean)] =>
-          val isAdmin:Boolean  = x.headOption match {
-            case None => false
-            case Some(rec) => rec._4
-          }
-          val byTeam: Seq[(ResourceteamRow, (Int, EfficencyMonth))] = x.map{ tE => ( tE._1, tE._2
+          t <- resourcePoolRepo.getDevStats(rpId)
+          isAdmin <- user.isAdmin(LDAPAuth.getUser())
+        } yield (t,isAdmin))
+        .map { xx =>
+          val isAdmin:Boolean  = xx._2
+          val team = xx._1
+          val byTeam: Seq[(ResourceteamRow, (Int, EfficencyMonth))] = team.map{ tE => ( tE._1, tE._2
             .foldLeft( (0,EfficencyMonth(0, 0, 0 ,0, 0))) ((z:(Int,EfficencyMonth), i) => (z._1 +1,z._2.add( i._3))  ))
           }
           val byPool: (Int, EfficencyMonth) = byTeam.map( _._2)
                       .foldLeft( (0,EfficencyMonth(0, 0, 0 ,0, 0))) ((z:(Int,EfficencyMonth), i) => (z._1 + i._1 ,z._2.add( i._2) ))
 
-          val sum: Seq[TeamSummary] = x.flatMap{ line =>
+          val sum: Seq[TeamSummary] = team.flatMap{ line =>
             val baseX = line._3
 
             baseX.groupBy(p=> (p.agency, p.isContractor,p.country,p.positionType, p.isPE )).map{ xx =>
@@ -436,6 +436,94 @@ class ResourcePoolController @Inject()
     os.close()
     f.deleteOnExit()
     f
+  }
+
+  def roadmap(rpId:Int) = Action.async { implicit request =>
+    (for {
+      rp <- resourcePoolRepo.find(rpId)
+      r <-  resourcePoolRepo.roadMap(rpId)
+      t <- resourcePoolRepo.getDevStats(rpId)
+      slack <- resourcePoolRepo.quarterSlack
+    } yield (rp,r,t,slack) ).map{ x =>
+      x._1 match {
+        case Some(rp) =>
+          val devStats: Seq[(Int, EfficencyMonth)] = x._3.flatMap{ rtL =>
+            rtL._2.map{ line => (line._2,line._3)}
+          }
+          val slack1: Map[Int, BigDecimal] = x._4.map{ line => line.ordering -> line.efficiency.getOrElse(BigDecimal(1.0))}.toMap
+          val slack: Map[Int, BigDecimal] = (1 to 5).map{ l => l->slack1.getOrElse(l,BigDecimal(1.0))}.toMap
+
+          val features: Seq[(Int, Some[ProductfeatureRow], BigDecimal, BigDecimal, Map[Int, BigDecimal])] = x._2.groupBy(_._4).map{ byFeature =>
+            val teamEffortMap = byFeature._2.groupBy(_._1).map { byTeam =>
+              val effort = byTeam._2.map{ projectL => projectL._2.featuresizeremaining.getOrElse(BigDecimal(projectL._2.featuresize))}.sum
+              byTeam._1.id  -> effort
+            }
+            val remaining: BigDecimal = teamEffortMap.values.sum
+
+            ( byFeature._1.ordering, Some(byFeature._1), remaining, BigDecimal(0),teamEffortMap )
+          }.filter( p => p._3 >0).toSeq.sortBy(_._1)
+
+          val teams: Seq[ResourceteamRow] =    x._2.groupBy(_._1).keys.toSeq.sortBy(_.ordering)
+
+
+          val t: Option[ProductfeatureRow] = None
+          val s:Map[Int, BigDecimal] = Map.empty
+
+          val cumSize = features.scanLeft( (0, t, BigDecimal(0), BigDecimal(0), s)   )( (b,z) => ( z._1, z._2, z._3, b._4 + z._3, z._5)).drop(1)
+
+
+         // val emps = x._3
+          val prodTeamDet: (Int,EfficencyMonth) = devStats
+            .foldLeft( (0,EfficencyMonth(0, 0, 0 ,0, 0))) ((z:(Int,EfficencyMonth), i) => (z._1 + 1, z._2.add( i._2)))
+          // 3 months * 20 days/month * a bit of slack to allow unforseen
+          val devDaysPerQ: (BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal) = (
+            prodTeamDet._2.t0 * 3 * 20 * slack.getOrElse(1,BigDecimal(1.0)),
+            prodTeamDet._2.t3 * 3 * 20 * slack.getOrElse(2,BigDecimal(1.0)),
+            prodTeamDet._2.t6 * 3 * 20 * slack.getOrElse(3,BigDecimal(1.0)),
+            prodTeamDet._2.t9 * 3 * 20 * slack.getOrElse(4,BigDecimal(1.0)),
+            prodTeamDet._2.t12* 3 * 20 * slack.getOrElse(5,BigDecimal(1.0))
+          )
+          val cumDaysPerQ = (
+            devDaysPerQ._1,
+            devDaysPerQ._1 + devDaysPerQ._2,
+            devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3,
+            devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3 + devDaysPerQ._4,
+            devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3 + devDaysPerQ._4 + devDaysPerQ._5
+          )
+
+          val cumSize2:Seq[(Int, ProductfeatureRow, BigDecimal, BigDecimal,Map[Int, BigDecimal], String)] = cumSize.map{ line =>
+            val s = line._2 match {
+              case Some(pf) => pf.name
+              case None => "-None-"
+            }
+            val q = if ( line._4 < cumDaysPerQ._1 ) {
+              "Q-now"
+            } else {
+              if ( line._4 < cumDaysPerQ._2) {
+                "Q+1"
+              } else {
+                if ( line._4 < cumDaysPerQ._3) {
+                  "Q+2"
+                } else {
+                  if ( line._4 < cumDaysPerQ._4) {
+                    "Q+3"
+                  } else {
+                    if ( line._4 < cumDaysPerQ._5 ) {
+                      "Q+4"
+                    } else {
+                      "Q++"
+                    }
+                  }
+                }
+              }
+            }
+            (line._1, line._2.get, line._3, line._4,line._5, q)
+          }
+
+          Ok(views.html.product.pool.roadmap(rpId, rp, prodTeamDet,devDaysPerQ, teams, cumSize2, slack))
+        case None => NotFound(views.html.page_404(  "Pool not found"))
+      }
+    }
   }
 }
 

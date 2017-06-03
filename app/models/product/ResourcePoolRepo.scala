@@ -20,6 +20,7 @@ package models.product
 import java.sql.Date
 import javax.inject.Inject
 
+import controllers.LDAPAuth
 import models.people.{MatrixTeamMemberRepo, OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
@@ -216,5 +217,38 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
         }
         (byTeam, byProject)
       }
+  }
+  def quarterSlack: Future[Seq[RoadmapslackRow]] = db.run( Roadmapslack.sortBy(_.ordering).result)
+  def getDevStats(id:Int)(implicit resourceTeamRepo: ResourceTeamRepo,
+                          teamDescriptionRepo: TeamDescriptionRepo,
+                          matrixTeamMemberRepo: models.people.MatrixTeamMemberRepo,
+                          officeRepo:models.people.OfficeRepo,
+                          positionTypeRepo:models.people.PositionTypeRepo):Future[
+                                                        Seq[(ResourceteamRow,
+                                                          Seq[(offline.Tables.EmprelationsRow, Int, EfficencyMonth)],
+                                                          Seq[TeamSummary])]
+                                                        ] = {
+    resourceTeamRepo.findInPool( id).map{
+      (teamS: Seq[ResourceteamRow]) => Future.sequence( teamS.map { team:ResourceteamRow =>
+        (for{
+          dsX <- resourceTeamRepo.getDevStatsForTeam(team.id)
+          ctX <- resourceTeamRepo.getTeamSummaryByVendorCountry(team.id)
+        } yield (dsX,ctX)).map{ x=>
+          (team,x._1, x._2)
+        }
+      })
+    }.flatMap(identity)
+  }
+  def roadMap(id:Int): Future[Seq[(ResourceteamRow, ResourceteamprojectRow, ProjectRow, ProductfeatureRow)]] = {
+    val qry = Resourceteam.filter(_.resourcepoolid === id)
+      .join(Resourceteamproject).on(_.id === _.resourceteamid)
+      .join( Project).on(_._2.projectid === _.id).filter(_._2.isactive)
+      .join( Productfeature).on( _._2.productfeatureid === _.id )
+      .filter( _._2.isactive)
+    db.run(qry.result).map { x =>
+      x.map { row =>
+        (row._1._1._1, row._1._1._2, row._1._2, row._2)
+      }
+    }
   }
 }
