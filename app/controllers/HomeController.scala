@@ -113,8 +113,9 @@ class HomeController @Inject()
               emp <- employeeRepo.findByLogin(data.username)
               prefs <- userRepo.userPrefs(data.username).map( s=> s.map(_._2.code))
               isSpecial <- user.isSpecialLogo( Some( data.username))
-            } yield (emp, isSpecial,prefs)).map { x =>
-              val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString) ++ x._3.map(y=> y -> "Y")
+              isCatLover <- user.isACatLover(Some(data.username))
+            } yield (emp, isSpecial,prefs, isCatLover)).map { x =>
+              val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString,"cats" -> x._4.toString) ++ x._3.map(y=> y -> "Y")
 
               x._1 match {
                 case Some(emp) =>
@@ -133,8 +134,10 @@ class HomeController @Inject()
             emp <- employeeRepo.findByLogin(data.username)
             isSpecial <- user.isSpecialLogo( Some( data.username))
             prefs <- userRepo.userPrefs(data.username).map( s=> s.map(_._2.code))
-          } yield (emp, isSpecial,prefs)).map { x =>
-            val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString) ++ x._3.map(y=> y -> "Y")
+            isCatLover <- user.isACatLover(Some(data.username))
+          } yield (emp, isSpecial,prefs,isCatLover)).map { x =>
+            Logger.info(s"CATS = ${x._4.toString}")
+            val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString,"cats" -> x._4.toString) ++ x._3.map(y=> y -> "Y")
 
             x._1 match {
               case Some(emp) => Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> emp.fullName)

@@ -32,6 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class User @Inject()(implicit employeeRepo:EmployeeRepo, executionContext: ExecutionContext ) {
   import scala.collection.JavaConversions._
   val specialLogo: Set[String] = ConfigFactory.load().getStringList("offline.speciallogo").toList.map(x => x.toLowerCase).toSet
+  val catLover: Set[String] = ConfigFactory.load().getStringList("offline.cats").toList.map(x => x.toLowerCase).toSet
   val admins: Set[String] = ConfigFactory.load().getStringList("scenario.admins").toList.map(x => x.toLowerCase).toSet
   val adminsHierarchy: Set[String] = ConfigFactory.load().getStringList("scenario.admins_hierarchy").toList.map(x => x.toLowerCase).toSet
   val kudosAdmins: Set[String] = ConfigFactory.load().getStringList("kudos.admins").toList.map(x => x.toLowerCase).toSet
@@ -53,6 +54,13 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo, executionContext: Execu
     userO match {
       case None =>Future.successful(false)
       case Some(user) => Future.successful(specialLogo.contains(user.toLowerCase))
+    }
+  }
+  def isACatLover(userO:Option[String]):Future[Boolean] = {
+   // Logger.info(s"LIGHT ${specialLogo.mkString(",")}"  )
+    userO match {
+      case None =>Future.successful(false)
+      case Some(user) => Future.successful(catLover.contains(user.toLowerCase))
     }
   }
 

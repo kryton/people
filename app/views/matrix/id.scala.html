@@ -23,9 +23,11 @@
 @import offline.Tables.OfficeRow
 @import offline.Tables.EmptagRow
 @import offline.Tables.MatrixteamRow
+@import offline.Tables.TeamdescriptionRow
 @(      id:Long,
         matrix:MatrixteamRow,
-        members:util.Page[EmprelationsRow])(implicit  webJarAssets: WebJarAssets,
+        members:util.Page[EmprelationsRow],
+        teams: Map[String, Option[TeamdescriptionRow]])(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
         ldap: util.LDAP)
@@ -57,7 +59,13 @@
                                 } else {
                                     <i class="fa fa-id-card" aria-hidden="true"></i>
                                 }
+
                             </a>
+                            @teams.get(member.login).map { tO =>
+                                @tO.map{ t =>
+                                    (<a href="@routes.TeamDescriptionController.id(t.tagtext)">@t.tagtext</a>)
+                                }
+                            }
                         </div>
                     }
                     </div>

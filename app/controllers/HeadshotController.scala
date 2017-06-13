@@ -56,7 +56,9 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
 
   protected val imageDir: String = ConfigFactory.load().getString("image.directory")
   protected val cacheDir: String = ConfigFactory.load().getString("image.cache")
+  protected val catPercentage: Double = ConfigFactory.load().getDouble("image.catPercentage")
   protected val userUploadDir: String = ConfigFactory.load().getString("image.user")
+  protected val random = new scala.util.Random()
 
   protected def findPicInDirByLogin(directoryName: String, login:String): Option[String] = {
     def getMatchingPicsLogin(directoryName: String, login: String): List[String] = {
@@ -156,21 +158,54 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
 
 
   def headShot(login:String,notCurrent:Option[String]) = Action.async(bodyParser = Action.parser) { implicit request =>
-    val currentOnly:Boolean = if ( notCurrent.getOrElse("N").equalsIgnoreCase("N")) { false } else {true}
-    //Logger.info(s"HeadShot NotCurrent $notCurrent - currentOnly = $currentOnly ")
-    findAndCacheHeadShot(login,currentOnly).map {
-      case Left(oS) => oS match {
-        case Some(path) =>
-          /*
-          Ok.sendFile(content = new java.io.File(path), inline = true).as(path.takeRight(3).toLowerCase match {
-            case "png" => "image/png"
-            case _ => "image/jpeg"
-          })
-          */
-          Ok(makeSquare(path).get.bytes).as("image/jpeg")
-        case None => TemporaryRedirect("/assets/images/noFace.jpg")
+    //val catsPrank: Boolean  = Option("Y") match {
+    val catsPrank: Boolean  = request.session.get("cats") match {
+      case Some(s) => if ( s.contentEquals("true")) {
+        if ( catPercentage > random.nextDouble() ) {
+          Logger.info("We have a Cat Lover!")
+          true
+        } else {
+          false
+        }
+      } else {
+        false
       }
-      case Right(buffer) =>  Ok(buffer).as("image/jpeg")
+      case None =>false
+    }
+    if (catsPrank) {
+      val d = new File("app/assets/images/cat/")
+      if ( d.exists && d.isDirectory ) {
+       val cats: List[File] = d.listFiles().filter(_.isFile).filter(p => p.getName.endsWith(".jpg")).toList
+        if ( cats.nonEmpty) {
+          val index = random.nextInt(cats.size)
+          //Logger.info(cats(index).getAbsolutePath)
+          Future.successful(Ok(makeSquare(cats(index).getAbsolutePath).get.bytes).as("image/jpeg"))
+        } else {
+          Future.successful(Ok(makeSquare("app/assets/images/noFace.jpg").get.bytes).as("image/jpeg"))
+        }
+      } else {
+        Logger.warn("No Cat Directory?")
+        Future.successful(Ok(makeSquare("app/assets/images/noFace.jpg").get.bytes).as("image/jpeg"))
+      }
+
+    }
+    else {
+      val currentOnly: Boolean = if (notCurrent.getOrElse("N").equalsIgnoreCase("N")) {
+        false
+      } else {
+        true
+      }
+      //Logger.info(s"HeadShot NotCurrent $notCurrent - currentOnly = $currentOnly ")
+      findAndCacheHeadShot(login, currentOnly).map {
+        case Left(oS) => oS match {
+          case Some(path) =>
+            Ok(makeSquare(path).get.bytes).as("image/jpeg")
+          case None =>
+            Ok(makeSquare("app/assets/images/noFace.jpg").get.bytes).as("image/jpeg")
+            //TemporaryRedirect("/assets/images/noFace.jpg")
+        }
+        case Right(buffer) => Ok(buffer).as("image/jpeg")
+      }
     }
   }
 

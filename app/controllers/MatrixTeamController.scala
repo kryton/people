@@ -22,6 +22,7 @@ import javax.inject._
 import models.people.EmpRelationsRowUtils._
 import models.people._
 import models.product.ProductTrackRepo
+import offline.Tables
 import offline.Tables.{EmprelationsRow, MatrixteamRow}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
@@ -42,7 +43,6 @@ class MatrixTeamController @Inject()
    protected val dbConfigProvider: DatabaseConfigProvider,
    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
-   employeeRepo: EmployeeRepo,
    empBioRepo: EmpBioRepo,
    teamDescriptionRepo: TeamDescriptionRepo,
    empTagRepo: EmpTagRepo,
@@ -53,6 +53,7 @@ class MatrixTeamController @Inject()
 
   )(implicit    costCenterRepo: CostCenterRepo,
     officeRepo: OfficeRepo,
+    employeeRepo: EmployeeRepo,
     empHistoryRepo: EmpHistoryRepo,
     ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
@@ -62,19 +63,12 @@ class MatrixTeamController @Inject()
     ldap: LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
 
-  /**
-    * Create an Action to render an HTML page.
-    *
-    * The configuration in the `routes` file means that this method
-    * will be called when the application receives a `GET` request with
-    * a path of `/`.
-    */
-
-
 
   def search( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
       search match {
-        case None => matrixTeamRepo.all.map{ emps => Ok(views.html.matrix.search(Page(emps,page),search)) }
+        case None => matrixTeamRepo.all.map{ emps =>
+          Ok(views.html.matrix.search(Page(emps,page),search))
+        }
         case Some(searchString) => matrixTeamRepo.search(searchString).map{ emps:Seq[MatrixteamRow] =>
           if (emps.size == 1 ) {
             Redirect(routes.MatrixTeamController.id( emps.head.id))
@@ -91,9 +85,12 @@ class MatrixTeamController @Inject()
         val empsF = matrixTeamMemberRepo.findLoginByMatrixTeam(mt.id)
         (for {
           emps <- empsF
-        } yield emps)
+          teams <- empsF.map{ empS => Future.sequence( empS.map{ emp => teamDescriptionRepo.findTeamForLogin( emp.login).map{ x => emp.login -> x}}) }.flatMap(identity)
+        } yield (emps,teams))
         .map { x =>
-          Ok(views.html.matrix.id( ID, mt, Page(x,page, pageSize = 9) ))
+          val emps = x._1
+          val teams: Map[String, Option[Tables.TeamdescriptionRow]] = x._2.toMap
+          Ok(views.html.matrix.id( ID, mt, Page(emps,page, pageSize = 9), teams ))
         }
       case None => Future.successful(NotFound(views.html.page_404("Team ID not found")))
     }.flatMap(identity)

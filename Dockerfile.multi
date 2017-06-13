@@ -33,6 +33,13 @@ COPY --from=BUILD  /root/play /root/play
 ADD certs /root/certs
 ADD lib   /root/lib
 
+RUN         mkdir -p /root/app/assets/images/cat/
+RUN         mkdir -p /root/target/universal/stage/app/assets/images/cat/
+ADD	    app/assets/images/noFace.jpg /root/app/assets/images
+ADD	    app/assets/images/cat/*.jpg /root/app/assets/images/cat/
+ADD	    app/assets/images/noFace.jpg /root/target/universal/stage/app/assets/images
+ADD	    app/assets/images/cat/*.jpg /root/target/universal/stage/app/assets/images/cat/
+
 RUN         cd  /root/conf; cp secret.conf.docker secret.conf
 RUN         cd  /root/conf; cp logback.xml.docker logback.xml
 RUN         rm /root/target/universal/stage/bin/*.bat

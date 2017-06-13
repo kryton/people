@@ -20,3 +20,7 @@ target
 /play
 /app/assets/images/logo.gif
 /app/assets/images/logo2.gif
+/app/assets/images/cat/*.gif
+/app/assets/images/cat/*.png
+/app/assets/images/cat/*.jpg
+
