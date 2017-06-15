@@ -159,8 +159,9 @@ class KudosController @Inject()
           (for {
             f <- employeeRepo.findByLogin(data.from)
             t <- employeeRepo.findByLogin(data.to)
+            mgr <- employeeRepo.manager(data.to)
             admins <- employeeRepo.findByLogin(user.kudosAdmins)
-          } yield( f,t, admins)).map{ x =>
+          } yield( f,t, admins,mgr)).map{ x =>
             x._1 match {
               case Some(from) => x._2 match {
                 case Some(to) =>
@@ -175,6 +176,10 @@ class KudosController @Inject()
                     rejectedon = Some(now),
                     rejectedreason = Some("AwaitingAuth"))
                   kudosToRepo.insert(kudos).map { newKudos =>
+                    val cc: Seq[String] = x._4 match {
+                      case None => Seq.empty[String]
+                      case Some(mgr) => Seq(s"${mgr.login}@$emailDomain")
+                    }
                     val crypt = encryptit(newKudos.id.toString)
                     val url = routes.KudosController.authKudos(crypt.nonce,crypt.cipher).url
                     val bodyText = views.html.shoutout.authEmailText(newKudos,from,to,offlineHostname, url, x._3, emailDomain )
@@ -183,6 +188,7 @@ class KudosController @Inject()
                       subject=s"Authorization Required: for ${to.fullName}",
                       from= s"Shoutout Admin <Shoutout-noreply@$emailDomain>",
                       to = Seq(s"${from.login}@$emailDomain"),
+                      cc = cc,
                       //cc = x._3.map( f => s"${f.login}@$emailDomain" ),
                       bodyText = Some(bodyText.body),
                       bodyHtml = Some(bodyHTML.body)

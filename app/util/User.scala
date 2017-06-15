@@ -20,6 +20,7 @@ package util
 import javax.inject.Inject
 
 import com.typesafe.config.ConfigFactory
+import com.unboundid.ldap.sdk.SearchResultEntry
 import models.people.EmployeeRepo
 import play.api.Logger
 
@@ -117,11 +118,33 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo, executionContext: Execu
   def inManagementTree(user:String,owner:String): Future[Boolean] = {
     userOrManager(owner).map{ users:Seq[String] => users.exists(_.equalsIgnoreCase(user)) }
   }
+
+  /**
+    * Is 'user' part of a distribution group?
+    * @param user the user in question
+    * @param group the group in question
+    * @param ldap LDAP server to search
+    * @return true if it is
+    */
+  // XXX still in development
+  def inDistGroup(user:String, group:String)(implicit ldap:LDAP): Boolean = {
+
+    Logger.warn("Warning. this feature is untested, and doesn't work for shared mailboxes")
+    ldap.getPersonByAccount(user).headOption match {
+      case Some(person) =>
+        val groups: List[String] = person.getAttributeValues("memberof").toList
+        groups.exists(p  => p.equalsIgnoreCase(s"CN=$group,"))
+
+      case None=> false
+    }
+  }
+
   /**
     * return a set of users who are in management chain (including this user)
     * @param user the user login.
     * @return the Set of managers
     */
+
   def userOrManager(user: String): Future[Seq[String]] = {
     employeeRepo.managementTreeUp(user).map(sE => sE.map(_.login))
   }

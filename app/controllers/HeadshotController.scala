@@ -187,7 +187,6 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
         Logger.warn("No Cat Directory?")
         Future.successful(Ok(makeSquare("app/assets/images/noFace.jpg").get.bytes).as("image/jpeg"))
       }
-
     }
     else {
       val currentOnly: Boolean = if (notCurrent.getOrElse("N").equalsIgnoreCase("N")) {
