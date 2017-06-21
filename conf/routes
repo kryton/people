@@ -61,9 +61,11 @@ GET         /kudos/genAuth/:toEncyrpt                       controllers.KudosCon
 
 GET         /shoutout/                                      controllers.KudosController.search( p:Int ?= 0, search: Option[String] ?= None)
 GET         /shoutout/:id                                   controllers.KudosController.id( id:Long )
+
 GET         /shoutout/admin/auth                            controllers.KudosController.testAuth()
 GET         /shoutout/:id/reject                            controllers.KudosController.reject(id:Long, reject: Boolean ?= true )
-
+GET         /award/:login/nominate                          controllers.KudosController.awardNominationForm(login:String )
+POST         /award/:login/nominate                          controllers.KudosController.awardNominationSubmit(login:String )
 GET         /OKR/                                           controllers.OKRController.topX(size: Int ?= 40, format: Option[String] ?= None)
 GET         /OKR/:login                                     controllers.OKRController.login(login:String, quarter:Option[String] ?= None)
 GET         /OKR/:login/:id                                 controllers.OKRController.byObjective(login:String, id:Long)

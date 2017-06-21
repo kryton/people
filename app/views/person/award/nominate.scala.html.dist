@@ -1,0 +1,66 @@
+@import models.people.EmpRelationsRowUtils._
+@import offline.Tables.EmprelationsRow
+@(emp:EmprelationsRow,
+        form:Form[forms.AwardForm.Data])(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        messages:Messages,
+        ldap: util.LDAP)
+
+@main("Nomination") {
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Nominate @emp.fullName for an award</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div> <!-- x_title -->
+                <div class="x_content">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xs-12 col-md-6">
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <img src="/assets/images/specific/award-logo.png">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                    @helper.form(action = routes.KudosController.awardNominationSubmit(emp.login)) {
+                                        @helper.CSRF.formField
+
+                                        <input type="hidden" name="login" value="@emp.login" />
+                                        @helper.textarea(form("description"),
+                                            '_label -> "Please provide as much information as you can about your nominee.",
+                                            'class -> "form-control",'_help ->"" )
+                                        <button class="btn btn-default submit">Submit for nomination</button>
+                                    }
+                                    </div>
+                                </div>
+                                <div class="row"><div class="col-xs-12">
+                                    <p>Questions or comments about this program?  Contact the <a href="#">Award Committee</a>.</p>
+                                </div>
+                                </div>
+                            </div><!-- col-xs- -->
+                            <div class="col-xs-12 col-md-6">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h1>About the Monthly Award</h1>
+                                    </div>
+                                    <div class="panel-body">
+<p>Insert description of award here</p>
+                                    </div>
+                                </div>
+
+                            </div><!-- col-xs- -->
+                        </div>
+                    </div> <!-- container -->
+                </div><!-- x_content -->
+            </div>
+        </div>
+    </div>
+}

@@ -126,3 +126,13 @@ object ResourcePoolForm {
   )
   case class Data(name:String, ordering:Int, poolsize:Int)
 }
+
+object AwardForm {
+  val form = Form(
+    mapping(
+      "login" -> nonEmptyText,
+      "description" -> nonEmptyText
+    )(Data.apply)(Data.unapply)
+  )
+  case class Data(login:String, description:String)
+}

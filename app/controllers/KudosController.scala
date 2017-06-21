@@ -23,9 +23,10 @@ import java.util.Base64
 import javax.inject._
 
 import com.typesafe.config.ConfigFactory
+import forms.{AwardForm, LoginForm}
 import models.people._
 import offline.Tables
-import offline.Tables.{KudostoRow}
+import offline.Tables.KudostoRow
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import models.people.EmpRelationsRowUtils._
 import org.abstractj.kalium.crypto.Random
@@ -66,7 +67,7 @@ class KudosController @Inject()
     webJarAssets: WebJarAssets,
     assets: AssetsFinder,
     ldap:LDAP
-  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
+  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport {
 
   protected val returnURL: String = ConfigFactory.load().getString("kudos.returnURL")
   protected val mailReceipient: Boolean = ConfigFactory.load().getBoolean("kudos.emailRecipient")
@@ -88,10 +89,11 @@ class KudosController @Inject()
      * Storing key information confidentially and doing key rotation properly is a specialized area. Check out Daniel Somerfield's talk: <a href="https://youtu.be/OUSvv2maMYI">Turtles All the Way Down: Storing Secrets in the Cloud and the Data Center</a> for the details.
      */
     val secretHexConfig: String = ConfigFactory.load().getString("kudos.secret")
-    val secretHex  = Base64.getEncoder.encode( secretHexConfig.getBytes())
+    val secretHex = Base64.getEncoder.encode(secretHexConfig.getBytes())
 
     new org.abstractj.kalium.crypto.SecretBox(secretHex)
   }
+
   /**
     * Create an Action to render an HTML page.
     *
@@ -101,33 +103,32 @@ class KudosController @Inject()
     */
 
 
+  def search(page: Int, search: Option[String]): Action[AnyContent] = Action.async { implicit request =>
+    val shoutoutsF = search match {
+      case None => kudosToRepo.all
+      case Some(searchString) => kudosToRepo.all
 
-  def search( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
-      val shoutoutsF = search match {
-        case None => kudosToRepo.all //.map{ emps => Ok(views.html.shoutout.search(Page(emps,page),search)) }
-        case Some(searchString) => kudosToRepo.all
+    }
+    shoutoutsF.map { shoutouts =>
+      if (shoutouts.size == 1) {
+        Future.successful(Redirect(routes.KudosController.id(shoutouts.head.id)))
+      } else {
 
+        Future.sequence(shoutouts.map { shoutout =>
+          val from = employeeRepo.findByLogin(shoutout.fromperson)
+          val to = employeeRepo.findByLogin(shoutout.toperson)
+          (for {
+            f <- from
+            t <- to
+          } yield (f, t)).map { x => (shoutout, x._1, x._2) }
+        }).map { s => Ok(views.html.person.shoutout.search(Page(s, page), search)) }
       }
-      shoutoutsF.map { shoutouts =>
-        if ( shoutouts.size == 1) {
-          Future.successful(Redirect( routes.KudosController.id(shoutouts.head.id)))
-        } else {
-
-           Future.sequence( shoutouts.map{ shoutout =>
-            val from = employeeRepo.findByLogin(shoutout.fromperson)
-            val to = employeeRepo.findByLogin(shoutout.toperson)
-            (for {
-              f <- from
-              t <- to
-            } yield(f,t)).map { x=> (shoutout, x._1, x._2 )}
-          }).map{ s => Ok(views.html.shoutout.search( Page(s,page), search ))}
-        }
-      }.flatMap(identity)
+    }.flatMap(identity)
   }
 
-  def id( ID:Long): Action[AnyContent] = Action.async { implicit request =>
+  def id(ID: Long): Action[AnyContent] = Action.async { implicit request =>
     user.isKudosAdmin(LDAPAuth.getUser()).map { isAdmin =>
-      kudosToRepo.find(ID, isAdmin ).map {
+      kudosToRepo.find(ID, isAdmin).map {
         case Some(kudos: KudostoRow) =>
           val fromF = employeeRepo.findByLogin(kudos.fromperson)
           val toF = employeeRepo.findByLogin(kudos.toperson)
@@ -136,7 +137,7 @@ class KudosController @Inject()
             to <- toF
           } yield (from, to))
             .map { x =>
-              Ok(views.html.shoutout.id(ID, kudos, x._1, x._2, isAdmin ))
+              Ok(views.html.person.shoutout.id(ID, kudos, x._1, x._2, isAdmin))
             }
         case None => Future.successful(NotFound(views.html.page_404("Shoutout ID not found")))
       }.flatMap(identity)
@@ -144,16 +145,16 @@ class KudosController @Inject()
   }
 
   def testAuth() = Action.async { implicit request =>
-    Future.successful(Ok(views.html.shoutout.testAuth(forms.KudosForm.form)))
+    Future.successful(Ok(views.html.person.shoutout.testAuth(forms.KudosForm.form)))
   }
 
   def genKudosEmail() = Action.async { implicit request =>
-    forms.KudosForm.form.bindFromRequest.fold (
+    forms.KudosForm.form.bindFromRequest.fold(
       form => {
         Future.successful(BadRequest("I don't understand that request"))
       },
       data => {
-        if ( data.from.contentEquals(data.to)) {
+        if (data.from.contentEquals(data.to)) {
           Future.successful(BadRequest("Can't compliment yourself"))
         } else {
           (for {
@@ -161,14 +162,14 @@ class KudosController @Inject()
             t <- employeeRepo.findByLogin(data.to)
             mgr <- employeeRepo.manager(data.to)
             admins <- employeeRepo.findByLogin(user.kudosAdmins)
-          } yield( f,t, admins,mgr)).map{ x =>
+          } yield (f, t, admins, mgr)).map { x =>
             x._1 match {
               case Some(from) => x._2 match {
                 case Some(to) =>
                   val now: java.sql.Date = new java.sql.Date(System.currentTimeMillis())
-                  val kudos = KudostoRow(id=0,
-                    fromperson=from.login.toLowerCase,
-                    toperson=to.login.toLowerCase,
+                  val kudos = KudostoRow(id = 0,
+                    fromperson = from.login.toLowerCase,
+                    toperson = to.login.toLowerCase,
                     dateadded = now,
                     feedback = data.message,
                     rejected = true,
@@ -181,12 +182,12 @@ class KudosController @Inject()
                       case Some(mgr) => Seq(s"${mgr.login}@$emailDomain")
                     }
                     val crypt = encryptit(newKudos.id.toString)
-                    val url = routes.KudosController.authKudos(crypt.nonce,crypt.cipher).url
-                    val bodyText = views.html.shoutout.authEmailText(newKudos,from,to,offlineHostname, url, x._3, emailDomain )
-                    val bodyHTML = views.html.shoutout.authEmail(newKudos,from,to, offlineHostname,url, x._3, emailDomain )
+                    val url = routes.KudosController.authKudos(crypt.nonce, crypt.cipher).url
+                    val bodyText = views.html.person.shoutout.authEmailText(newKudos, from, to, offlineHostname, url, x._3, emailDomain)
+                    val bodyHTML = views.html.person.shoutout.authEmail(newKudos, from, to, offlineHostname, url, x._3, emailDomain)
                     val email: Email = Email(
-                      subject=s"Authorization Required: for ${to.fullName}",
-                      from= s"Shoutout Admin <Shoutout-noreply@$emailDomain>",
+                      subject = s"Authorization Required: for ${to.fullName}",
+                      from = s"Shoutout Admin <Shoutout-noreply@$emailDomain>",
                       to = Seq(s"${from.login}@$emailDomain"),
                       cc = cc,
                       //cc = x._3.map( f => s"${f.login}@$emailDomain" ),
@@ -206,12 +207,12 @@ class KudosController @Inject()
       }
     )
 
-  //  Future.successful(Ok("TBD"))
+    //  Future.successful(Ok("TBD"))
   }
 
-  case class Encrypted( nonce:String, cipher:String)
+  case class Encrypted(nonce: String, cipher: String)
 
-  protected def encryptit(toEncrypt:String) = {
+  protected def encryptit(toEncrypt: String): Encrypted = {
 
     val nonce = Nonce.createNonce()
     val rawData = ("42|" + toEncrypt).getBytes(StandardCharsets.UTF_8)
@@ -219,20 +220,21 @@ class KudosController @Inject()
 
     val nonceHex = encoder.encode(nonce.raw)
     val cipherHex = encoder.encode(cipherText)
-    Encrypted(nonceHex,cipherHex)
+    Encrypted(nonceHex, cipherHex)
   }
 
-  def genKudos(toEncyrpt:String) = Action.async { implicit request =>
+  def genKudos(toEncyrpt: String) = Action.async { implicit request =>
     Logger.error("Warning. genKudos should not be run in production. please leave this route commented")
-    if ( environment.mode == Mode.Prod  ) {
+    if (environment.mode == Mode.Prod) {
       Future.successful(InternalServerError("This should not be run in production"))
     } else {
-      val res= encryptit(toEncyrpt)
+      val res = encryptit(toEncyrpt)
       Future.successful(Ok(routes.KudosController.authKudos(res.nonce, res.cipher).toString))
     }
   }
-  def authKudos(nonceString:String,cryptString: String) = Action.async { implicit request =>
-    val nonceHex =nonceString
+
+  def authKudos(nonceString: String, cryptString: String) = Action.async { implicit request =>
+    val nonceHex = nonceString
     val nonce = Nonce.nonceFromBytes(encoder.decode(nonceHex))
     val cipherTextHex = cryptString
     val cipherText = encoder.decode(cipherTextHex)
@@ -240,49 +242,49 @@ class KudosController @Inject()
 
     val rawData: Array[Byte] = box.decrypt(nonce.raw, cipherText)
 
-    val decrypted: String = new String(  rawData, "UTF-8")
+    val decrypted: String = new String(rawData, "UTF-8")
     val parts = decrypted.split("\\|")
 
-    if (parts.length != 2 ) {
+    if (parts.length != 2) {
       Future.successful(BadRequest(s"Invalid message. I was expecting 2 parts\n$decrypted"))
     } else {
       if (parts(0) != "42") {
         Future.successful(BadRequest("Invalid message. Bad cookie"))
       } else {
 
-        kudosToRepo.find(parts(1).toLong,isAdmin = true).map{
+        kudosToRepo.find(parts(1).toLong, isAdmin = true).map {
           case Some(k) =>
             if (k.rejected) {
-              (for{
+              (for {
                 kO <- kudosToRepo.update(k.id,
-                  k.copy( rejected = false,rejectedby = None, rejectedreason = None, rejectedon = None)
+                  k.copy(rejected = false, rejectedby = None, rejectedreason = None, rejectedon = None)
                 )
                 f <- employeeRepo.findByLogin(k.fromperson)
                 t <- employeeRepo.findByLogin(k.toperson)
                 admins <- employeeRepo.findByLogin(user.kudosAdmins)
 
-              } yield(f,t,kO,admins)).map{ xx  =>
+              } yield (f, t, kO, admins)).map { xx =>
                 // TODO get these from LDAP
                 val fromEmail = xx._1 match {
                   case Some(x) => s"${x.fullName} <${x.login}@$emailDomain>"
-                  case None =>s"${k.fromperson} <${k.fromperson}@$emailDomain>"
+                  case None => s"${k.fromperson} <${k.fromperson}@$emailDomain>"
                 }
                 val toEmail = xx._2 match {
                   case Some(x) => s"${x.fullName} <${x.login}@$emailDomain>"
-                  case None =>s"${k.toperson} <${k.toperson}@$emailDomain>"
+                  case None => s"${k.toperson} <${k.toperson}@$emailDomain>"
                 }
                 val subject = xx._2 match {
                   case Some(x) => s"New Shoutout received for ${x.fullName}"
-                  case None => s"New Shoutout received for ${k.toperson }"
+                  case None => s"New Shoutout received for ${k.toperson}"
                 }
 
-                val bodyText = views.html.shoutout.emailText(k,xx._1,xx._2,offlineHostname,  xx._4, emailDomain)
-                val bodyHTML = views.html.shoutout.email(k,xx._1,xx._2, offlineHostname, xx._4, emailDomain )
+                val bodyText = views.html.person.shoutout.emailText(k, xx._1, xx._2, offlineHostname, xx._4, emailDomain)
+                val bodyHTML = views.html.person.shoutout.email(k, xx._1, xx._2, offlineHostname, xx._4, emailDomain)
                 val email: Email = Email(
-                  subject= subject,
-                  from= s"Shoutout Admin <Shoutout-noreply@$emailDomain>",
-                  to = Seq(toEmail,fromEmail),
-                  cc = xx._4.map( f => s"${f.login}@$emailDomain" ),
+                  subject = subject,
+                  from = s"Shoutout Admin <Shoutout-noreply@$emailDomain>",
+                  to = Seq(toEmail, fromEmail),
+                  cc = xx._4.map(f => s"${f.login}@$emailDomain"),
                   bodyText = Some(bodyText.body),
                   bodyHtml = Some(bodyHTML.body)
                 )
@@ -294,14 +296,13 @@ class KudosController @Inject()
               Future.successful(Redirect(routes.KudosController.id(k.id)))
             }
 
-          case None => Future.successful( NotFound("Couldn't find the original message"))
+          case None => Future.successful(NotFound("Couldn't find the original message"))
         }.flatMap(identity)
-       // Ok(parts(1)
       }
     }
   }
 
-  def topX( size:Int, format:Option[String]) = Action.async { implicit request =>
+  def topX(size: Int, format: Option[String]) = Action.async { implicit request =>
     kudosToRepo.latest(size).map { seq =>
       seq.map { line =>
         val theKudos = line._1
@@ -309,7 +310,7 @@ class KudosController @Inject()
         val toEmp = line._2
         KudosExt(fromLogin = theKudos.fromperson,
           fromPerson = fromEmp match {
-            case Some(from) =>Some(from.fullName)
+            case Some(from) => Some(from.fullName)
             case None => None
           },
           headShotFrom = routes.HeadshotController.headShot(theKudos.fromperson).url,
@@ -327,43 +328,89 @@ class KudosController @Inject()
         case Some(x) => x.toLowerCase
         case None => "json"
       }
-      val json = Json.toJson( seq )
-      Ok( json).as("application/json;charset=utf-8").withHeaders(("Access-Control-Allow-Origin","*"))
+      val json = Json.toJson(seq)
+      Ok(json).as("application/json;charset=utf-8").withHeaders(("Access-Control-Allow-Origin", "*"))
     }
   }
 
-  def reject(id:Long, reject:Boolean) = Action.async { implicit request =>
+  def reject(id: Long, reject: Boolean) = Action.async { implicit request =>
     val userid = LDAPAuth.getUser()
-    kudosToRepo.find(id,isAdmin = true).map {
-        case Some(k:KudostoRow) => user.isOwnerManagerOrKudosAdmin(k.toperson, userid).map {
-          case true =>
-            if (reject) {
-              kudosToRepo.update(id,
-                k.copy(
-                  rejected = true,
-                  rejectedon = Some(new java.sql.Date(System.currentTimeMillis())),
-                  rejectedby = userid,
-                  rejectedreason = Some("Website")
-                )
-              ).map { result =>
-                Redirect(routes.KudosController.id(id))
+    kudosToRepo.find(id, isAdmin = true).map {
+      case Some(k: KudostoRow) => user.isOwnerManagerOrKudosAdmin(k.toperson, userid).map {
+        case true =>
+          if (reject) {
+            kudosToRepo.update(id,
+              k.copy(
+                rejected = true,
+                rejectedon = Some(new java.sql.Date(System.currentTimeMillis())),
+                rejectedby = userid,
+                rejectedreason = Some("Website")
+              )
+            ).map { result =>
+              Redirect(routes.KudosController.id(id))
+            }
+          } else {
+            kudosToRepo.update(id,
+              k.copy(
+                rejected = false,
+                rejectedby = userid
+              )
+            ).map { result =>
+              Redirect(routes.KudosController.id(id))
+            }
+          }
+        case false => Future.successful(Unauthorized(views.html.page_403("Not Authorized")))
+      }.flatMap(identity)
+      case None => Future.successful(NotFound(views.html.page_404("Shoutout not found")))
+    }.flatMap(identity)
+    //  Future(Ok(""))
+  }
+
+  def awardNominationForm(toLogin: String) = LDAPAuthAction {
+    Action.async { implicit request =>
+      LDAPAuth.getUser() match {
+        case Some(fromUser) =>
+          (for {
+            e <- employeeRepo.findByLogin(toLogin)
+
+          } yield (e)).map {
+            case Some(emp) => Ok(views.html.person.award.nominate(emp, AwardForm.form))
+            case None => NotFound(views.html.page_404("Login not found"))
+          }
+
+        case None => Future.successful(Unauthorized(views.html.page_403("You need to be logged in")))
+      }
+    }
+  }
+
+  def awardNominationSubmit(toLogin: String): Action[AnyContent] = LDAPAuthAction {
+    Action.async { implicit request =>
+      employeeRepo.findByLogin(toLogin).map {
+        case None => Future.successful(NotFound(views.html.page_404("Login not found")))
+        case Some(emp) =>
+        AwardForm.form.bindFromRequest.fold(
+          form => {
+            Future.successful(BadRequest(views.html.person.award.nominate(emp, form)))
+          },
+          data => {
+            val login = data.login
+            val desc = data.description
+            if ( login.equalsIgnoreCase(toLogin)) {
+              Future.successful{
+                // TODO. submit it in the DB, send an email to HR group to ensure they aren't on a PIP or something
+                Ok(views.html.person.award.nominateSubmitted(emp))
               }
             } else {
-              kudosToRepo.update(id,
-                k.copy(
-                  rejected = false,
-                  rejectedby = userid
-                )
-              ).map { result =>
-                Redirect(routes.KudosController.id(id))
-              }
+              Future.successful(BadRequest("Sync problem."))
             }
-          case false =>Future.successful(Unauthorized(views.html.page_403("Not Authorized")))
-        }.flatMap(identity)
-        case None => Future.successful(NotFound(views.html.page_404("Shoutout not found")))
-    }.flatMap(identity)
-  //  Future(Ok(""))
+          }
+        )
+      }.flatMap(identity)
+    }
   }
+
+
+
 
   implicit val DateWrites = new Writes[java.sql.Date] {
     def writes( d: java.sql.Date) = Json.toJson(
@@ -371,8 +418,6 @@ class KudosController @Inject()
     )
   }
 
-  // XXX TEMPORARY FIX
-  // TODO REVERT THIS BACK
   implicit val KudosExtWrites = new Writes[KudosExt] {
     def writes( k : KudosExt ): JsObject = Json.obj(
       "fromLogin" -> k.fromLogin,

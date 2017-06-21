@@ -4,6 +4,11 @@
 *.cmd
 logs
 target
+project/project
+project/target
+tmp
+dist
+.cache
 /.idea
 /.idea_modules
 /.classpath
@@ -23,4 +28,6 @@ target
 /app/assets/images/cat/*.gif
 /app/assets/images/cat/*.png
 /app/assets/images/cat/*.jpg
-
+/app/assets/images/specific/*.jpg
+/app/assets/images/specific/*.png
+/internal

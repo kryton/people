@@ -7,12 +7,16 @@ It has since morphed into areas to help me (and others) do resource planning and
 * Basic search/display of Org
 * Add photos of people
 * Recognize people (shoutouts)
+* Corporate monthly awards
 * OKR's
 * Matrix teams, Tagging, Workgroups
 
 ## Project
 * Ability to see what work is going on within the department
 * Basic stats on why a project is being done, and for who
+* Basic capacity planning (still a work in progress)
+
+
 
 # feature requests
 ## general
@@ -36,3 +40,11 @@ Around the work coming in,  getting done, or past metrics
 ## CRM
 * Stuff which helps manage our clients.
 * Stuff to help with Incidents/bugs etc.
+
+# To Run
+for the most part it should be 
+* create the DB from the schema, and evolutions
+* find all the 'dist' or 'template' files and modify them to your needs (put your passwords in, and customize it with your logos, corporate values etc)
+* build the docker file
+* figure out how to get a load from your HR system into this. (TBD: provide a sample input file)
+

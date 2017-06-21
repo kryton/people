@@ -1,5 +1,7 @@
+
 import de.heikoseeberger.sbtheader.license.GPLv3
 import play.twirl.sbt.Import.TwirlKeys
+
 
 name := """people"""
 organization := "com.zilbo"
@@ -91,5 +93,15 @@ headers := Map(
   "conf" -> GPLv3("2014", "Ian Holsman", "#"),
   "html" -> GPLv3("2014", "Ian Holsman", "@*")
 )
+
+//TwirlKeys.compileTemplates  += baseDirectory.value / "internal"
+//val internalDir = baseDirectory / "internal"
+
+//sourceDirectory in Compile <<= baseDirectory(_ / "internal")
+//sourceDirectories in (Compile, TwirlKeys.compileTemplates) := Seq((sourceDirectory in Compile).value),
+
+sourceDirectories in (Compile,TwirlKeys.compileTemplates)  ++= Seq(baseDirectory.value / "internal")
+
+sourceDirectories in (Compile, TwirlKeys.compileTemplates) ++= (unmanagedSourceDirectories in Compile).value // ++ internalDir.value
 
 unmanagedSources.in(Compile, createHeaders) ++= sources.in(Compile, TwirlKeys.compileTemplates).value
