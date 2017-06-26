@@ -96,7 +96,7 @@
                                     </thead>
 
                         @results.map { item =>
-                            <tr><td >@item._2.login</td>
+                            <tr><td ><a href="@routes.AuthController.userroles(item._2.login)">@item._2.login</a></td>
                                 <td>@item._2.fullName</td>
                             </tr>
                         }

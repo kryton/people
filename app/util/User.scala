@@ -164,7 +164,7 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo, executionContext: Execu
        //   Logger.info(s"isAdmin - true - $login")
           Future.successful(true)
         } else {
-          Logger.info(s"isAdmin - false - $login")
+          Logger.debug(s"isAdmin - false - $login")
           loginInAdminHierarchy(login.toLowerCase)
         }
       case None => Future.successful(false)

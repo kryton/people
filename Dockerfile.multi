@@ -5,6 +5,7 @@ MAINTAINER  Ian Holsman <kryton@gmail.com>
 # COMMIT PROJECT FILES
 
 ADD         app /root/app
+ADD         internal /root/internal
 ADD         lib /root/lib
 ADD         test /root/test
 ADD         conf /root/conf

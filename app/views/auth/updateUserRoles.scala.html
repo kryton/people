@@ -55,7 +55,7 @@
                             </thead>
                             @allPrefs.toSeq.sortBy(_._2.role).map { pref =>
                             <tr>
-                                <td>@pref._2.role</td>
+                                <td><a href="@routes.AuthController.role(pref._2.id,0)">@pref._2.role</a></td>
                                 <td>@userRolez.get(pref._1).map { ignore =>
                                   <a href="@routes.UserController.enabledisable(login,pref._2.id,enable=false)">Remove It</a>
                                 }.getOrElse{

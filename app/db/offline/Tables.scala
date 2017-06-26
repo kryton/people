@@ -1,20 +1,3 @@
-/*
- * Copyright (C) 2014  Ian Holsman
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package offline
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
@@ -31,79 +14,9 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Aceawardnominationto.schema, Authpermission.schema, Authpreference.schema, Authrole.schema, Authrolepermission.schema, Authuser.schema, Authuserpreference.schema, Businessunit.schema, Corplevel.schema, Costcenter.schema, Empbio.schema, Emphistory.schema, Employeemilestone.schema, Employeeroster.schema, Emppayroll.schema, Emprelations.schema, Emptag.schema, Functionalarea.schema, Gitcommit.schema, Gitissue.schema, Individualarchetype.schema, Individualbusinessunit.schema, Jiraissue.schema, Jiraparentissue.schema, Kudosto.schema, Managerarchetype.schema, Matrixteam.schema, Matrixteammember.schema, Milestone.schema, Office.schema, Okrkeyresult.schema, Okrobjective.schema, PlayEvolutions.schema, Positiontype.schema, Profitcenter.schema, Ratecard.schema, Ratecardrate.schema, Ratecardrole.schema, Resourcepool.schema, Resourcepoolteam.schema, Scenario.schema, Scenariodetail.schema, Scenariolevel.schema, Surveyanswer.schema, Surveycategory.schema, Surveyquestion.schema, Surveyset.schema, Surveysetinstance.schema, Surveysetperson.schema, Teamdescription.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Authpermission.schema, Authpreference.schema, Authrole.schema, Authrolepermission.schema, Authuser.schema, Authuserpreference.schema, Awardnominationto.schema, Businessunit.schema, Corplevel.schema, Costcenter.schema, Empbio.schema, Emphistory.schema, Employeemilestone.schema, Employeeroster.schema, Emppayroll.schema, Emprelations.schema, Emptag.schema, Functionalarea.schema, Gitcommit.schema, Gitissue.schema, Individualarchetype.schema, Individualbusinessunit.schema, Jiraissue.schema, Jiraparentissue.schema, Kudosto.schema, Managerarchetype.schema, Matrixteam.schema, Matrixteammember.schema, Milestone.schema, Office.schema, Okrkeyresult.schema, Okrobjective.schema, PlayEvolutions.schema, Positiontype.schema, Profitcenter.schema, Ratecard.schema, Ratecardrate.schema, Ratecardrole.schema, Resourcepool.schema, Resourcepoolteam.schema, Scenario.schema, Scenariodetail.schema, Scenariolevel.schema, Surveyanswer.schema, Surveycategory.schema, Surveyquestion.schema, Surveyset.schema, Surveysetinstance.schema, Surveysetperson.schema, Teamdescription.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
-
-  /** Entity class storing rows of table Aceawardnominationto
-   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
-   *  @param fromperson Database column FromPerson SqlType(VARCHAR), Length(254,true)
-   *  @param toperson Database column ToPerson SqlType(VARCHAR), Length(254,true)
-   *  @param dateadded Database column DateAdded SqlType(DATE)
-   *  @param managersfeedback Database column ManagersFeedback SqlType(TEXT), Default(None)
-   *  @param valuerespect Database column valueRespect SqlType(TEXT), Default(None)
-   *  @param valueintegrity Database column valueIntegrity SqlType(TEXT), Default(None)
-   *  @param valuecustomercentricity Database column valueCustomerCentricity SqlType(TEXT), Default(None)
-   *  @param valueinnovation Database column valueInnovation SqlType(TEXT), Default(None)
-   *  @param valueglobalperspective Database column valueGlobalPerspective SqlType(TEXT), Default(None)
-   *  @param valueaccountability Database column valueAccountability SqlType(TEXT), Default(None)
-   *  @param valueother Database column valueOther SqlType(TEXT), Default(None)
-   *  @param rejected Database column Rejected SqlType(BIT)
-   *  @param rejectedby Database column RejectedBy SqlType(VARCHAR), Length(254,true), Default(None)
-   *  @param rejectedon Database column RejectedOn SqlType(DATE), Default(None)
-   *  @param rejectedreason Database column RejectedReason SqlType(VARCHAR), Length(254,true), Default(None) */
-  final case class AceawardnominationtoRow(id: Long, fromperson: String, toperson: String, dateadded: java.sql.Date, managersfeedback: Option[String] = None, valuerespect: Option[String] = None, valueintegrity: Option[String] = None, valuecustomercentricity: Option[String] = None, valueinnovation: Option[String] = None, valueglobalperspective: Option[String] = None, valueaccountability: Option[String] = None, valueother: Option[String] = None, rejected: Boolean, rejectedby: Option[String] = None, rejectedon: Option[java.sql.Date] = None, rejectedreason: Option[String] = None)
-  /** GetResult implicit for fetching AceawardnominationtoRow objects using plain SQL queries */
-  implicit def GetResultAceawardnominationtoRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Date], e3: GR[Option[String]], e4: GR[Boolean], e5: GR[Option[java.sql.Date]]): GR[AceawardnominationtoRow] = GR{
-    prs => import prs._
-    AceawardnominationtoRow.tupled((<<[Long], <<[String], <<[String], <<[java.sql.Date], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String], <<[Boolean], <<?[String], <<?[java.sql.Date], <<?[String]))
-  }
-  /** Table description of table aceawardnominationto. Objects of this class serve as prototypes for rows in queries. */
-  class Aceawardnominationto(_tableTag: Tag) extends profile.api.Table[AceawardnominationtoRow](_tableTag, Some("offline"), "aceawardnominationto") {
-    def * = (id, fromperson, toperson, dateadded, managersfeedback, valuerespect, valueintegrity, valuecustomercentricity, valueinnovation, valueglobalperspective, valueaccountability, valueother, rejected, rejectedby, rejectedon, rejectedreason) <> (AceawardnominationtoRow.tupled, AceawardnominationtoRow.unapply)
-    /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(fromperson), Rep.Some(toperson), Rep.Some(dateadded), managersfeedback, valuerespect, valueintegrity, valuecustomercentricity, valueinnovation, valueglobalperspective, valueaccountability, valueother, Rep.Some(rejected), rejectedby, rejectedon, rejectedreason).shaped.<>({r=>import r._; _1.map(_=> AceawardnominationtoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7, _8, _9, _10, _11, _12, _13.get, _14, _15, _16)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
-
-    /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
-    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
-    /** Database column FromPerson SqlType(VARCHAR), Length(254,true) */
-    val fromperson: Rep[String] = column[String]("FromPerson", O.Length(254,varying=true))
-    /** Database column ToPerson SqlType(VARCHAR), Length(254,true) */
-    val toperson: Rep[String] = column[String]("ToPerson", O.Length(254,varying=true))
-    /** Database column DateAdded SqlType(DATE) */
-    val dateadded: Rep[java.sql.Date] = column[java.sql.Date]("DateAdded")
-    /** Database column ManagersFeedback SqlType(TEXT), Default(None) */
-    val managersfeedback: Rep[Option[String]] = column[Option[String]]("ManagersFeedback", O.Default(None))
-    /** Database column valueRespect SqlType(TEXT), Default(None) */
-    val valuerespect: Rep[Option[String]] = column[Option[String]]("valueRespect", O.Default(None))
-    /** Database column valueIntegrity SqlType(TEXT), Default(None) */
-    val valueintegrity: Rep[Option[String]] = column[Option[String]]("valueIntegrity", O.Default(None))
-    /** Database column valueCustomerCentricity SqlType(TEXT), Default(None) */
-    val valuecustomercentricity: Rep[Option[String]] = column[Option[String]]("valueCustomerCentricity", O.Default(None))
-    /** Database column valueInnovation SqlType(TEXT), Default(None) */
-    val valueinnovation: Rep[Option[String]] = column[Option[String]]("valueInnovation", O.Default(None))
-    /** Database column valueGlobalPerspective SqlType(TEXT), Default(None) */
-    val valueglobalperspective: Rep[Option[String]] = column[Option[String]]("valueGlobalPerspective", O.Default(None))
-    /** Database column valueAccountability SqlType(TEXT), Default(None) */
-    val valueaccountability: Rep[Option[String]] = column[Option[String]]("valueAccountability", O.Default(None))
-    /** Database column valueOther SqlType(TEXT), Default(None) */
-    val valueother: Rep[Option[String]] = column[Option[String]]("valueOther", O.Default(None))
-    /** Database column Rejected SqlType(BIT) */
-    val rejected: Rep[Boolean] = column[Boolean]("Rejected")
-    /** Database column RejectedBy SqlType(VARCHAR), Length(254,true), Default(None) */
-    val rejectedby: Rep[Option[String]] = column[Option[String]]("RejectedBy", O.Length(254,varying=true), O.Default(None))
-    /** Database column RejectedOn SqlType(DATE), Default(None) */
-    val rejectedon: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("RejectedOn", O.Default(None))
-    /** Database column RejectedReason SqlType(VARCHAR), Length(254,true), Default(None) */
-    val rejectedreason: Rep[Option[String]] = column[Option[String]]("RejectedReason", O.Length(254,varying=true), O.Default(None))
-
-    /** Index over (fromperson) (database name FromPerson) */
-    val index1 = index("FromPerson", fromperson)
-    /** Index over (toperson) (database name ToPerson) */
-    val index2 = index("ToPerson", toperson)
-  }
-  /** Collection-like TableQuery object for table Aceawardnominationto */
-  lazy val Aceawardnominationto = new TableQuery(tag => new Aceawardnominationto(tag))
 
   /** Entity class storing rows of table Authpermission
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
@@ -287,6 +200,76 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Authuserpreference */
   lazy val Authuserpreference = new TableQuery(tag => new Authuserpreference(tag))
+
+  /** Entity class storing rows of table Awardnominationto
+   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param fromperson Database column FromPerson SqlType(VARCHAR), Length(254,true)
+   *  @param toperson Database column ToPerson SqlType(VARCHAR), Length(254,true)
+   *  @param dateadded Database column DateAdded SqlType(DATE)
+   *  @param awarded Database column Awarded SqlType(INT)
+   *  @param awardactionby Database column AwardActionBy SqlType(VARCHAR), Length(254,true), Default(None)
+   *  @param awardactionon Database column AwardActionOn SqlType(DATE), Default(None)
+   *  @param managersfeedback Database column ManagersFeedback SqlType(TEXT), Default(None)
+   *  @param nominationfeedback Database column nominationFeedback SqlType(TEXT), Default(None)
+   *  @param hrapproved Database column HRApproved SqlType(INT)
+   *  @param hractionby Database column HRActionBy SqlType(VARCHAR), Length(254,true), Default(None)
+   *  @param hractionon Database column HRActionOn SqlType(DATE), Default(None)
+   *  @param rejected Database column Rejected SqlType(BIT)
+   *  @param rejectedby Database column RejectedBy SqlType(VARCHAR), Length(254,true), Default(None)
+   *  @param rejectedon Database column RejectedOn SqlType(DATE), Default(None)
+   *  @param rejectedreason Database column RejectedReason SqlType(VARCHAR), Length(254,true), Default(None) */
+  final case class AwardnominationtoRow(id: Long, fromperson: String, toperson: String, dateadded: java.sql.Date, awarded: Int, awardactionby: Option[String] = None, awardactionon: Option[java.sql.Date] = None, managersfeedback: Option[String] = None, nominationfeedback: Option[String] = None, hrapproved: Int, hractionby: Option[String] = None, hractionon: Option[java.sql.Date] = None, rejected: Boolean, rejectedby: Option[String] = None, rejectedon: Option[java.sql.Date] = None, rejectedreason: Option[String] = None)
+  /** GetResult implicit for fetching AwardnominationtoRow objects using plain SQL queries */
+  implicit def GetResultAwardnominationtoRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Date], e3: GR[Int], e4: GR[Option[String]], e5: GR[Option[java.sql.Date]], e6: GR[Boolean]): GR[AwardnominationtoRow] = GR{
+    prs => import prs._
+    AwardnominationtoRow.tupled((<<[Long], <<[String], <<[String], <<[java.sql.Date], <<[Int], <<?[String], <<?[java.sql.Date], <<?[String], <<?[String], <<[Int], <<?[String], <<?[java.sql.Date], <<[Boolean], <<?[String], <<?[java.sql.Date], <<?[String]))
+  }
+  /** Table description of table awardnominationto. Objects of this class serve as prototypes for rows in queries. */
+  class Awardnominationto(_tableTag: Tag) extends profile.api.Table[AwardnominationtoRow](_tableTag, Some("offline"), "awardnominationto") {
+    def * = (id, fromperson, toperson, dateadded, awarded, awardactionby, awardactionon, managersfeedback, nominationfeedback, hrapproved, hractionby, hractionon, rejected, rejectedby, rejectedon, rejectedreason) <> (AwardnominationtoRow.tupled, AwardnominationtoRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(fromperson), Rep.Some(toperson), Rep.Some(dateadded), Rep.Some(awarded), awardactionby, awardactionon, managersfeedback, nominationfeedback, Rep.Some(hrapproved), hractionby, hractionon, Rep.Some(rejected), rejectedby, rejectedon, rejectedreason).shaped.<>({r=>import r._; _1.map(_=> AwardnominationtoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6, _7, _8, _9, _10.get, _11, _12, _13.get, _14, _15, _16)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column FromPerson SqlType(VARCHAR), Length(254,true) */
+    val fromperson: Rep[String] = column[String]("FromPerson", O.Length(254,varying=true))
+    /** Database column ToPerson SqlType(VARCHAR), Length(254,true) */
+    val toperson: Rep[String] = column[String]("ToPerson", O.Length(254,varying=true))
+    /** Database column DateAdded SqlType(DATE) */
+    val dateadded: Rep[java.sql.Date] = column[java.sql.Date]("DateAdded")
+    /** Database column Awarded SqlType(INT) */
+    val awarded: Rep[Int] = column[Int]("Awarded")
+    /** Database column AwardActionBy SqlType(VARCHAR), Length(254,true), Default(None) */
+    val awardactionby: Rep[Option[String]] = column[Option[String]]("AwardActionBy", O.Length(254,varying=true), O.Default(None))
+    /** Database column AwardActionOn SqlType(DATE), Default(None) */
+    val awardactionon: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("AwardActionOn", O.Default(None))
+    /** Database column ManagersFeedback SqlType(TEXT), Default(None) */
+    val managersfeedback: Rep[Option[String]] = column[Option[String]]("ManagersFeedback", O.Default(None))
+    /** Database column nominationFeedback SqlType(TEXT), Default(None) */
+    val nominationfeedback: Rep[Option[String]] = column[Option[String]]("nominationFeedback", O.Default(None))
+    /** Database column HRApproved SqlType(INT) */
+    val hrapproved: Rep[Int] = column[Int]("HRApproved")
+    /** Database column HRActionBy SqlType(VARCHAR), Length(254,true), Default(None) */
+    val hractionby: Rep[Option[String]] = column[Option[String]]("HRActionBy", O.Length(254,varying=true), O.Default(None))
+    /** Database column HRActionOn SqlType(DATE), Default(None) */
+    val hractionon: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("HRActionOn", O.Default(None))
+    /** Database column Rejected SqlType(BIT) */
+    val rejected: Rep[Boolean] = column[Boolean]("Rejected")
+    /** Database column RejectedBy SqlType(VARCHAR), Length(254,true), Default(None) */
+    val rejectedby: Rep[Option[String]] = column[Option[String]]("RejectedBy", O.Length(254,varying=true), O.Default(None))
+    /** Database column RejectedOn SqlType(DATE), Default(None) */
+    val rejectedon: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("RejectedOn", O.Default(None))
+    /** Database column RejectedReason SqlType(VARCHAR), Length(254,true), Default(None) */
+    val rejectedreason: Rep[Option[String]] = column[Option[String]]("RejectedReason", O.Length(254,varying=true), O.Default(None))
+
+    /** Index over (fromperson) (database name FromPerson) */
+    val index1 = index("FromPerson", fromperson)
+    /** Index over (toperson) (database name ToPerson) */
+    val index2 = index("ToPerson", toperson)
+  }
+  /** Collection-like TableQuery object for table Awardnominationto */
+  lazy val Awardnominationto = new TableQuery(tag => new Awardnominationto(tag))
 
   /** Entity class storing rows of table Businessunit
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey

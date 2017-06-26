@@ -65,7 +65,16 @@ GET         /shoutout/:id                                   controllers.KudosCon
 GET         /shoutout/admin/auth                            controllers.KudosController.testAuth()
 GET         /shoutout/:id/reject                            controllers.KudosController.reject(id:Long, reject: Boolean ?= true )
 GET         /award/:login/nominate                          controllers.KudosController.awardNominationForm(login:String )
-POST         /award/:login/nominate                          controllers.KudosController.awardNominationSubmit(login:String )
+POST        /award/:login/nominate                          controllers.KudosController.awardNominationSubmit(login:String )
+GET         /award/:login/:id/HRApprove                     controllers.KudosController.awardHRApprove(login:String, id:Long)
+GET         /award/:login/:id/HRReject                      controllers.KudosController.awardHRReject(login:String, id:Long)
+GET         /award/HRApprove                                controllers.KudosController.awardHRApproveList(p:Int ?=0 )
+GET         /award/:login/:id/Approve                     controllers.KudosController.awardApprove(login:String, id:Long)
+GET         /award/:login/:id/UnApprove                     controllers.KudosController.awardUnApprove(login:String, id:Long)
+GET         /award/:login/:id/Reject                      controllers.KudosController.awardReject(login:String, id:Long)
+GET         /award/Approve                                controllers.KudosController.awardApproveList(p:Int ?=0 )
+
+
 GET         /OKR/                                           controllers.OKRController.topX(size: Int ?= 40, format: Option[String] ?= None)
 GET         /OKR/:login                                     controllers.OKRController.login(login:String, quarter:Option[String] ?= None)
 GET         /OKR/:login/:id                                 controllers.OKRController.byObjective(login:String, id:Long)
@@ -133,6 +142,7 @@ POST        /mclient/:id                                    controllers.ManagedC
 
 
 ## Auth URLs
+GET         /auth/active/:login                             controllers.AuthController.active(login:String)
 GET         /auth/user/:login                               controllers.AuthController.userroles(login:String)
 GET         /auth/role/                                     controllers.AuthController.roleSearch( p:Int ?= 0, search: Option[String] ?= None)
 GET         /auth/role/:id                                  controllers.AuthController.role(id:Long, p:Int ?= 0)

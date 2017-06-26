@@ -37,23 +37,33 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
-                    Please ensure your profile picture is a head shot and a minimum 300x300 size.<br>
-                    Current Photo - <img class="img-responsive" src='@routes.HeadshotController.headShot(login)' >
+                    <div class="row">
+                    <div class="col-xs-4">
+                        <img class="img-responsive" src='@routes.HeadshotController.headShot(login)' >
+                    </div>
+                        <div class="col-xs-6">
 
-                    @form(action = CSRF(routes.HeadshotController.headShotUpdate(login)),  'enctype -> "multipart/form-data") {
-                        <div class="col-xs-12 col-md-8">
-                            <fieldset>
-                                <input type="file" name='file' >
-                            </fieldset>
+                                @form(action = CSRF(routes.HeadshotController.headShotUpdate(login)),  'enctype -> "multipart/form-data") {
+                                    Please ensure your profile picture is a head shot and a minimum 300x300 size.
+                                    <div class="col-xs-12 col-md-8">
+                                        <fieldset>
+                                            <input type="file" name='file' >
+                                        </fieldset>
 
-                            <div class="col-xs-12 col-md-4">
-                                <div class="actions">
-                                    <input type="submit" value="Update" class="btn btn-primary">
-                                    <a href="#" class="btn btn-default">Cancel</a>
-                                </div>
-                            </div>
-                        }
-                    @theForm.errors
+                                        <div class="col-xs-12 col-md-4">
+                                            <div class="actions">
+                                                <input type="submit" value="Update" class="btn btn-primary">
+                                                <a href="#" class="btn btn-default">Cancel</a>
+                                            </div>
+                                        </div>
+                                        }
+                        </div>
+                    </div>
+                    <div class="row">
+                    <div class="col-xs-12">
+                        @theForm.errors
+                    </div>
+                    </div>
                 </div>
             </div>
         </div>

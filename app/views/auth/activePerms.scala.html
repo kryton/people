@@ -1,0 +1,50 @@
+@import offline.Tables.AuthpermissionRow
+@import offline.Tables.AuthpreferenceRow
+@(login:String,
+        allPerms:Map[String,AuthpermissionRow],
+        userPerms:Map[String,AuthpermissionRow])(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+@main(s"Active Preferences & Permissions for $login"){
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Details</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                    <!-- x_title -->
+                <div class="x_content">
+                    <div class="container">
+<table class="table">
+    <tr>
+        <th>Permission</th><th>Description</th>
+        <th>Granted</th><th>In Session</th>
+    </tr>
+                        @allPerms.map { row =>
+                            <tr>
+                                <td><a href="@routes.AuthController.permission(row._2.id)">@row._2.permission</a></td>
+                                <td>@row._2.description</td>
+                                @userPerms.get(row._1).map { x =>
+                                    <td>Y</td>
+                                }.getOrElse {
+                                    <td>&nbsp;</td>
+                                }
+                                @request.session.get(row._1).map { x =>
+                                    <td>@x</td>
+                                }.getOrElse{
+                                    <td>&nbsp;</td>
+                                }
+                            </tr>
+                        }
+
+</table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -23,6 +23,7 @@ import com.typesafe.config.ConfigFactory
 import play.Logger
 import play.api.libs.typedmap.TypedKey
 import play.api.mvc._
+import play.shaded.ahc.org.asynchttpclient.netty.handler.intercept.Unauthorized401Interceptor
 import util.{LDAP, basicAuth}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -75,13 +76,52 @@ case class LDAPAuthAction[A] (action: Action[A])  extends Action[A] {
   override def executionContext: ExecutionContext = action.executionContext
 }
 
-//object LDAPAuthAction {
-//  def apply(action:Action[AnyContent])(implicit executionContext: ExecutionContext) = new LDAPAuthAction(action)
-//}
+case class LDAPAuthPermission[A] (permission:String)(action: Action[A])  extends Action[A] {
+  lazy val unauthResult: Result = Results.Unauthorized.withHeaders(("WWW-Authenticate", "Basic realm=\"use your Digital River Login please\""))
+
+  def apply(request: Request[A]): Future[Result] = {
+    request.session.get("userId") match {
+      case Some(user) => if ( LDAPAuth.hasPermission(permission)(request)) {
+        action(request)
+      } else {
+        Logger.warn(s"User:$user - missing permission $permission ${request.uri}")
+        Future.successful(Results.Unauthorized(views.html.page_403("You don't have permission for that")))
+      }
+
+      case None => Future.successful( Results.Redirect( routes.HomeController.login()))
+    }
+  }
+
+  override  def parser: BodyParser[A] = action.parser
+  override def executionContext: ExecutionContext = action.executionContext
+}
+
 
 object LDAPAuth {
   def getUser()(implicit request: Request[_]):Option[String] = {
    // request.attrs.get(LDAPAuthAttrs.UserName)
     request.session.get("userId")
+  }
+  def hasPermission(perm:String)(implicit request:Request[_]): Boolean = {
+    val isAdmin = request.session.get("isAdmin") match {
+      case Some(x) => x.equalsIgnoreCase("true")
+      case None => false
+    }
+    if (isAdmin) {
+      true
+    } else {
+      request.session.get(s"perm$perm") match {
+        case None => getUser match {
+          case None => false
+          // TODO if the permission isn't there..look it up. but it means making this a future.
+          case Some(user) => false
+        }
+        case Some(s) => if (s.equalsIgnoreCase("Y")) {
+          true
+        } else {
+          false
+        }
+      }
+    }
   }
 }

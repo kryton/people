@@ -54,6 +54,15 @@ class PermissionRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
     }
   }.flatMap(identity)
 
+  def permissionsForUser(user:String) :Future[Seq[AuthpermissionRow]] = {
+    db.run(
+      Authuser.filter(_.username.toLowerCase === user.toLowerCase)
+        .join(Authrolepermission).on(_.roleid === _.roleid)
+        .join(Authpermission).on(_._2.permissionid === _.id)
+        .result
+    ).map { resultS => resultS.map(_._2) }
+  }
+
   def all = db.run(Authpermission.sortBy( _.permission).result)
   def search(term:String) = db.run(Authpermission.filter(_.permission startsWith term).sortBy( _.permission).result)
 

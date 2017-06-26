@@ -14,7 +14,7 @@ resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
 lazy val slickGenerate = taskKey[Seq[File]]("slick code generation from an existing database")
 
 libraryDependencies ++= Seq(
@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   guice,
   // jdbc,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0-M2" % Test,
-  "com.typesafe.play" %% "play-slick" % "3.0.0-RC1",
+  "com.typesafe.play" %% "play-slick" % "3.0.0",
   //"com.typesafe.play" %% "play-slick-evolutions" % "3.0.0-M3",
   "com.typesafe.slick" %% "slick" % slickVersion,
   "com.typesafe.slick" %% "slick-codegen" % slickVersion,

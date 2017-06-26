@@ -28,7 +28,7 @@
 <p>@obj.feedback</p>
 
 <p>
-    Please click <a href="@host@url">here</a> to confirm your post. If you didnâ€™t post this recognition,
+    Please click <a href="@host@url">here</a> to confirm your post. If you didn't post this recognition,
     please ignore this message or forward it to one of the admins: @admins.map { admin =>
         @admin.getLDAPPerson().map { LDAPPerson =>
             <a href="mailto:@admin.eMail(Some(LDAPPerson))">@admin.fullName</a>

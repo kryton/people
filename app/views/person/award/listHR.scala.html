@@ -1,0 +1,166 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import offline.Tables.KudostoRow
+@import people.EmpRelationsRowUtils._
+@import offline.Tables.EmprelationsRow
+@import offline.Tables.AwardnominationtoRow
+@(  page: util.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow)],
+    rejected: util.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow)]
+       )(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+
+
+@main("HR Review/Approval needed") {
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>HR Approval required</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+            @Option(page.items).filterNot(_.isEmpty).map { results =>
+                <div class="container">
+                    <div class="row"><div class="col-xs-12">
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th >From</th>
+            <th >To</th>
+            <th>Nomination</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @results.map { mtm =>
+            <tr>
+                <td>@mtm._1.dateadded</td>
+
+                <td>
+                    <a href="@routes.PersonController.id(mtm._2.login)">@mtm._2.fullName</a>
+                </td>
+
+                <td>
+                    <a href="@routes.PersonController.id(mtm._3.login)">@mtm._3.fullName</a>
+                </td>
+
+            <td>
+                @mtm._1.nominationfeedback.map { x =>
+                  @x
+                }
+            </td>
+            <td><a href="@routes.KudosController.awardHRApprove(mtm._1.toperson,mtm._1.id)">Approve</a> <a href="@routes.KudosController.awardHRReject(mtm._1.toperson,mtm._1.id)">Reject</a></td>
+        </tr>
+        }
+    </tbody>
+    </table>
+
+                    </div>
+                </div>
+               <div class="row">
+                @page.prev.map { x =>
+                    <a href="@routes.KudosController.awardHRApproveList(x)">... prev ...</a>
+                }
+                @page.next.map { x =>
+                    <a href="@routes.KudosController.awardHRApproveList(x)">... next ...</a>
+                }
+
+               </div>
+            </div>
+            }
+            </div>
+        </div> <!-- x_panel -->
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Recent HR Rejections</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+            @Option(rejected.items).filterNot(_.isEmpty).map { results =>
+                <div class="container">
+                    <div class="row"><div class="col-xs-12">
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th >From</th>
+                    <th >To</th>
+                    <th>Nomination</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+        @results.map { mtm =>
+            <tr>
+                <td>@mtm._1.dateadded</td>
+
+                <td>
+                    <a href="@routes.PersonController.id(mtm._2.login)">@mtm._2.fullName</a>
+                </td>
+
+                <td>
+                    <a href="@routes.PersonController.id(mtm._3.login)">@mtm._3.fullName</a>
+                </td>
+
+            <td>
+                @mtm._1.nominationfeedback.map { x =>
+                  @x
+                }
+            </td>
+            <td><a href="@routes.KudosController.awardHRApprove(mtm._1.toperson,mtm._1.id)">Approve</a></td>
+        </tr>
+        }
+    </tbody>
+    </table>
+
+                    </div>
+                </div>
+               <div class="row">
+                @page.prev.map { x =>
+                    <a href="@routes.KudosController.awardHRApproveList(x)">... prev ...</a>
+                }
+                @page.next.map { x =>
+                    <a href="@routes.KudosController.awardHRApproveList(x)">... next ...</a>
+                }
+
+               </div>
+            </div>
+            }
+            </div>
+        </div> <!-- x_panel -->
+
+    </div>
+</div>
+}

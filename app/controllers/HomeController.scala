@@ -22,7 +22,7 @@ import javax.inject._
 
 import com.typesafe.config.ConfigFactory
 import forms.LoginForm
-import models.auth.UserPrefRepo
+import models.auth.{PermissionRepo, UserPrefRepo}
 import models.people._
 import models.product.{ProductFeatureRepo, ProductTrackRepo}
 import offline.Tables.{EmphistoryRow, EmprelationsRow, KudostoRow}
@@ -57,6 +57,7 @@ class HomeController @Inject()
     kudosToRepo: KudosToRepo,
     empHistoryRepo: EmpHistoryRepo,
     userRepo: UserPrefRepo,
+    permissionRepo: PermissionRepo,
     user: User
   )(implicit ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
@@ -108,14 +109,19 @@ class HomeController @Inject()
         val credentials = data.username
         if (enableAuth) {
           if (ldap.authenticateAccount(data.username, data.password)) {
-            Logger.info(s"LoginSubmit ${data.username} Auth")
+         //   Logger.info(s"LoginSubmit ${data.username} Auth")
             (for{
               emp <- employeeRepo.findByLogin(data.username)
               prefs <- userRepo.userPrefs(data.username).map( s=> s.map(_._2.code))
               isSpecial <- user.isSpecialLogo( Some( data.username))
               isCatLover <- user.isACatLover(Some(data.username))
-            } yield (emp, isSpecial,prefs, isCatLover)).map { x =>
-              val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString,"cats" -> x._4.toString) ++ x._3.map(y=> y -> "Y")
+              isAdmin <- user.isAdmin(Some(data.username))
+              perms <- permissionRepo.permissionsForUser(data.username)
+            } yield (emp, isSpecial,prefs, isCatLover,isAdmin,perms)).map { x =>
+              val permKeys = x._6.map( p => s"perm${p.permission}" -> "Y")
+              val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString,"cats" -> x._4.toString,"isAdmin" -> x._5.toString) ++
+                x._3.map(y=> y -> "Y") ++
+                permKeys
 
               x._1 match {
                 case Some(emp) =>
@@ -125,7 +131,7 @@ class HomeController @Inject()
               }
             }
           } else {
-            Logger.info(s"LoginSubmit ${data.username} Bad Password")
+           // Logger.info(s"LoginSubmit ${data.username} Bad Password")
             Future.successful(Redirect(routes.HomeController.login()).flashing("error" -> "invalid.credentials"))
           }
         } else {
@@ -135,9 +141,15 @@ class HomeController @Inject()
             isSpecial <- user.isSpecialLogo( Some( data.username))
             prefs <- userRepo.userPrefs(data.username).map( s=> s.map(_._2.code))
             isCatLover <- user.isACatLover(Some(data.username))
-          } yield (emp, isSpecial,prefs,isCatLover)).map { x =>
-            Logger.info(s"CATS = ${x._4.toString}")
-            val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString,"cats" -> x._4.toString) ++ x._3.map(y=> y -> "Y")
+            isAdmin <- user.isAdmin(Some(data.username))
+            perms <- permissionRepo.permissionsForUser(data.username)
+
+          } yield (emp, isSpecial,prefs,isCatLover,isAdmin,perms )).map { x =>
+          //  Logger.info(s"CATS = ${x._4.toString}")
+            val permKeys = x._6.map( p => s"perm${p.permission}" -> "Y")
+            val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString,"cats" -> x._4.toString,"isAdmin" -> x._5.toString) ++
+              x._3.map(y=> y -> "Y") ++
+              permKeys
 
             x._1 match {
               case Some(emp) => Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> emp.fullName)
