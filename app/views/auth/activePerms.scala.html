@@ -31,12 +31,12 @@
                                 @userPerms.get(row._1).map { x =>
                                     <td>Y</td>
                                 }.getOrElse {
-                                    <td>&nbsp;</td>
+                                    <td>N</td>
                                 }
                                 @request.session.get(row._1).map { x =>
                                     <td>@x</td>
                                 }.getOrElse{
-                                    <td>&nbsp;</td>
+                                    <td>N</td>
                                 }
                             </tr>
                         }

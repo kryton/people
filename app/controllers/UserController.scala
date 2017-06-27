@@ -23,6 +23,7 @@ import javax.inject._
 import models.auth.{UserPrefRepo, UserRepo}
 import models.people._
 import offline.Tables.{CostcenterRow, FunctionalareaRow, ProfitcenterRow}
+import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
@@ -84,20 +85,33 @@ class UserController @Inject()
   def enabledisable(login:String, pref:Long, enable:Boolean) = LDAPAuthAction {
 
     Action.async { implicit request =>
-      user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map {
+      val loggedInUser = LDAPAuth.getUser()
+      user.isOwnerManagerOrAdmin(login, loggedInUser ).map {
         case true =>
-          //val enableIt = enable.getOrElse(false)
           userPrefRepo.findPref(pref).map{
             case Some(preference) =>
-              if (enable) {
+              ( if (enable) {
                 userPrefRepo.enablePref(login, pref).map { result =>
-                  Redirect(routes.UserController.prefs(login)).addingToSession(preference.code -> "Y")
+                  user.getUserSession(login).map { session =>
+                    if ( loggedInUser.getOrElse("-").equalsIgnoreCase(login)) {
+                      Redirect(routes.UserController.prefs(login)).withSession(session:_*)//.addingToSession(session:_*)
+                    } else {
+                      Redirect(routes.UserController.prefs(login))
+                    }
+                  }
                 }
               } else {
                 userPrefRepo.disablePref(login, pref).map { result =>
-                  Redirect(routes.UserController.prefs(login)).removingFromSession(preference.code)
+                  user.getUserSession(login).map{ session =>
+                    if ( loggedInUser.getOrElse("-").equalsIgnoreCase(login)) {
+
+                      Redirect(routes.UserController.prefs(login)).withSession(session:_*)//.removingFromSession(preference.code).addingToSession(session:_*)
+                    } else {
+                      Redirect(routes.UserController.prefs(login))
+                    }
+                  }
                 }
-              }
+              }).flatMap(identity)
             case None => Future.successful(NotFound(views.html.page_404("Preference not found")))
           }.flatMap(identity)
 

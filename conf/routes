@@ -69,10 +69,10 @@ POST        /award/:login/nominate                          controllers.KudosCon
 GET         /award/:login/:id/HRApprove                     controllers.KudosController.awardHRApprove(login:String, id:Long)
 GET         /award/:login/:id/HRReject                      controllers.KudosController.awardHRReject(login:String, id:Long)
 GET         /award/HRApprove                                controllers.KudosController.awardHRApproveList(p:Int ?=0 )
-GET         /award/:login/:id/Approve                     controllers.KudosController.awardApprove(login:String, id:Long)
+GET         /award/:login/:id/Approve                       controllers.KudosController.awardApprove(login:String, id:Long)
 GET         /award/:login/:id/UnApprove                     controllers.KudosController.awardUnApprove(login:String, id:Long)
-GET         /award/:login/:id/Reject                      controllers.KudosController.awardReject(login:String, id:Long)
-GET         /award/Approve                                controllers.KudosController.awardApproveList(p:Int ?=0 )
+GET         /award/:login/:id/Reject                        controllers.KudosController.awardReject(login:String, id:Long)
+GET         /award/Approve                                  controllers.KudosController.awardApproveList(p:Int ?=0 )
 
 
 GET         /OKR/                                           controllers.OKRController.topX(size: Int ?= 40, format: Option[String] ?= None)
@@ -144,6 +144,7 @@ POST        /mclient/:id                                    controllers.ManagedC
 ## Auth URLs
 GET         /auth/active/:login                             controllers.AuthController.active(login:String)
 GET         /auth/user/:login                               controllers.AuthController.userroles(login:String)
+GET         /auth/user/:login/:id/:enable                   controllers.AuthController.enabledisable(login:String,id:Long, enable:Boolean )
 GET         /auth/role/                                     controllers.AuthController.roleSearch( p:Int ?= 0, search: Option[String] ?= None)
 GET         /auth/role/:id                                  controllers.AuthController.role(id:Long, p:Int ?= 0)
 POST        /auth/role/:id/newUSER                          controllers.AuthController.newUserRole(id:Long)

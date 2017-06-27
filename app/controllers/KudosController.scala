@@ -19,6 +19,7 @@ package controllers
 
 import java.nio.charset.StandardCharsets
 import java.sql.Date
+import java.time.{LocalDateTime, LocalTime, Period, ZoneOffset}
 import java.util.Base64
 import javax.inject._
 
@@ -205,8 +206,14 @@ class KudosController @Inject()
 
   protected def encryptit(toEncrypt: String): Encrypted = {
 
+    val period:Period = Period.ofDays(2)
+    val time: LocalDateTime = LocalDateTime.now().plus(period)
     val nonce = Nonce.createNonce()
-    val rawData = ("42|" + toEncrypt).getBytes(StandardCharsets.UTF_8)
+
+    val timeInMilli:Long = time.atZone(ZoneOffset.UTC).toInstant.toEpochMilli
+
+    val rawData = s"43|$toEncrypt|${timeInMilli}".getBytes(StandardCharsets.UTF_8)
+
     val cipherText = box.encrypt(nonce.raw, rawData)
 
     val nonceHex = encoder.encode(nonce.raw)
@@ -224,6 +231,7 @@ class KudosController @Inject()
     }
   }
 
+  // warning. this function will also log the person in
   def authKudos(nonceString: String, cryptString: String) = Action.async { implicit request =>
     val nonceHex = nonceString
     val nonce = Nonce.nonceFromBytes(encoder.decode(nonceHex))
@@ -236,13 +244,10 @@ class KudosController @Inject()
     val decrypted: String = new String(rawData, "UTF-8")
     val parts = decrypted.split("\\|")
 
-    if (parts.length != 2) {
-      Future.successful(BadRequest(s"Invalid message. I was expecting 2 parts\n$decrypted"))
+    if (parts.length != 2 && parts.length !=3) {
+      Future.successful(BadRequest(s"Invalid message. I was expecting 2 or 3 parts\n$decrypted"))
     } else {
-      if (parts(0) != "42") {
-        Future.successful(BadRequest("Invalid message. Bad cookie"))
-      } else {
-
+      if (parts(0) == "42") {
         kudosToRepo.find(parts(1).toLong, isAdmin = true).map {
           case Some(k) =>
             if (k.rejected) {
@@ -289,6 +294,75 @@ class KudosController @Inject()
 
           case None => Future.successful(NotFound("Couldn't find the original message"))
         }.flatMap(identity)
+      } else {
+        if ( parts(0) == "43") {
+          if (parts.length == 3 ) {
+            val inMilli = LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant.toEpochMilli
+            val expiryAt = parts(2).toLong
+            if ( expiryAt != 0 && expiryAt > inMilli) {
+              kudosToRepo.find(parts(1).toLong, isAdmin = true).map {
+                case Some(k) =>
+                  if (k.rejected) {
+                    (for {
+                      kO <- kudosToRepo.update(k.id,
+                        k.copy(rejected = false, rejectedby = None, rejectedreason = None, rejectedon = None)
+                      )
+                      f <- employeeRepo.findByLogin(k.fromperson)
+                      t <- employeeRepo.findByLogin(k.toperson)
+                      admins <- employeeRepo.findByLogin(user.kudosAdmins)
+
+                    } yield (f, t, kO, admins)).map { xx =>
+                      // TODO get these from LDAP
+                      val fromEmail = xx._1 match {
+                        case Some(x) => s"${x.fullName} <${x.login}@$emailDomain>"
+                        case None => s"${k.fromperson} <${k.fromperson}@$emailDomain>"
+                      }
+                      val toEmail = xx._2 match {
+                        case Some(x) => s"${x.fullName} <${x.login}@$emailDomain>"
+                        case None => s"${k.toperson} <${k.toperson}@$emailDomain>"
+                      }
+                      val subject = xx._2 match {
+                        case Some(x) => s"New Shoutout received for ${x.fullName}"
+                        case None => s"New Shoutout received for ${k.toperson}"
+                      }
+
+                      val bodyText = views.html.person.shoutout.emailText(k, xx._1, xx._2, offlineHostname, xx._4, emailDomain)
+                      val bodyHTML = views.html.person.shoutout.email(k, xx._1, xx._2, offlineHostname, xx._4, emailDomain)
+                      val email: Email = Email(
+                        subject = subject,
+                        from = s"Shoutout Admin <Shoutout-noreply@$emailDomain>",
+                        to = Seq(toEmail, fromEmail),
+                        cc = xx._4.map(f => s"${f.login}@$emailDomain"),
+                        bodyText = Some(bodyText.body),
+                        bodyHtml = Some(bodyHTML.body)
+                      )
+                      mailerClient.send(email)
+                      xx._1 match {
+                        case Some(emp) =>
+                          user.getUserSession(emp.login).map {
+                            session =>
+                              Redirect(routes.KudosController.id(k.id)).addingToSession(session: _*)
+                          }
+                        case None => Future.successful(Redirect(routes.KudosController.id(k.id)))
+                      }
+                    }.flatMap(identity)
+                  } else {
+                    Future.successful(Redirect(routes.KudosController.id(k.id)))
+                  }
+                case None => Future.successful(NotFound("Couldn't find the original message"))
+              }.flatMap(identity)
+              //Future.successful(BadRequest("Invalid message. TBD"))
+            } else {
+              Logger.info(s"Debug: $decrypted - $inMilli")
+              Future.successful(BadRequest("Invalid message. Link has expired"))
+            }
+          } else {
+            Future.successful(BadRequest("Invalid message. Bad cookie. Needs 3 parts"))
+          }
+
+        } else {
+          Future.successful(BadRequest("Invalid message. Bad cookie"))
+        }
       }
     }
   }

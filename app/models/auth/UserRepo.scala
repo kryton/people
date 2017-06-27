@@ -20,7 +20,7 @@ package models.auth
 import javax.inject.Inject
 
 import offline.Tables
-import offline.Tables.{Authrole, AuthroleRow, Authuser, AuthuserRow, Emprelations}
+import offline.Tables.{Authrole, AuthroleRow, Authuser, AuthuserRow, Authuserpreference, Emprelations}
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import slick.basic.DatabaseConfig
@@ -65,11 +65,21 @@ class UserRepo @Inject()(@NamedDatabase("default")  protected val dbConfigProvid
     .run(Authuser returning Authuser.map(_.id) += pt)
     .map(id => pt.copy(id = id))
 
-
   def update(id: Long, pt:AuthuserRow) = {
     db.run(Authuser.filter(_.id === id).update( pt.copy(id = id))) map { _ > 0 }
   }
 
   def delete(id: Long) =
     db.run(Authuser.filter(_.id === id).delete) map { _ > 0 }
+
+
+  def enableRole(login:String,id:Long): Future[Int] = {
+    disableRole(login, id).map { x =>
+      db.run(Authuser += AuthuserRow(id=0,roleid = id, username = login))
+    }.flatMap(identity)
+  }
+
+  def disableRole(login:String,id:Long): Future[Int] =
+    db.run( Authuser.filter(_.username === login).filter(_.roleid === id).delete)
+
 }

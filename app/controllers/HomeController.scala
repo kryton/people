@@ -109,26 +109,9 @@ class HomeController @Inject()
         val credentials = data.username
         if (enableAuth) {
           if (ldap.authenticateAccount(data.username, data.password)) {
-         //   Logger.info(s"LoginSubmit ${data.username} Auth")
-            (for{
-              emp <- employeeRepo.findByLogin(data.username)
-              prefs <- userRepo.userPrefs(data.username).map( s=> s.map(_._2.code))
-              isSpecial <- user.isSpecialLogo( Some( data.username))
-              isCatLover <- user.isACatLover(Some(data.username))
-              isAdmin <- user.isAdmin(Some(data.username))
-              perms <- permissionRepo.permissionsForUser(data.username)
-            } yield (emp, isSpecial,prefs, isCatLover,isAdmin,perms)).map { x =>
-              val permKeys = x._6.map( p => s"perm${p.permission}" -> "Y")
-              val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString,"cats" -> x._4.toString,"isAdmin" -> x._5.toString) ++
-                x._3.map(y=> y -> "Y") ++
-                permKeys
-
-              x._1 match {
-                case Some(emp) =>
-                  Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> emp.fullName)
-                case None =>
-                  Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> "?Not Found?")
-              }
+            user.getUserSession(data.username).map {
+              session =>
+                Redirect(routes.HomeController.index()).withSession(session:_*)//.addingToSession(session:_*)
             }
           } else {
            // Logger.info(s"LoginSubmit ${data.username} Bad Password")
@@ -136,25 +119,9 @@ class HomeController @Inject()
           }
         } else {
           Logger.info(s"LoginSubmit ${data.username} NoAuth")
-          (for{
-            emp <- employeeRepo.findByLogin(data.username)
-            isSpecial <- user.isSpecialLogo( Some( data.username))
-            prefs <- userRepo.userPrefs(data.username).map( s=> s.map(_._2.code))
-            isCatLover <- user.isACatLover(Some(data.username))
-            isAdmin <- user.isAdmin(Some(data.username))
-            perms <- permissionRepo.permissionsForUser(data.username)
-
-          } yield (emp, isSpecial,prefs,isCatLover,isAdmin,perms )).map { x =>
-          //  Logger.info(s"CATS = ${x._4.toString}")
-            val permKeys = x._6.map( p => s"perm${p.permission}" -> "Y")
-            val session = Seq("userId"->data.username, "speciallogo" -> x._2.toString,"cats" -> x._4.toString,"isAdmin" -> x._5.toString) ++
-              x._3.map(y=> y -> "Y") ++
-              permKeys
-
-            x._1 match {
-              case Some(emp) => Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> emp.fullName)
-              case None => Redirect(routes.HomeController.index()).addingToSession(session:_*).addingToSession( "name" -> "?Not Found?")
-            }
+          user.getUserSession(data.username).map {
+            session =>
+              Redirect(routes.HomeController.index()).withSession(session:_*)//.addingToSession(session:_*)
           }
         }
       }

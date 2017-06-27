@@ -136,29 +136,43 @@ class AuthController @Inject()
             case false => Future.successful(Unauthorized(views.html.page_403("You can't do this")))
 
           }.flatMap(identity)
-
       }
     }
   }
 
-  def enabledisable(login: String, pref: Long, enable: Boolean) = LDAPAuthAction {
-
+  def enabledisable(login: String, role: Long, enable: Boolean) = LDAPAuthAction {
     Action.async { implicit request =>
-      user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map {
+      val loggedInUser = LDAPAuth.getUser()
+      user.isOwnerManagerOrAdmin(login, loggedInUser ).map {
         case true =>
           //val enableIt = enable.getOrElse(false)
-          userPrefRepo.findPref(pref).map {
-            case Some(preference) =>
-              if (enable) {
-                userPrefRepo.enablePref(login, pref).map { result =>
-                  Redirect(routes.UserController.prefs(login)).addingToSession(preference.code -> "Y")
+          roleRepo.find(role).map {
+            case Some(roleRow) =>
+              (if (enable) {
+                userRepo.enableRole(login, role).map { result =>
+                  user.getUserSession(login).map {
+                    session =>
+                      if ( loggedInUser.getOrElse("-").equalsIgnoreCase(login)) {
+                        Redirect(routes.AuthController.userroles(login)).withSession(session:_*)//.addingToSession(session:_*)
+                      }else {
+                        Redirect(routes.AuthController.userroles(login))
+                      }
+                  }
                 }
               } else {
-                userPrefRepo.disablePref(login, pref).map { result =>
-                  Redirect(routes.UserController.prefs(login)).removingFromSession(preference.code)
+                userRepo.disableRole(login, role).map { result =>
+                  user.getUserSession(login).map{
+                    session =>
+                      if ( loggedInUser.getOrElse("-").equalsIgnoreCase(login)) {
+                        Redirect(routes.AuthController.userroles(login)).withSession(session:_*)//.addingToSession(session:_*)
+                      }else {
+                        Redirect(routes.AuthController.userroles(login))
+                      }
+                      //Redirect(routes.AuthController.userroles(login)).addingToSession(session:_*)
+                  }
                 }
-              }
-            case None => Future.successful(NotFound(views.html.page_404("Preference not found")))
+              }).flatMap(identity)
+            case None => Future.successful(NotFound(views.html.page_404("Permission not found")))
           }.flatMap(identity)
 
         case false => Future.successful(Unauthorized(views.html.page_403("You can't do this")))

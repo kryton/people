@@ -31,7 +31,7 @@
         FieldConstructor(twitterBootstrapInput.f)
     }
 
-@main("Self Service - User Roles") {
+@main("Self Service - User Roles (Auth)") {
 
     <!-- Begin page content -->
 
@@ -57,7 +57,7 @@
                             <tr>
                                 <td><a href="@routes.AuthController.role(pref._2.id,0)">@pref._2.role</a></td>
                                 <td>@userRolez.get(pref._1).map { ignore =>
-                                  <a href="@routes.UserController.enabledisable(login,pref._2.id,enable=false)">Remove It</a>
+                                  <a href="@routes.AuthController.enabledisable(login,pref._2.id,enable=false)">Remove It</a>
                                 }.getOrElse{
                                     <i class="fa fa-check-square-o" title="Role Disabled"></i>
 
@@ -65,7 +65,7 @@
                                 <td>@userRolez.get(pref._1).map { ignore =>
                                 <i class="fa fa-check-square-o" title="Role Enabled"></i>
                                 }.getOrElse{
-                                    <a href="@routes.UserController.enabledisable(login,pref._2.id,enable=true)">Enable It</a>
+                                    <a href="@routes.AuthController.enabledisable(login,pref._2.id,enable=true)">Enable It</a>
                                 }</td>
 
                             </tr>

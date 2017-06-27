@@ -48,3 +48,7 @@ for the most part it should be
 * build the docker file
 * figure out how to get a load from your HR system into this. (TBD: provide a sample input file)
 
+
+# Gotchas
+* Auth is done via LDAP and storing stuff in the session cookie. It also uses the shoutout auth email to log you in. This may be a 'security' issue in your organisation. I judged the risk as low, but I put this note in the readme in case you might not.
+* we also reset the session/user details in the preferences area.

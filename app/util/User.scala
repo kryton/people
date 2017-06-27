@@ -21,6 +21,8 @@ import javax.inject.Inject
 
 import com.typesafe.config.ConfigFactory
 import com.unboundid.ldap.sdk.SearchResultEntry
+import controllers.routes
+import models.auth.{PermissionRepo, UserPrefRepo, UserRepo}
 import models.people.EmployeeRepo
 import play.api.Logger
 
@@ -30,7 +32,11 @@ import scala.concurrent.{ExecutionContext, Future}
   * Created by iholsman on 3/30/2017.
   * All Rights reserved
   */
-class User @Inject()(implicit employeeRepo:EmployeeRepo, executionContext: ExecutionContext ) {
+class User @Inject()(implicit employeeRepo:EmployeeRepo,
+                     userRepo:UserRepo,
+                     permissionRepo: PermissionRepo,
+                     userPrefRepo:UserPrefRepo,
+                     executionContext: ExecutionContext ) {
   import scala.collection.JavaConversions._
   val specialLogo: Set[String] = ConfigFactory.load().getStringList("offline.speciallogo").toList.map(x => x.toLowerCase).toSet
   val catLover: Set[String] = ConfigFactory.load().getStringList("offline.cats").toList.map(x => x.toLowerCase).toSet
@@ -204,4 +210,27 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo, executionContext: Execu
      Future.sequence(adminsHierarchy.map(manager => inManagementTree(login,manager))).map{ s:Set[Boolean] => s.contains(true)}
   }
 
+  def getUserSession(login:String): Future[Seq[(String, String)]] = {
+    import models.people.EmpRelationsRowUtils._
+    (for{
+      emp <- employeeRepo.findByLogin(login)
+      isSpecial <- this.isSpecialLogo( Some( login))
+      prefs <- userPrefRepo.userPrefs(login).map( s=> s.map(_._2.code))
+      isCatLover <- this.isACatLover(Some(login))
+      isAdmin <- this.isAdmin(Some(login))
+      perms <- permissionRepo.permissionsForUser(login)
+
+    } yield (emp, isSpecial,prefs,isCatLover,isAdmin,perms )).map { x =>
+      //  Logger.info(s"CATS = ${x._4.toString}")
+      val permKeys = x._6.map( p => s"perm${p.permission}" -> "Y")
+      val session: Seq[(String, String)] = Seq("userId"->login, "speciallogo" -> x._2.toString,"cats" -> x._4.toString,"isAdmin" -> x._5.toString) ++
+        x._3.map(y=> y -> "Y") ++
+        permKeys
+
+      x._1 match {
+        case Some(emp) => session ++ Seq( "name" -> emp.fullName)
+        case None => session ++ Seq( "name" -> "?Not Found?")
+      }
+    }
+  }
 }
