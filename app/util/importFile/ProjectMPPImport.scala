@@ -20,6 +20,7 @@ package util.importFile
 import java.nio.charset.CodingErrorAction
 import java.nio.file.Path
 import java.util
+import java.util.Date
 
 import models.product.ResourceTeamRepo
 import net.sf.mpxj.mpp.MPPReader
@@ -147,20 +148,53 @@ object ProjectMPPImport {
     }
  //   val resources: util.List[ResourceAssignment] = task.getResourceAssignments
     val predecessors: util.List[Relation] = task.getPredecessors
-    val pred = ( 0 until predecessors.size()).flatMap{ id =>
+    val pred: Seq[(Int,String)] = ( 0 until predecessors.size()).map{ id =>
       val relation = predecessors.get(id)
       if ( relation != null) {
         val source: Task = relation.getSourceTask
         val target: Task = relation.getTargetTask
-        if (source != null) {
-          Some(target.getID.toInt)
+          // FS - Finish Start (default)
+          // FF - Finish Finish
+          // SS - Start Start
+          // SF - Start Finish
+        if (target != null) {
+          (Some(target.getID.toInt),relation.getType.toString)
         } else {
-          None
+          (None,"")
         }
       } else {
-        None
+        (None,"")
       }
-    }.filterNot( _ == task.getID)
+    }.filter(p => p._1.isDefined).map{ p => (p._1.get,p._2)}.filterNot( p=> p._1 == task.getID)
+    val constraintType = task.getConstraintType.getValue match {
+      case 0 => "ASAP"
+      case 1 => "ALAP"
+      case 2 => "MSO"
+      case 3 => "MFO"
+      case 4 => "SNET"
+      case 5 => "SNLT"
+      case 6 => "FNET"
+      case 7 => "FNLT"
+      case _ => "???"
+    }
+    /*
+     AS_SOON_AS_POSSIBLE(0),
+   AS_LATE_AS_POSSIBLE(1),
+   MUST_START_ON(2),
+   MUST_FINISH_ON(3),
+   START_NO_EARLIER_THAN(4),
+   START_NO_LATER_THAN(5),
+   FINISH_NO_EARLIER_THAN(6),
+   FINISH_NO_LATER_THAN(7);
+     */
+    val constraintDate: Option[java.sql.Date] = Option(task.getConstraintDate) match {
+      case Some(d) =>Some( new java.sql.Date(d.getTime))
+      case None => None
+    }
+    if ( !constraintType.equalsIgnoreCase("ASAP")) {
+      Logger.error(s"Task #${task.getID} - ${task.getName} has a constraint $constraintType - $constraintDate")
+    }
+
 
     val eTasks = getETasks( task )
 
@@ -192,7 +226,9 @@ object ProjectMPPImport {
       start =  new java.sql.Date(task.getStart.getTime),
       finish = new java.sql.Date(task.getFinish.getTime),
       percentComplete = task.getPercentageComplete.doubleValue(),
-      resourceTeam = resourceMap.get(resName._1.getOrElse("").toLowerCase.trim)
+      resourceTeam = resourceMap.get(resName._1.getOrElse("").toLowerCase.trim),
+      constraint = constraintType,
+      constraintDate = constraintDate
     ))
   }
 }

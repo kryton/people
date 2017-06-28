@@ -23,9 +23,10 @@ import projectdb.Tables._
   * Created by iholsman on 4/15/2017.
   * All Rights reserved
   */
-case class ProjectImport(row:Int,  predecessor:Seq[Int], disabled:Boolean, program:Option[String], isCID:Boolean,
+case class ProjectImport(row:Int,  predecessor:Seq[(Int,String)], disabled:Boolean, program:Option[String], isCID:Boolean,
                          isAnchor:Boolean, priority:Int, feature:String,task:String, resource:String, resourceNumber:Int,
                          devEstimate:Double, bufferedEstimate:Double, work:Double, duration:Double,
                          start:java.sql.Date, finish:java.sql.Date,
                          percentComplete:Double /*, notes:String, percentWorkComplete:Double */,
-                         resourceTeam:Option[(ResourceteamRow,Option[ResourcepoolRow])] )
+                         resourceTeam:Option[(ResourceteamRow,Option[ResourcepoolRow])],
+                         constraint:String, constraintDate:Option[java.sql.Date])

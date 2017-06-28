@@ -345,18 +345,20 @@ trait Tables {
    *  @param finished Database column finished SqlType(DATE), Default(None)
    *  @param isactive Database column isActive SqlType(BIT)
    *  @param productfeatureid Database column productFeatureId SqlType(INT), Default(1)
-   *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None) */
-  final case class ProjectRow(id: Int, name: String, execsummary: String, currentstatusid: Int, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None, isactive: Boolean, productfeatureid: Int = 1, msprojectname: Option[String] = None)
+   *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None)
+   *  @param constrainttype Database column constraintType SqlType(CHAR), Length(4,false), Default(ASAP)
+   *  @param constraintdate Database column constraintDate SqlType(DATE), Default(None) */
+  final case class ProjectRow(id: Int, name: String, execsummary: String, currentstatusid: Int, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None, isactive: Boolean, productfeatureid: Int = 1, msprojectname: Option[String] = None, constrainttype: String = "ASAP", constraintdate: Option[java.sql.Date] = None)
   /** GetResult implicit for fetching ProjectRow objects using plain SQL queries */
   implicit def GetResultProjectRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Date]], e3: GR[Boolean], e4: GR[Option[String]]): GR[ProjectRow] = GR{
     prs => import prs._
-    ProjectRow.tupled((<<[Int], <<[String], <<[String], <<[Int], <<?[java.sql.Date], <<?[java.sql.Date], <<[Boolean], <<[Int], <<?[String]))
+    ProjectRow.tupled((<<[Int], <<[String], <<[String], <<[Int], <<?[java.sql.Date], <<?[java.sql.Date], <<[Boolean], <<[Int], <<?[String], <<[String], <<?[java.sql.Date]))
   }
   /** Table description of table project. Objects of this class serve as prototypes for rows in queries. */
   class Project(_tableTag: Tag) extends profile.api.Table[ProjectRow](_tableTag, Some("project_db"), "project") {
-    def * = (id, name, execsummary, currentstatusid, started, finished, isactive, productfeatureid, msprojectname) <> (ProjectRow.tupled, ProjectRow.unapply)
+    def * = (id, name, execsummary, currentstatusid, started, finished, isactive, productfeatureid, msprojectname, constrainttype, constraintdate) <> (ProjectRow.tupled, ProjectRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(execsummary), Rep.Some(currentstatusid), started, finished, Rep.Some(isactive), Rep.Some(productfeatureid), msprojectname).shaped.<>({r=>import r._; _1.map(_=> ProjectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7.get, _8.get, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(execsummary), Rep.Some(currentstatusid), started, finished, Rep.Some(isactive), Rep.Some(productfeatureid), msprojectname, Rep.Some(constrainttype), constraintdate).shaped.<>({r=>import r._; _1.map(_=> ProjectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7.get, _8.get, _9, _10.get, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -376,6 +378,10 @@ trait Tables {
     val productfeatureid: Rep[Int] = column[Int]("productFeatureId", O.Default(1))
     /** Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None) */
     val msprojectname: Rep[Option[String]] = column[Option[String]]("msprojectname", O.Length(200,varying=true), O.Default(None))
+    /** Database column constraintType SqlType(CHAR), Length(4,false), Default(ASAP) */
+    val constrainttype: Rep[String] = column[String]("constraintType", O.Length(4,varying=false), O.Default("ASAP"))
+    /** Database column constraintDate SqlType(DATE), Default(None) */
+    val constraintdate: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("constraintDate", O.Default(None))
 
     /** Foreign key referencing Statuscolor (database name Project_ibfk_1) */
     lazy val statuscolorFk = foreignKey("Project_ibfk_1", currentstatusid, Statuscolor)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
@@ -421,18 +427,19 @@ trait Tables {
   /** Entity class storing rows of table Projectdependency
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param fromproject Database column fromProject SqlType(INT)
-   *  @param toproject Database column toProject SqlType(INT) */
-  final case class ProjectdependencyRow(id: Long, fromproject: Int, toproject: Int)
+   *  @param toproject Database column toProject SqlType(INT)
+   *  @param dependencytype Database column dependencytype SqlType(CHAR), Length(2,false), Default(FS) */
+  final case class ProjectdependencyRow(id: Long, fromproject: Int, toproject: Int, dependencytype: String = "FS")
   /** GetResult implicit for fetching ProjectdependencyRow objects using plain SQL queries */
-  implicit def GetResultProjectdependencyRow(implicit e0: GR[Long], e1: GR[Int]): GR[ProjectdependencyRow] = GR{
+  implicit def GetResultProjectdependencyRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[String]): GR[ProjectdependencyRow] = GR{
     prs => import prs._
-    ProjectdependencyRow.tupled((<<[Long], <<[Int], <<[Int]))
+    ProjectdependencyRow.tupled((<<[Long], <<[Int], <<[Int], <<[String]))
   }
   /** Table description of table ProjectDependency. Objects of this class serve as prototypes for rows in queries. */
   class Projectdependency(_tableTag: Tag) extends profile.api.Table[ProjectdependencyRow](_tableTag, Some("project_db"), "ProjectDependency") {
-    def * = (id, fromproject, toproject) <> (ProjectdependencyRow.tupled, ProjectdependencyRow.unapply)
+    def * = (id, fromproject, toproject, dependencytype) <> (ProjectdependencyRow.tupled, ProjectdependencyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(fromproject), Rep.Some(toproject)).shaped.<>({r=>import r._; _1.map(_=> ProjectdependencyRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(fromproject), Rep.Some(toproject), Rep.Some(dependencytype)).shaped.<>({r=>import r._; _1.map(_=> ProjectdependencyRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -440,6 +447,8 @@ trait Tables {
     val fromproject: Rep[Int] = column[Int]("fromProject")
     /** Database column toProject SqlType(INT) */
     val toproject: Rep[Int] = column[Int]("toProject")
+    /** Database column dependencytype SqlType(CHAR), Length(2,false), Default(FS) */
+    val dependencytype: Rep[String] = column[String]("dependencytype", O.Length(2,varying=false), O.Default("FS"))
 
     /** Foreign key referencing Project (database name ProjectDependency_ibfk_1) */
     lazy val projectFk1 = foreignKey("ProjectDependency_ibfk_1", fromproject, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)

@@ -4,7 +4,7 @@ INSERT INTO `AuthRole` (`role`, `description`, `isAdmin`) VALUES ('AwardCommitte
 INSERT INTO `AuthRole` (`role`, `description`, `isAdmin`) VALUES ('EPMO', 'EPMO', b'0');
 INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('AuthorizeAwardsHR', 'used to authorize awards at the HR level');
 INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('AuthorizeAwards', 'After HR Authorizes, allows award to be \'public\'');
-INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('permTeamHireDate', 'Display hire date panel on Resource pages');
+INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('TeamHireDate', 'Display hire date panel on Resource pages');
 
 INSERT INTO `AuthRolePermission` (`permissionID`, `roleID`) VALUES (2, 2);
 INSERT INTO `AuthRolePermission` (`permissionID`, `roleID`) VALUES (1, 1);

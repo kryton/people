@@ -152,7 +152,7 @@ object ProjectXLSImport {
             }.toMap
             val priCell = row.getCell(headerCells("Priority"))
             val isDisabled = wb.getFontAt(priCell.getCellStyle.getFontIndex).getStrikeout
-            val predecessorsValue: Seq[Int] = cellValues("Predecessors").split(",").flatMap(Conversions.toIntO)
+            val predecessorsValue: Seq[(Int,String)] = cellValues("Predecessors").split(",").flatMap(Conversions.toIntO).map{ i => (i,"")}
             val priorityV = Conversions.toInt(cellValues("Priority"), 0)
 
             val isAnchorV = Conversions.toBool(cellValues("Anchor"))
@@ -188,7 +188,8 @@ object ProjectXLSImport {
               workInDays, durationsInDays,
               startD, finishD,
               Conversions.parsePercent(cellValues("% Complete"), 0.0) /*,notesS,parsePercent(cells(percentWorkComplete, 0.0 ) */ ,
-              resourceTeam = resourceTeamV
+              resourceTeam = resourceTeamV,
+              constraint = "ASAP", constraintDate = None
             )
             Some(projectImportRecord)
           }

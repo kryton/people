@@ -116,7 +116,9 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
       val toUpd = existMap.filterNot( p => toDelS.contains(p._1 ))
       val toUpdF = Future.sequence( toUpd.map{ (rec: (String, ProjectRow)) =>
         val imp = newMap(rec._1)
-        update(rec._2.id, rec._2.copy( isactive = !imp.disabled, started = Some(imp.start), finished = Some(imp.finish)))
+        update(rec._2.id, rec._2.copy( isactive = !imp.disabled,
+          started = Some(imp.start), finished = Some(imp.finish),
+          constrainttype = imp.constraint, constraintdate = imp.constraintDate))
       })
       val delF: Future[Iterable [Boolean]] =Future.sequence( toDel.map{ (rec: (String,ProjectRow)) => delete( rec._2.id ) })
       val insF: Future[Set[ProjectRow]] = Future.sequence(newMap.keySet.diff(existMap.keySet).map{ msprojectname =>
@@ -129,7 +131,9 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
           started = Some(imp.start),
           finished = Some(imp.finish),
           isactive = !imp.disabled,
-          productfeatureid = featureId
+          productfeatureid = featureId,
+          constrainttype = imp.constraint,
+          constraintdate = imp.constraintDate
         ))
       })
 
@@ -184,10 +188,11 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
           }
           projectDependencyRepo.deleteFrom(projID).map{ aaaa =>
             Future.sequence(proj.predecessor.map{ predRow =>
-              byProjRow.get( predRow ) match {
+              val predTask = predRow._1
+              byProjRow.get( predTask ) match {
                 case Some(task) => fullMap.get(task) match {
                   case Some(projRow) =>
-                    projectDependencyRepo.insert(ProjectdependencyRow(0,projID, projRow.id))
+                    projectDependencyRepo.insert(ProjectdependencyRow(0,projID, projRow.id, dependencytype = predRow._2))
                       .map( res => Some(res) )
                   case None =>
                     Logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key")
@@ -197,7 +202,7 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
                   Logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key x2")
                   Future.successful(None)
               }
-            })//.flatMap(identity)
+            })
           }.flatMap(identity)
         })
         (for{
