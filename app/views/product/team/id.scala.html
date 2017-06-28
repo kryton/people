@@ -150,7 +150,11 @@
                                     }</td>
                                     <td>@line.country</td>
                                     <td>@line.positionType</td>
-                                    <td>@line.isPE</td>
+                                    <td>@if(line.isPE) {
+                                            Y
+                                    } else {
+                                            &nbsp;
+                                    }</td>
                                     <td align="right">@line.tally</td>
                                 </tr>
                                 }
@@ -204,10 +208,10 @@
                 </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->
-@if( isAdmin ) {
+@if( isAdmin || request.session.get("permTeamHireDate").getOrElse("N").contentEquals("Y") ) {
     <div class="x_panel">
         <div class="x_title">
-            <h2>Debug - Position+ hire date</h2>
+            <h2>Position + hire date</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
                 <li><a class="close-link"><i class="fa fa-close"></i></a></li>
