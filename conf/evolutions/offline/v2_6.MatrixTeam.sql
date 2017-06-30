@@ -1,0 +1,2 @@
+ALTER TABLE `MatrixTeam`
+	ADD COLUMN `owner` VARCHAR(254) NULL AFTER `isPE`;

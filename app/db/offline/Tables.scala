@@ -1061,18 +1061,19 @@ trait Tables {
   /** Entity class storing rows of table Matrixteam
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param name Database column Name SqlType(VARCHAR), Length(254,true)
-   *  @param ispe Database column isPE SqlType(BIT) */
-  final case class MatrixteamRow(id: Long, name: String, ispe: Boolean)
+   *  @param ispe Database column isPE SqlType(BIT)
+   *  @param owner Database column owner SqlType(VARCHAR), Length(254,true), Default(None) */
+  final case class MatrixteamRow(id: Long, name: String, ispe: Boolean, owner: Option[String] = None)
   /** GetResult implicit for fetching MatrixteamRow objects using plain SQL queries */
-  implicit def GetResultMatrixteamRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Boolean]): GR[MatrixteamRow] = GR{
+  implicit def GetResultMatrixteamRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Boolean], e3: GR[Option[String]]): GR[MatrixteamRow] = GR{
     prs => import prs._
-    MatrixteamRow.tupled((<<[Long], <<[String], <<[Boolean]))
+    MatrixteamRow.tupled((<<[Long], <<[String], <<[Boolean], <<?[String]))
   }
   /** Table description of table MatrixTeam. Objects of this class serve as prototypes for rows in queries. */
   class Matrixteam(_tableTag: Tag) extends profile.api.Table[MatrixteamRow](_tableTag, Some("offline"), "MatrixTeam") {
-    def * = (id, name, ispe) <> (MatrixteamRow.tupled, MatrixteamRow.unapply)
+    def * = (id, name, ispe, owner) <> (MatrixteamRow.tupled, MatrixteamRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ispe)).shaped.<>({r=>import r._; _1.map(_=> MatrixteamRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ispe), owner).shaped.<>({r=>import r._; _1.map(_=> MatrixteamRow.tupled((_1.get, _2.get, _3.get, _4)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -1080,6 +1081,8 @@ trait Tables {
     val name: Rep[String] = column[String]("Name", O.Length(254,varying=true))
     /** Database column isPE SqlType(BIT) */
     val ispe: Rep[Boolean] = column[Boolean]("isPE")
+    /** Database column owner SqlType(VARCHAR), Length(254,true), Default(None) */
+    val owner: Rep[Option[String]] = column[Option[String]]("owner", O.Length(254,varying=true), O.Default(None))
 
     /** Uniqueness Index over (name) (database name Name) */
     val index1 = index("Name", name, unique=true)

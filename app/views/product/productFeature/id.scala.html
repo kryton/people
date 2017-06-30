@@ -260,7 +260,7 @@
                                 <table class="table table-responsive">
                                     <thead>
                                         <tr><th>ID</th>
-                                            <th>Active</th>
+                                            <!-- <th>Active</th> -->
                                             <th>Project</th>
                                             <th>Status</th>
                                             <th>Constraint</th>
@@ -273,11 +273,12 @@
                                     @projects.map { project =>
                                       <tr>
                                           <td>@project._1.id</td>
+<!--
                                           <td>@if(project._1.isactive) {
                                               <i class="fa fa-check-square-o" aria-hidden="true"></i>
                                           } else {
                                               <i class="fa fa-square-o" aria-hidden="true"></i>
-                                          }</td>
+                                          }</td> -->
                                           <td>
                                           @if(project._1.isactive) {
                                               @project._1.name
@@ -289,8 +290,14 @@
                                           -
                                       }</td>
                                             <td>@project._1.constrainttype @project._1.constraintdate.map{ x => /@x}</td>
-                                          <td>@project._4.map{ x=> @x._1.toproject / @x._1.dependencytype }</td>
-                                          <td>@project._3.map{ x => @x._2.name (@x._1.featuresize)} </td>
+                                          <td>@project._4.map{ x=> @x._1.toproject/@x._1.dependencytype }</td>
+                                          <td>@project._3.map{ x => @x._2.name (@x._1.featuresize /@x._1.maxdevs @x._1.featuresizeremaining.map{ y =>
+                                                @if(y==0) {
+                                                    complete
+                                                } else {
+                                                    (@y rem)
+                                                }
+                                                })} </td>
                                       <td>@project._1.started.map{ x => @x}</td>
                                       <td>@project._1.finished.map{ x => @x}</td>
                                       </tr>
@@ -312,6 +319,9 @@
                                             <tr><th>FNET</th><td>Finish no earlier than</td></tr>
                                             <tr><th>FNLT</th><td>Finish no later than</td></tr>
                                             <tr><th>MSO</th><td>Must start on</td></tr>
+<tr><th>FS</th><td>Other task must finish before this can start</td></tr>
+<tr><th>FF</th><td>Other task must finish before this can finish</td></tr>
+<tr><th>SS</th><td>Other task must start before this can start</td></tr>
                                         </tbody>
                                 </table>
                             </div>
@@ -382,7 +392,7 @@
             </div>
         </div>
 
-<script nonce="PMAN"><script nonce="PMAN"><script nonce="PMAN"><script nonce="PMAN">
+<script nonce="PMAN"><script nonce="PMAN"><script nonce="PMAN"><script nonce="PMAN"><script nonce="PMAN"><script nonce="PMAN"><script nonce="PMAN"><script nonce="PMAN">
     <!--
     window.onload = function () {
          //turn to inline mode

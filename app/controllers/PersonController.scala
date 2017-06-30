@@ -312,17 +312,24 @@ class PersonController @Inject()
   def matrixEnabledisable(login:String, pref:Long, enable:Boolean) = LDAPAuthAction {
 
     Action.async { implicit request =>
-      user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser()).map {
-        case true =>
-          (if ( enable ) {
-            matrixTeamMemberRepo.enablePref(login, pref)
+      val loggedIn = LDAPAuth.getUser().get
+      (for {
+        u <- user.isOwnerManagerOrAdmin(login, Some(loggedIn))
+        matrix <- matrixTeamRepo.find(pref)
+      } yield (u,matrix)).map{ result =>
+        result._2 match {
+          case None => Future.successful(NotFound(views.html.page_404("Matrix team now found")))
+          case Some(matrix) => if ( result._1 || ( matrix.owner.isDefined && matrix.owner.get.equalsIgnoreCase(loggedIn) )) {
+            (if ( enable ) {
+              matrixTeamMemberRepo.enablePref(login, pref)
+            } else {
+              matrixTeamMemberRepo.disablePref(login, pref)
+            }).map{ x => Redirect(routes.PersonController.matrix(login))}
           } else {
-            matrixTeamMemberRepo.disablePref(login, pref)
-          }).map{ x => Redirect(routes.PersonController.matrix(login))}
-
-        case false => Future(Unauthorized(views.html.page_403("No Access")))
+            Future.successful(Unauthorized(views.html.page_403("No Access")))
+          }
+        }
       }.flatMap(identity)
-    //Future(Ok(""))
     }
   }
 

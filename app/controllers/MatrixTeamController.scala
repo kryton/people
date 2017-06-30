@@ -41,18 +41,14 @@ import scala.concurrent.{ExecutionContext, Future}
 class MatrixTeamController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+   //@NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
-   empBioRepo: EmpBioRepo,
    teamDescriptionRepo: TeamDescriptionRepo,
-   empTagRepo: EmpTagRepo,
-   kudosToRepo: KudosToRepo,
    matrixTeamRepo: MatrixTeamRepo,
    matrixTeamMemberRepo: MatrixTeamMemberRepo,
    user: User
 
-  )(implicit    costCenterRepo: CostCenterRepo,
-    officeRepo: OfficeRepo,
+  )(implicit
     employeeRepo: EmployeeRepo,
     empHistoryRepo: EmpHistoryRepo,
     ec: ExecutionContext,
