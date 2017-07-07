@@ -152,9 +152,9 @@ class KudosController @Inject()
           (for {
             f <- employeeRepo.findByLogin(data.from)
             t <- employeeRepo.findByLogin(data.to)
-            mgr <- employeeRepo.manager(data.to)
+
             admins <- employeeRepo.findByLogin(user.kudosAdmins)
-          } yield (f, t, admins, mgr)).map { x =>
+          } yield (f, t, admins)).map { x =>
             x._1 match {
               case Some(from) => x._2 match {
                 case Some(to) =>
@@ -169,10 +169,7 @@ class KudosController @Inject()
                     rejectedon = Some(now),
                     rejectedreason = Some("AwaitingAuth"))
                   kudosToRepo.insert(kudos).map { newKudos =>
-                    val cc: Seq[String] = x._4 match {
-                      case None => Seq.empty[String]
-                      case Some(mgr) => Seq(s"${mgr.login}@$emailDomain")
-                    }
+
                     val crypt = encryptit(newKudos.id.toString)
                     val url = routes.KudosController.authKudos(crypt.nonce, crypt.cipher).url
                     val bodyText = views.html.person.shoutout.authEmailText(newKudos, from, to, offlineHostname, url, x._3, emailDomain)
@@ -181,7 +178,7 @@ class KudosController @Inject()
                       subject = s"Authorization Required: for ${to.fullName}",
                       from = s"Shoutout Admin <Shoutout-noreply@$emailDomain>",
                       to = Seq(s"${from.login}@$emailDomain"),
-                      cc = cc,
+                     // cc = cc,
                       //cc = x._3.map( f => s"${f.login}@$emailDomain" ),
                       bodyText = Some(bodyText.body),
                       bodyHtml = Some(bodyHTML.body)
@@ -258,8 +255,9 @@ class KudosController @Inject()
                 f <- employeeRepo.findByLogin(k.fromperson)
                 t <- employeeRepo.findByLogin(k.toperson)
                 admins <- employeeRepo.findByLogin(user.kudosAdmins)
+                mgr <- employeeRepo.manager(k.toperson)
 
-              } yield (f, t, kO, admins)).map { xx =>
+              } yield (f, t, kO, admins, mgr)).map { xx =>
                 // TODO get these from LDAP
                 val fromEmail = xx._1 match {
                   case Some(x) => s"${x.fullName} <${x.login}@$emailDomain>"
@@ -273,6 +271,10 @@ class KudosController @Inject()
                   case Some(x) => s"New Shoutout received for ${x.fullName}"
                   case None => s"New Shoutout received for ${k.toperson}"
                 }
+                val cc: Seq[String] = xx._5 match {
+                  case None => Seq.empty[String]
+                  case Some(mgr) => Seq(s"${mgr.login}@$emailDomain")
+                }
 
                 val bodyText = views.html.person.shoutout.emailText(k, xx._1, xx._2, offlineHostname, xx._4, emailDomain)
                 val bodyHTML = views.html.person.shoutout.email(k, xx._1, xx._2, offlineHostname, xx._4, emailDomain)
@@ -280,7 +282,7 @@ class KudosController @Inject()
                   subject = subject,
                   from = s"Shoutout Admin <Shoutout-noreply@$emailDomain>",
                   to = Seq(toEmail, fromEmail),
-                  cc = xx._4.map(f => s"${f.login}@$emailDomain"),
+                  cc = xx._4.map(f => s"${f.login}@$emailDomain") ++ cc,
                   bodyText = Some(bodyText.body),
                   bodyHtml = Some(bodyHTML.body)
                 )
@@ -310,8 +312,8 @@ class KudosController @Inject()
                       f <- employeeRepo.findByLogin(k.fromperson)
                       t <- employeeRepo.findByLogin(k.toperson)
                       admins <- employeeRepo.findByLogin(user.kudosAdmins)
-
-                    } yield (f, t, kO, admins)).map { xx =>
+                      mgr <- employeeRepo.manager(k.toperson)
+                    } yield (f, t, kO, admins,mgr )).map { xx =>
                       // TODO get these from LDAP
                       val fromEmail = xx._1 match {
                         case Some(x) => s"${x.fullName} <${x.login}@$emailDomain>"
@@ -325,6 +327,10 @@ class KudosController @Inject()
                         case Some(x) => s"New Shoutout received for ${x.fullName}"
                         case None => s"New Shoutout received for ${k.toperson}"
                       }
+                      val cc: Seq[String] = xx._5 match {
+                        case None => Seq.empty[String]
+                        case Some(mgr) => Seq(s"${mgr.login}@$emailDomain")
+                      }
 
                       val bodyText = views.html.person.shoutout.emailText(k, xx._1, xx._2, offlineHostname, xx._4, emailDomain)
                       val bodyHTML = views.html.person.shoutout.email(k, xx._1, xx._2, offlineHostname, xx._4, emailDomain)
@@ -332,7 +338,7 @@ class KudosController @Inject()
                         subject = subject,
                         from = s"Shoutout Admin <Shoutout-noreply@$emailDomain>",
                         to = Seq(toEmail, fromEmail),
-                        cc = xx._4.map(f => s"${f.login}@$emailDomain"),
+                        cc = xx._4.map(f => s"${f.login}@$emailDomain") ++ cc,
                         bodyText = Some(bodyText.body),
                         bodyHtml = Some(bodyHTML.body)
                       )
@@ -351,7 +357,6 @@ class KudosController @Inject()
                   }
                 case None => Future.successful(NotFound("Couldn't find the original message"))
               }.flatMap(identity)
-              //Future.successful(BadRequest("Invalid message. TBD"))
             } else {
               Logger.info(s"Debug: $decrypted - $inMilli")
               Future.successful(BadRequest("Invalid message. Link has expired"))
@@ -428,7 +433,6 @@ class KudosController @Inject()
       }.flatMap(identity)
       case None => Future.successful(NotFound(views.html.page_404("Shoutout not found")))
     }.flatMap(identity)
-    //  Future(Ok(""))
   }
 
   def awardNominationForm(toLogin: String) = LDAPAuthAction {
@@ -482,10 +486,8 @@ class KudosController @Inject()
                 )
             }.flatMap(identity)
           }
-
         case None => Future.successful(Unauthorized(views.html.page_403("You need to be logged in")))
       }
-
     }
   }
 
@@ -565,7 +567,6 @@ class KudosController @Inject()
         case None =>
           Future.successful(Unauthorized(views.html.page_403("You need to be logged in")))
       }
-
     }
   }
   def awardUnApprove(login: String, id:Long): Action[AnyContent] = LDAPAuthPermission("AuthorizeAwards") {
