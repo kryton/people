@@ -50,6 +50,12 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
     db.run(Emprelations.filter(_.login inSet logins.map(_.toLowerCase)).result)
   def findByCC(costcenter:Long):Future[Seq[EmprelationsRow]] =
     db.run(Emprelations.filter(_.costcenter === costcenter).sortBy(_.lastname).result)
+  def findByOffice(office:Long):Future[Seq[EmprelationsRow]] =
+    db.run(Emprelations.filter(_.officeid === office).sortBy(_.lastname).result)
+  def findByCountry(country:String):Future[Seq[(OfficeRow,EmprelationsRow)]] =
+    db.run(Office.filter(_.country === country).join(Emprelations).on(_.id === _.officeid)
+      .sortBy(_._2.lastname).result)
+
 
   def findCEO(): Future[Option[EmprelationsRow]] = {
     db.run( Emprelations.filter(_.managerid.isEmpty).result.headOption)

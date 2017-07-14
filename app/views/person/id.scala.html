@@ -161,7 +161,7 @@
                                     <tr><td>eMail:</td><td>@emp.eMail(Some(LDAPPerson)) </td></tr>
                         }
                         @office.map { off =>
-                                <tr><td>Office:</td><td>@off.city @off.country </td></tr>
+                                <tr><td>Office:</td><td><a href="@routes.OfficeController.id(off.id)">@person.office.dispOffice(off,true)</a></td></tr>
                         }
                         </table>
                         </div>

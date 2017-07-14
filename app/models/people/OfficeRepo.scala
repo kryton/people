@@ -59,6 +59,15 @@ class OfficeRepo @Inject()( @NamedDatabase("default")  protected val dbConfigPro
     }.flatMap(identity)
   }
   def all(): Future[Seq[OfficeRow]] = db.run(Office.result)
+
+  def active: Future[Seq[(OfficeRow,Int)]] = db.run(
+    Office.join(Emprelations).on(_.id === _.officeid).result
+  ).map{ seq =>
+    seq.groupBy(_._1).map{ k =>
+      (k._1, k._2.size)
+    }   .toSeq
+  }
+
   def insert(office: OfficeRow): Future[Tables.OfficeRow] =
     db.run(Office returning Office.map(_.id) += office)
     .map(id => office.copy(id = id))

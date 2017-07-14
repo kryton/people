@@ -1,0 +1,23 @@
+@import offline.Tables.OfficeRow
+@(office:OfficeRow, country:Boolean = false)
+@if( office.city.isDefined) {
+    @office.city
+
+    @if(office.region.isDefined) {
+        - @office.region
+    } else {
+        @if(office.zipcode.isDefined) {
+            (@office.zipcode)
+        }
+    }
+} else {
+    @if(office.region.isDefined) {
+        @office.region
+    } else {
+        ?-No City/Region info available-?
+    }
+}
+@if( country ) {
+    @office.country
+}
+

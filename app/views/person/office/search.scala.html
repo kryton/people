@@ -1,0 +1,57 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import offline.Tables.OfficeRow
+@(offices:Map[Option[String], Seq[(OfficeRow,Int)]])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+
+@main("Offices") {
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Offices!</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="container">
+            @offices.toSeq.sortBy(_._1).map { country =>
+                    <div class="row">
+                        <div class="col-xs-2">
+                            <a href="@routes.OfficeController.byCountry(country._1.getOrElse("-?"))"><b>@country._1.getOrElse("-?-")</b></a>
+                        </div>
+                        <div class="col-xs-10">
+                        @country._2.sortBy(_._1.region).map { mtm =>
+                            <div class="col-xs-4">
+                                <a href="@routes.OfficeController.id(mtm._1.id)">@person.office.dispOffice(mtm._1)</a> (@mtm._2)
+                            </div>
+                        }
+                        </div>
+                    </div>
+                }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}
