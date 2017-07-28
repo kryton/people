@@ -19,16 +19,32 @@
 @import offline.Tables.EmprelationsRow
 @import models.people.EmpRelationsRowUtils._
 @import offline.Tables.AwardnominationtoRow
-@(obj:AwardnominationtoRow, from:EmprelationsRow, to:EmprelationsRow,
+@import offline.Tables.EmphistoryRow
+
+@(obj:AwardnominationtoRow,
+        from:Option[EmprelationsRow],
+        to:EmprelationsRow,
+        mgr:Option[EmprelationsRow],
+        hist:Option[EmphistoryRow],
         host:String)(implicit  ldap: util.LDAP )
 
-<h1>A Shoutout was received for @to.fullName on @obj.dateadded</h1>
-@from.fullName  wrote the following:
+<h1>An award nomination was received for @to.fullName on @obj.dateadded</h1>
+
+@from.map{ emp => @emp.fullName } wrote the following:
 
 <p>@obj.nominationfeedback.map{ x =>
     @x
 }</p>
+<p>
 
+Employee: @to.fullName<br />
+ @mgr.map{ emp =>
+Manager: @emp.fullName<br />
+ }
+ @hist.map { h =>
+Hire Date: @h.hirerehiredate.map{ dt => @dt }<br />
+ }
+</p>
 <p>
     Please click <a href="@host@routes.KudosController.awardHRApprove(obj.toperson, obj.id)">here</a> here to confirm that the @to.fullName meets the HR  eligibility criteria for the Award.
     Please visit <a href="@host@routes.KudosController.awardHRApproveList(0)">here</a> for a full list of award nominations awaiting HR approval.

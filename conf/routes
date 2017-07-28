@@ -39,6 +39,8 @@ GET         /orgchart                                       controllers.PersonCo
 GET         /matrix/                                        controllers.MatrixTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
 GET         /matrix/:id                                     controllers.MatrixTeamController.id( id:Long, p:Int ?= 0 )
 
+GET         /agency/                                        controllers.PersonController.agencyList()
+GET         /agency/:agency                                 controllers.PersonController.byAgency(agency, p:Int ?= 0)
 GET         /office/                                        controllers.OfficeController.search( p:Int ?= 0, search: Option[String] ?= None)
 GET         /office/:id                                     controllers.OfficeController.id( id:Long, p:Int ?= 0 )
 GET         /office/c/:country                              controllers.OfficeController.byCountry( country:String, p:Int ?= 0 )

@@ -76,7 +76,6 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
           ( m.login startsWith searchString ) || (m.nickname startsWith searchString)
       }.sortBy(_.lastname).result
     }
-
   }
 
   def manager(login:String): Future[Option[EmprelationsRow]] = {
@@ -130,6 +129,12 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
     }
     managementTreeDownI(Future(Set(login.toLowerCase)), Future(Set.empty))
   }
+
+  def agencies():Future[Seq[(String,Int)]] = {
+   db.run( Emprelations.filterNot(_.agency === "").groupBy(_.agency).map{ x => (x._1, x._2.length)}.result)
+  }
+  def findByAgency(agency:String):Future[Seq[EmprelationsRow]] =
+    db.run( Emprelations.filter(_.agency.toLowerCase === agency.toLowerCase).sortBy(p => ( p.lastname, p.firstname)).result)
 
   def repopulate(updatedEmployeeList:Seq[EmprelationsRow]): Future[(Set[EmprelationsRow],Int, Set[String])] = {
     val newLogins: Set[String] = updatedEmployeeList.map(_.login.toLowerCase).toSet

@@ -27,7 +27,7 @@ import com.typesafe.config.ConfigFactory
 import forms.{AwardForm, LoginForm}
 import models.people._
 import offline.Tables
-import offline.Tables.{AwardnominationtoRow, KudostoRow}
+import offline.Tables.{AwardnominationtoRow, EmphistoryRow, KudostoRow, EmprelationsRow}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import models.people.EmpRelationsRowUtils._
 import org.abstractj.kalium.crypto.Random
@@ -35,7 +35,7 @@ import play.api.data.Form
 import play.api.{Configuration, Environment, Logger, Mode}
 import play.api.i18n.I18nSupport
 import play.api.libs.Crypto
-import play.api.libs.json.{JsObject, Json, Writes}
+import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import play.db.NamedDatabase
@@ -57,6 +57,7 @@ class KudosController @Inject()
    employeeRepo: EmployeeRepo,
    kudosToRepo: KudosToRepo,
    awardNominationToRepo: AwardNominationToRepo,
+   empHistoryRepo: EmpHistoryRepo,
    user: User,
    configuration: Configuration,
    mailerClient: MailerClient
@@ -442,7 +443,7 @@ class KudosController @Inject()
           (for {
             e <- employeeRepo.findByLogin(toLogin)
 
-          } yield (e)).map {
+          } yield e).map {
             case Some(emp) => Ok(views.html.person.award.nominate(emp, AwardForm.form))
             case None => NotFound(views.html.page_404("Login not found"))
           }
@@ -459,31 +460,54 @@ class KudosController @Inject()
           if ( fromUser.equalsIgnoreCase(toLogin)) {
             Future.successful(Ok("You can't nominate yourself"))
           } else {
-            employeeRepo.findByLogin(toLogin).map {
-              case None => Future.successful(NotFound(views.html.page_404("Login not found")))
-              case Some(emp) =>
-                AwardForm.form.bindFromRequest.fold(
-                  form => {
-                    Future.successful(BadRequest(views.html.person.award.nominate(emp, form)))
-                  },
-                  data => {
-                    val login = data.login
-                    val desc = data.description
-                    if (login.equalsIgnoreCase(toLogin)) {
-                      val now: java.sql.Date = new java.sql.Date(System.currentTimeMillis())
-                      val award = AwardnominationtoRow(id = 0, fromperson = fromUser, toperson = toLogin, dateadded = now,
-                        awarded =  awardNominationToRepo.UNACTIONED,
-                        nominationfeedback = Some(desc),
-                        hrapproved = awardNominationToRepo.UNACTIONED, rejected = false)
-                      awardNominationToRepo.insert(award).map{ result =>
-                        // TODO. send an email to HR group to ensure they aren't on a PIP or something
-                        Ok(views.html.person.award.nominateSubmitted(emp))
+            (for {
+              e <- employeeRepo.findByLogin(toLogin)
+              f <- employeeRepo.findByLogin(fromUser)
+              m <- employeeRepo.manager(toLogin)
+              h <- empHistoryRepo.find(toLogin)
+            } yield (e, m, h, f)).map { empFull =>
+              empFull._1 match {
+                // employeeRepo.findByLogin(toLogin).map {
+                case None => Future.successful(NotFound(views.html.page_404("Login not found")))
+                case Some(emp) =>
+                  AwardForm.form.bindFromRequest.fold(
+                    form => {
+                      Future.successful(BadRequest(views.html.person.award.nominate(emp, form)))
+                    },
+                    data => {
+                      val login = data.login
+                      val desc = data.description
+                      if (login.equalsIgnoreCase(toLogin)) {
+                        val now: java.sql.Date = new java.sql.Date(System.currentTimeMillis())
+                        val award = AwardnominationtoRow(id = 0, fromperson = fromUser, toperson = toLogin, dateadded = now,
+                          awarded = awardNominationToRepo.UNACTIONED,
+                          nominationfeedback = Some(desc),
+                          hrapproved = awardNominationToRepo.UNACTIONED, rejected = false)
+                        awardNominationToRepo.insert(award).map { result =>
+                          // TODO. send an email to HR group to ensure they aren't on a PIP or something
+                          val mgrO = empFull._2
+                          val hist = empFull._3
+                          val from = empFull._4
+                          val bodyText = views.html.person.award.hrEmailText(result, from, emp, mgrO, hist, offlineHostname)
+                          val bodyHTML = views.html.person.award.hrEmail(result, from, emp, mgrO, hist, offlineHostname)
+                          val email: Email = Email(
+                            subject = s"HR Authorization Required: for ${emp.fullName}",
+                            from = s"Award Admin <award-noreply@$emailDomain>",
+                            to = Seq(s"iholsman@$emailDomain"),
+                            // cc = cc,
+                            //cc = x._3.map( f => s"${f.login}@$emailDomain" ),
+                            bodyText = Some(bodyText.body),
+                            bodyHtml = Some(bodyHTML.body)
+                          )
+                          mailerClient.send(email)
+                          Ok(views.html.person.award.nominateSubmitted(emp))
+                        }
+                      } else {
+                        Future.successful(BadRequest("Sync problem."))
                       }
-                    } else {
-                      Future.successful(BadRequest("Sync problem."))
                     }
-                  }
-                )
+                  )
+              }
             }.flatMap(identity)
           }
         case None => Future.successful(Unauthorized(views.html.page_403("You need to be logged in")))
@@ -536,7 +560,17 @@ class KudosController @Inject()
   def awardHRApproveList(page: Int): Action[AnyContent] = LDAPAuthPermission("AuthorizeAwardsHR") {
     Action.async { implicit request =>
       (for {
-        need <- awardNominationToRepo.awaitingHRApproval()
+        need <- awardNominationToRepo.awaitingHRApproval().map{ seq =>
+          Future.sequence(seq.map{ line =>
+            (for {
+              m <- employeeRepo.manager(line._3.login)
+              h <- empHistoryRepo.find(line._3.login)
+            } yield (m,h)).map{ mh =>
+              (line._1, line._2, line._3, mh._1, mh._2)
+            }
+          })
+         // seq
+        }.flatMap(identity)
         reject <- awardNominationToRepo.hrRejected()
       }  yield (need,reject)).map { list =>
         Ok(views.html.person.award.listHR(Page(list._1, page), Page(list._2)))
@@ -559,7 +593,7 @@ class KudosController @Inject()
                   Redirect(routes.KudosController.awardApproveList())
                 }
               }
-              /* TODO generate email to Someone ?? */
+              /* TODO generate email to person. */
             case None =>
               Future.successful(NotFound(views.html.page_404("Award not found")))
           }.flatMap(identity)
@@ -584,7 +618,6 @@ class KudosController @Inject()
                   Redirect(routes.KudosController.awardApproveList())
                 }
               }
-              /* TODO generate email to Someone ?? */
             case None =>
               Future.successful(NotFound(views.html.page_404("Award not found")))
           }.flatMap(identity)
@@ -600,7 +633,7 @@ class KudosController @Inject()
     Action.async { implicit request =>
       LDAPAuth.getUser() match {
         case Some(fromUser) =>
-          awardNominationToRepo.find(id,false /* TODO */).map {
+          awardNominationToRepo.find(id,isAdmin=false /* TODO */).map {
             case Some(award) =>
               val now: java.sql.Date = new java.sql.Date(System.currentTimeMillis())
               awardNominationToRepo.update(id, award.copy(awarded = awardNominationToRepo.REJECTED,
@@ -618,7 +651,18 @@ class KudosController @Inject()
   def awardApproveList(page: Int): Action[AnyContent] = LDAPAuthPermission("AuthorizeAwards") {
     Action.async { implicit request =>
       (for {
-        need <- awardNominationToRepo.awaitingAwardApproval()
+        //need <- awardNominationToRepo.awaitingAwardApproval()
+        need <- awardNominationToRepo.awaitingAwardApproval().map{ seq =>
+          Future.sequence(seq.map{ line =>
+            (for {
+              m <- employeeRepo.manager(line._3.login)
+              h <- empHistoryRepo.find(line._3.login)
+            } yield (m,h)).map{ mh =>
+              (line._1, line._2, line._3, mh._1, mh._2)
+            }
+          })
+          // seq
+        }.flatMap(identity)
         reject <- awardNominationToRepo.awardRejected()
         last <- awardNominationToRepo.latest(20,isAdmin = false,isHR = false,isAwardComittee = false)
       }  yield (need,reject,last)).map { list =>
@@ -631,7 +675,7 @@ class KudosController @Inject()
   }
 
   implicit val DateWrites = new Writes[java.sql.Date] {
-    def writes( d: java.sql.Date) = Json.toJson(
+    def writes( d: java.sql.Date): JsValue = Json.toJson(
       d.toString
     )
   }
@@ -650,7 +694,6 @@ class KudosController @Inject()
       "feedback" -> k.feedback
     )
   }
-
 }
 
 case class KudosExt(

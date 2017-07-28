@@ -19,7 +19,8 @@
 @import people.EmpRelationsRowUtils._
 @import offline.Tables.EmprelationsRow
 @import offline.Tables.AwardnominationtoRow
-@(  page: util.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow)],
+@import offline.Tables.EmphistoryRow
+@(  page: util.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow, Option[EmprelationsRow], Option[EmphistoryRow])],
     rejected: util.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow)]
        )(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
 
@@ -48,8 +49,10 @@
     <thead>
         <tr>
             <th>Date</th>
-            <th >From</th>
-            <th >To</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Manager</th>
+            <th>Hire Date</th>
             <th>Nomination</th>
             <th>Action</th>
         </tr>
@@ -66,6 +69,14 @@
                 <td>
                     <a href="@routes.PersonController.id(mtm._3.login)">@mtm._3.fullName</a>
                 </td>
+                <td>@mtm._4.map { x =>
+                  @x.fullName
+                }</td>
+                <td>@mtm._5.map{ x =>
+                  @x.hirerehiredate.map { d =>
+                    @d
+                  }
+                }</td>
 
             <td>
                 @mtm._1.nominationfeedback.map { x =>

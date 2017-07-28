@@ -68,10 +68,11 @@ class PersonController @Inject()
     webJarAssets: WebJarAssets,
     assets: AssetsFinder,
     ldap: LDAP
-  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
+  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport {
 
- // implicit val ldap: LDAP = new LDAP
+  // implicit val ldap: LDAP = new LDAP
   protected val sapImportDir: String = ConfigFactory.load().getString("offline.SAPImportDir")
+
   /**
     * Create an Action to render an HTML page.
     *
@@ -80,63 +81,64 @@ class PersonController @Inject()
     * a path of `/`.
     */
   case class person(id: String, name: String)
+
   case class autoCompleteResult(total_count: Int, incomplete_Results: Boolean, items: List[person])
 
 
   def personAutoComplete(q: Option[String]) = Action.async { implicit request =>
-    val result:Future[autoCompleteResult] = q match {
-      case None =>  Future.successful(autoCompleteResult(0,incomplete_Results=false,List.empty) )
+    val result: Future[autoCompleteResult] = q match {
+      case None => Future.successful(autoCompleteResult(0, incomplete_Results = false, List.empty))
       case Some(query) =>
         if (query.length < 2) {
-          Future.successful( autoCompleteResult(total_count = 0, incomplete_Results = false, items = List.empty))
+          Future.successful(autoCompleteResult(total_count = 0, incomplete_Results = false, items = List.empty))
         } else {
-          employeeRepo.search(query).map{ seq =>
-            autoCompleteResult(seq.size, incomplete_Results = false, items = seq.map{ e => person( e.login, e.fullName)}.toList )
+          employeeRepo.search(query).map { seq =>
+            autoCompleteResult(seq.size, incomplete_Results = false, items = seq.map { e => person(e.login, e.fullName) }.toList)
           }
         }
     }
-    result.map{ x => Ok(Json.toJson(x)).as("application/json; charset=utf-8").withHeaders(("Access-Control-Allow-Origin", "*"))}
+    result.map { x => Ok(Json.toJson(x)).as("application/json; charset=utf-8").withHeaders(("Access-Control-Allow-Origin", "*")) }
     //Future.successful(Ok(""))
   }
 
-  def search( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
-      search match {
-        case None => Future( Redirect(routes.HomeController.index()) )
-        case Some(searchString) => employeeRepo.search(searchString).map{ emps:Seq[EmprelationsRow] =>
-          if (emps.size == 1 ) {
-            Redirect(routes.PersonController.id( emps.head.login))
-          } else {
-            Ok(views.html.person.search(search.getOrElse(""),util.Page(emps, page = page)))
-          }
+  def search(page: Int, search: Option[String]): Action[AnyContent] = Action.async { implicit request =>
+    search match {
+      case None => Future(Redirect(routes.HomeController.index()))
+      case Some(searchString) => employeeRepo.search(searchString).map { emps: Seq[EmprelationsRow] =>
+        if (emps.size == 1) {
+          Redirect(routes.PersonController.id(emps.head.login))
+        } else {
+          Ok(views.html.person.search(search.getOrElse(""), util.Page(emps, page = page)))
         }
       }
+    }
   }
 
-  def ceo = Action.async{ implicit  request =>
-    employeeRepo.findCEO().map{
-      case Some(emp) => Redirect(routes.PersonController.id( emp.login))
+  def ceo = Action.async { implicit request =>
+    employeeRepo.findCEO().map {
+      case Some(emp) => Redirect(routes.PersonController.id(emp.login))
       case None => Redirect(routes.HomeController.index())
     }
   }
 
-  def id( login:String): Action[AnyContent] = Action.async{ implicit request =>
+  def id(login: String): Action[AnyContent] = Action.async { implicit request =>
 
-    val canEdit = user.isOwnerManagerOrAdmin(login,LDAPAuth.getUser())
+    val canEdit = user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser())
     employeeRepo.findByLogin(login).map {
-      case Some(emp:EmprelationsRow) =>
+      case Some(emp: EmprelationsRow) =>
         val manager = employeeRepo.manager(login)
         val matrix = matrixTeamMemberRepo.findMatrixTeamByLogin(login)
         val directs = employeeRepo.managedBy(login).map { empsd =>
-          empsd.map { empd => matrixTeamMemberRepo.findMatrixTeamByLogin(empd.login).map(mtseq => ( empd, mtseq )) }
-        }.map { x => Future.sequence(x)}.flatMap(identity)
+          empsd.map { empd => matrixTeamMemberRepo.findMatrixTeamByLogin(empd.login).map(mtseq => (empd, mtseq)) }
+        }.map { x => Future.sequence(x) }.flatMap(identity)
 
         val team = teamDescriptionRepo.findTeamForLogin(login)(employeeRepo)
         val bio = empBioRepo.findByLogin(login)
-        val kTo = kudosToRepo.findTo(login).map( x=>  Future.sequence(x.map( k =>  employeeRepo.findByLogin(k.fromperson).map( e =>  (k,e))))).flatMap(identity)
-        val kFrom = kudosToRepo.findFrom(login).map( x=> Future.sequence( x.map( k => employeeRepo.findByLogin(k.toperson).map( e=> (k,e))))).flatMap(identity)
+        val kTo = kudosToRepo.findTo(login).map(x => Future.sequence(x.map(k => employeeRepo.findByLogin(k.fromperson).map(e => (k, e))))).flatMap(identity)
+        val kFrom = kudosToRepo.findFrom(login).map(x => Future.sequence(x.map(k => employeeRepo.findByLogin(k.toperson).map(e => (k, e))))).flatMap(identity)
         val tags = empTagRepo.findByLogin(login)
         val office = emp.officeid match {
-          case Some(officeid) =>officeRepo.find(officeid)
+          case Some(officeid) => officeRepo.find(officeid)
           case None => Future.successful(None)
         }
 
@@ -151,48 +153,48 @@ class PersonController @Inject()
           o <- office
           matrixT <- matrix
           c <- canEdit
-        } yield( m,d,t,b,kt, kf, tag, o,matrixT,c ))
-        .map { x =>
-          Ok(views.html.person.id( login.toLowerCase, emp, x._1 , x._2, x._3, x._4, x._5, x._6, x._7, x._8, x._9, x._10) )
-        }
+        } yield (m, d, t, b, kt, kf, tag, o, matrixT, c))
+          .map { x =>
+            Ok(views.html.person.id(login.toLowerCase, emp, x._1, x._2, x._3, x._4, x._5, x._6, x._7, x._8, x._9, x._10))
+          }
 
       case None => Future.successful(NotFound(views.html.page_404("Login not found")))
     }.flatMap(identity)
   }
 
-  def personNumber( id:Long) = Action.async{
+  def personNumber(id: Long) = Action.async {
     employeeRepo.findByPersonNumber(id).map {
-      case Some(emp:EmprelationsRow) => Redirect(routes.PersonController.id(emp.login))
-      case None => NotFound(views.html.page_404(  "No matching person number"))
+      case Some(emp: EmprelationsRow) => Redirect(routes.PersonController.id(emp.login))
+      case None => NotFound(views.html.page_404("No matching person number"))
     }
   }
 
-  def importFile = Action.async{ implicit request =>
+  def importFile = Action.async { implicit request =>
     user.isAdmin(LDAPAuth.getUser()).map {
-      case true =>Ok(views.html.person.importFile())
-      case false => Unauthorized(views.html.page_403(  "You don't have access to import SAP files"))
+      case true => Ok(views.html.person.importFile())
+      case false => Unauthorized(views.html.page_403("You don't have access to import SAP files"))
     }
   }
 
-  def importFileDir = Action.async{ implicit request =>
+  def importFileDir = Action.async { implicit request =>
     user.isAdmin(LDAPAuth.getUser()).map {
       case true =>
         val dir = new File(sapImportDir)
-        val files2:List[String] = if (dir.exists() && dir.isDirectory) {
+        val files2: List[String] = if (dir.exists() && dir.isDirectory) {
           dir.listFiles().filter(_.isFile).map(_.getName).filter(_.endsWith(".csv")).toList
         } else {
           List.empty
         }
-        val files:List[String]=   files2.sorted(Ordering[String].reverse).take(20)
+        val files: List[String] = files2.sorted(Ordering[String].reverse).take(20)
 
         Ok(views.html.person.importFileInDir(files))
-      case false => Unauthorized(views.html.page_403(  "You don't have access to import SAP files"))
+      case false => Unauthorized(views.html.page_403("You don't have access to import SAP files"))
     }
   }
 
   def doImport = Action.async(parse.multipartFormData) { implicit request =>
     user.isAdmin(LDAPAuth.getUser()).map {
-      case false => Future.successful(Unauthorized(views.html.page_403("You don't have access to import SAP files")) )
+      case false => Future.successful(Unauthorized(views.html.page_403("You don't have access to import SAP files")))
       case true =>
         request.body.file("importFile").map { picture =>
           val filename = picture.filename
@@ -220,45 +222,45 @@ class PersonController @Inject()
   // WARNING - this could possibly do more secure filename checking, but
   // a. it's in a Docker container
   // b. it's 'admin only'
- def doImportFile(filename:String) = Action.async { implicit request =>
+  def doImportFile(filename: String) = Action.async { implicit request =>
     user.isAdmin(LDAPAuth.getUser()).map {
-      case false => Future.successful(Unauthorized(views.html.page_403("You don't have access to import SAP files")) )
+      case false => Future.successful(Unauthorized(views.html.page_403("You don't have access to import SAP files")))
       case true =>
-        val file = new java.io.File(sapImportDir,filename)
+        val file = new java.io.File(sapImportDir, filename)
         val canonical = file.getCanonicalPath
-      /*
+        /*
         if (!FileIO.isInSecureDir(file.toPath) && !System.getProperty("os.name").startsWith("Windows")) {
           Logger.error(s"Insecure directory $canonical")
           Future.successful(Redirect(routes.PersonController.importFileDir()).flashing( "error" -> "unable to read file"))
         } else {
         */
-          if ( canonical.startsWith(sapImportDir) && file.canRead && file.isFile && file.exists()) {
+        if (canonical.startsWith(sapImportDir) && file.canRead && file.isFile && file.exists()) {
 
-            //request.body.file("importFile").map { picture =>
-            //  val filename = picture.filename
-            val path: Path = file.toPath
+          //request.body.file("importFile").map { picture =>
+          //  val filename = picture.filename
+          val path: Path = file.toPath
 
-            SAPImport.importFile(path).map {
-              employees =>
-                SAPImport.validate(employees) match {
-                  case Nil => employeeRepo.repopulate(employees).map { x =>
-                    Future.successful(Ok(views.html.person.importFileResult(x._1.toList.sortBy(_.login), x._2, x._3.toList)))
-                  }
-                  case x: Seq[String] => Future.successful(Future.successful(InternalServerError(s"Failed to Validate:\n ${x.mkString("\n")}")))
-
+          SAPImport.importFile(path).map {
+            employees =>
+              SAPImport.validate(employees) match {
+                case Nil => employeeRepo.repopulate(employees).map { x =>
+                  Future.successful(Ok(views.html.person.importFileResult(x._1.toList.sortBy(_.login), x._2, x._3.toList)))
                 }
-            }.flatMap(identity).flatMap(identity)
-          } else {
-            Logger.error(s"Unable to import file $canonical $filename")
-            Future.successful(Redirect(routes.PersonController.importFileDir()).flashing(
-              "error" -> "unable to read file"))
-          }
+                case x: Seq[String] => Future.successful(Future.successful(InternalServerError(s"Failed to Validate:\n ${x.mkString("\n")}")))
+
+              }
+          }.flatMap(identity).flatMap(identity)
+        } else {
+          Logger.error(s"Unable to import file $canonical $filename")
+          Future.successful(Redirect(routes.PersonController.importFileDir()).flashing(
+            "error" -> "unable to read file"))
+        }
       //  }
     }.flatMap(identity)
   }
 
 
-  def personOrgChart(login:Option[String]) = Action.async { implicit request =>
+  def personOrgChart(login: Option[String]) = Action.async { implicit request =>
 
     val empF = login match {
       case None => employeeRepo.findCEO()
@@ -281,7 +283,7 @@ class PersonController @Inject()
       }
   }
 
-  protected def officeString( id:Option[Long], officeMap: Map[Long,OfficeRow]):String = {
+  protected def officeString(id: Option[Long], officeMap: Map[Long, OfficeRow]): String = {
     id match {
       case Some(officeID) => officeMap.get(officeID) match {
         case Some(office) => " (" + office.city.getOrElse("-") + "/" + office.country.getOrElse("-") + ")"
@@ -290,6 +292,24 @@ class PersonController @Inject()
       case None => ""
     }
   }
+
+  def agencyList() =LDAPAuthPermission("SeeAgency") {
+    Action.async { implicit request =>
+      employeeRepo.agencies().map { seq =>
+        val sorted = seq.sortBy(_._1)
+        Ok(views.html.person.agencies(sorted))
+      }
+    }
+  }
+
+  def byAgency(agency: String, page: Int) = LDAPAuthPermission("SeeAgency") {
+    Action.async { implicit request =>
+      employeeRepo.findByAgency(agency).map { seq =>
+        Ok(views.html.person.byAgency(agency, util.Page(seq, page = page)))
+      }
+    }
+  }
+
 
   def matrix(login:String) = LDAPAuthAction {
     Action.async { implicit request =>
