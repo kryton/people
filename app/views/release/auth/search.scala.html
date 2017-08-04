@@ -1,0 +1,109 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import offline.Tables.KudostoRow
+@import offline.Tables.EmprelationsRow
+@import projectdb.Tables.ProducttrackRow
+@import projectdb.Tables.StageRow
+@import projectdb.Tables.ReleaseauthorizationtypeRow
+@(page: util.Page[ReleaseauthorizationtypeRow],
+        searchTerm:Option[String],
+        form: Form[forms.AuthorizationTypeForm.Data]
+)(implicit  webJarAssets: WebJarAssets,
+        assets: AssetsFinder,
+        request: Request[_],
+        messages: Messages,
+        ldap: util.LDAP )
+
+
+@main("Authorization Types") {
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Authorization Types
+                    @if( request.session.get("isAdmin").getOrElse("N").contentEquals("Y") || request.session.get("permReleaseAuthType").getOrElse("N").contentEquals("Y") ) {
+                        <a id="addRAT" href="#"><i class="fa fa-plus" title="Add a new Authorization Type"></i></a>
+                    }
+                </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+            @Option(page.items).filterNot(_.isEmpty).map { results =>
+                <div class="container">
+
+                    @results.map { mtm =>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <a href="@routes.ReleaseController.releaseAuthorizationType(mtm.id)">@mtm.name</a>
+                            </div>
+                    </div>
+                    }
+
+                </div>
+            }
+            </div>
+        </div>
+        <div id="addNewRAT" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Add a new Release Authorization Type</h4>
+                    </div>
+                    @helper.form( action = routes.ReleaseController.releaseAuthorizationTypeNew()) {
+
+                        <div class="modal-body">
+                            @helper.CSRF.formField
+                            @helper.inputText(form("name"), '_label -> "Name", 'placeholder -> "Name", 'class -> "form-control" )
+                            @helper.textarea(form("description"),'_label -> "Description", 'placeholder -> "Description", 'class ->"form-control")
+
+                            <p>Do you want to save changes you made to document before closing?</p>
+                            <p class="text-warning"><small>If you don't save, your changes will be lost.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script nonce="PMAN">
+<!--
+window.onload = function () {
+    //turn to inline mode
+    //$.fn.editable.defaults.mode = 'inline';
+    $(document).ready(function() {
+        $("#addRAT").click( function() {
+            $("#addNewRAT").modal('show');
+        });
+    });
+
+    }
+-->
+</script>
+}

@@ -222,8 +222,9 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo,
 
     } yield (emp, isSpecial,prefs,isCatLover,isAdmin,perms )).map { x =>
       //  Logger.info(s"CATS = ${x._4.toString}")
+      val isAdmin = if ( x._5 ) { "Y" } else {"N"}
       val permKeys = x._6.map( p => s"perm${p.permission}" -> "Y")
-      val session: Seq[(String, String)] = Seq("userId"->login, "speciallogo" -> x._2.toString,"cats" -> x._4.toString,"isAdmin" -> x._5.toString) ++
+      val session: Seq[(String, String)] = Seq("userId"->login, "speciallogo" -> x._2.toString,"cats" -> x._4.toString,"isAdmin" -> isAdmin) ++
         x._3.map(y=> y -> "Y") ++
         permKeys
 

@@ -54,8 +54,11 @@
                             @if( LDAPAuth.hasPermission("AuthorizeAwardsHR")) {
                                 <li><a href="@routes.KudosController.awardHRApproveList()">Awards requiring HR Approval</a></li>
                             }
+                            @if(LDAPAuth.hasPermission("TeamPoolBreakdown")) {
+                                <li><a href="@routes.ResourcePoolController.doFullBreakdown()">Resource Breakdown by Geo/Vendor</a></li>
+                            }
                             @request.session.get("isAdmin").map { isAdmin =>
-                                @if( isAdmin.equalsIgnoreCase("true")) {
+                                @if( isAdmin.equalsIgnoreCase("Y")) {
                                     <li><b>Admin</b></li>
                                     <li><a href="@routes.PersonController.importFileDir()">Import a new SAP File</a></li>
                                     <li><a href="@routes.ProductFeatureController.importFile()">Import a new MS Project File</a></li>

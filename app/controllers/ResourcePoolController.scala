@@ -152,30 +152,36 @@ class ResourcePoolController @Inject()
     }.flatMap(identity)
   }
 
-  def doFullBreakdown(format:Option[String]=None) = Action.async { implicit request =>
-    val x: Future[Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[TeamSummary])]] = resourceTeamRepo.allEx.map{ rtOs =>
-      val teamOrPool: Seq[Either[ResourceteamRow, ResourcepoolRow]] = rtOs.map{ rtO =>
-        rtO._2 match {
-          case Some(rp) => Right(rp)
-          case None => Left(rtO._1)
+  def doFullBreakdown(format:Option[String]=None, teamLevel:Option[String]) =LDAPAuthPermission("TeamPoolBreakdown") {
+    Action.async { implicit request =>
+      val x: Future[Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[TeamSummary])]] = resourceTeamRepo.allEx.map { rtOs =>
+        val teamOrPool: Seq[Either[ResourceteamRow, ResourcepoolRow]] = rtOs.map { rtO =>
+          if (teamLevel.getOrElse("N").equalsIgnoreCase("Y")) {
+            Left(rtO._1)
+          } else {
+            rtO._2 match {
+              case Some(rp) => Right(rp)
+              case None => Left(rtO._1)
+            }
+          }
         }
-      }
-      Future.sequence(teamOrPool.groupBy(p => p).keys.map {
-        case x@Left(team) => resourceTeamRepo.getTeamSummaryByVendorCountry(team.id).map{ res => (x,res)}
-        case x@Right(pool) =>resourcePoolRepo.getTeamSummaryByVendorCountry(pool.id).map{ res => (x,res)}
-      }.toSeq)
-    }.flatMap(identity)
+        Future.sequence(teamOrPool.groupBy(p => p).keys.map {
+          case x@Left(team) => resourceTeamRepo.getTeamSummaryByVendorCountry(team.id).map { res => (x, res) }
+          case x@Right(pool) => resourcePoolRepo.getTeamSummaryByVendorCountry(pool.id).map { res => (x, res) }
+        }.toSeq)
+      }.flatMap(identity)
 
-    x.map { (result: Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[TeamSummary])]) =>
-      val formatS:String = format.getOrElse("html")
+      x.map { (result: Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[TeamSummary])]) =>
+        val formatS: String = format.getOrElse("html")
 
-      if (formatS.equalsIgnoreCase("XLS")) {
-        Ok.sendFile(doFullBreakdownXLS(result))
-          .as("application/vnd.ms-excel")
-          .withHeaders(("Access-Control-Allow-Origin", "*"),
-            ("Content-Disposition", s"attachment; filename=ResourceList.xls"))
-      } else {
-        Ok(views.html.product.pool.fullBreakdown(result))
+        if (formatS.equalsIgnoreCase("XLS")) {
+          Ok.sendFile(doFullBreakdownXLS(result))
+            .as("application/vnd.ms-excel")
+            .withHeaders(("Access-Control-Allow-Origin", "*"),
+              ("Content-Disposition", s"attachment; filename=ResourceList.xls"))
+        } else {
+          Ok(views.html.product.pool.fullBreakdown(result,teamLevel))
+        }
       }
     }
   }

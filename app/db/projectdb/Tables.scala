@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Empefficiency.schema, Featureflag.schema, Managedclient.schema, Managedclientproductfeature.schema, PlayEvolutions.schema, Productfeature.schema, Productfeatureflag.schema, Producttrack.schema, Producttrackfeature.schema, Project.schema, Projectarea.schema, Projectdependency.schema, Projectfeature.schema, Projecthighlight.schema, Projectperson.schema, Projectpersontype.schema, Projectrelease.schema, Projectrole.schema, Resourcepool.schema, Resourceteam.schema, Resourceteamproductfeature.schema, Resourceteamproject.schema, Roadmapslack.schema, Stage.schema, Statuscolor.schema, Statusupdate.schema, Systemrole.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Empefficiency.schema, Featureflag.schema, Managedclient.schema, Managedclientproductfeature.schema, PlayEvolutions.schema, Productfeature.schema, Productfeatureflag.schema, Producttrack.schema, Producttrackfeature.schema, Project.schema, Projectarea.schema, Projectdependency.schema, Projectfeature.schema, Projecthighlight.schema, Projectperson.schema, Projectpersontype.schema, Projectrelease.schema, Projectrole.schema, Releaseauthorization.schema, Releaseauthorizationtype.schema, Releasetype.schema, Releasetypeauthorizationpeople.schema, Resourcepool.schema, Resourceteam.schema, Resourceteamproductfeature.schema, Resourceteamproject.schema, Roadmapslack.schema, Stage.schema, Statuscolor.schema, Statusupdate.schema, Systemrole.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -613,25 +613,46 @@ trait Tables {
   /** Entity class storing rows of table Projectrelease
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
-   *  @param deployed Database column Deployed SqlType(DATE), Default(None) */
-  final case class ProjectreleaseRow(id: Int, name: String, deployed: Option[java.sql.Date] = None)
+   *  @param deployed Database column Deployed SqlType(DATETIME), Default(None)
+   *  @param planned Database column Planned SqlType(DATETIME), Default(None)
+   *  @param releasetypeid Database column ReleaseTypeId SqlType(INT)
+   *  @param changeticket Database column changeticket SqlType(VARCHAR), Length(50,true), Default(None)
+   *  @param releasefileurl Database column releasefileURL SqlType(VARCHAR), Length(255,true), Default(None)
+   *  @param releasenotes Database column releasenotes SqlType(TEXT), Default(None)
+   *  @param rolledback Database column RolledBack SqlType(DATETIME), Default(None) */
+  final case class ProjectreleaseRow(id: Int, name: String, deployed: Option[java.sql.Timestamp] = None, planned: Option[java.sql.Timestamp] = None, releasetypeid: Int, changeticket: Option[String] = None, releasefileurl: Option[String] = None, releasenotes: Option[String] = None, rolledback: Option[java.sql.Timestamp] = None)
   /** GetResult implicit for fetching ProjectreleaseRow objects using plain SQL queries */
-  implicit def GetResultProjectreleaseRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Date]]): GR[ProjectreleaseRow] = GR{
+  implicit def GetResultProjectreleaseRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Timestamp]], e3: GR[Option[String]]): GR[ProjectreleaseRow] = GR{
     prs => import prs._
-    ProjectreleaseRow.tupled((<<[Int], <<[String], <<?[java.sql.Date]))
+    ProjectreleaseRow.tupled((<<[Int], <<[String], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp], <<[Int], <<?[String], <<?[String], <<?[String], <<?[java.sql.Timestamp]))
   }
   /** Table description of table projectrelease. Objects of this class serve as prototypes for rows in queries. */
   class Projectrelease(_tableTag: Tag) extends profile.api.Table[ProjectreleaseRow](_tableTag, Some("project_db"), "projectrelease") {
-    def * = (id, name, deployed) <> (ProjectreleaseRow.tupled, ProjectreleaseRow.unapply)
+    def * = (id, name, deployed, planned, releasetypeid, changeticket, releasefileurl, releasenotes, rolledback) <> (ProjectreleaseRow.tupled, ProjectreleaseRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(name), deployed).shaped.<>({r=>import r._; _1.map(_=> ProjectreleaseRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(name), deployed, planned, Rep.Some(releasetypeid), changeticket, releasefileurl, releasenotes, rolledback).shaped.<>({r=>import r._; _1.map(_=> ProjectreleaseRow.tupled((_1.get, _2.get, _3, _4, _5.get, _6, _7, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     /** Database column Name SqlType(VARCHAR), Length(45,true) */
     val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
-    /** Database column Deployed SqlType(DATE), Default(None) */
-    val deployed: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("Deployed", O.Default(None))
+    /** Database column Deployed SqlType(DATETIME), Default(None) */
+    val deployed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("Deployed", O.Default(None))
+    /** Database column Planned SqlType(DATETIME), Default(None) */
+    val planned: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("Planned", O.Default(None))
+    /** Database column ReleaseTypeId SqlType(INT) */
+    val releasetypeid: Rep[Int] = column[Int]("ReleaseTypeId")
+    /** Database column changeticket SqlType(VARCHAR), Length(50,true), Default(None) */
+    val changeticket: Rep[Option[String]] = column[Option[String]]("changeticket", O.Length(50,varying=true), O.Default(None))
+    /** Database column releasefileURL SqlType(VARCHAR), Length(255,true), Default(None) */
+    val releasefileurl: Rep[Option[String]] = column[Option[String]]("releasefileURL", O.Length(255,varying=true), O.Default(None))
+    /** Database column releasenotes SqlType(TEXT), Default(None) */
+    val releasenotes: Rep[Option[String]] = column[Option[String]]("releasenotes", O.Default(None))
+    /** Database column RolledBack SqlType(DATETIME), Default(None) */
+    val rolledback: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("RolledBack", O.Default(None))
+
+    /** Foreign key referencing Releasetype (database name projectrelease_ibfk_1) */
+    lazy val releasetypeFk = foreignKey("projectrelease_ibfk_1", releasetypeid, Releasetype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
   }
   /** Collection-like TableQuery object for table Projectrelease */
   lazy val Projectrelease = new TableQuery(tag => new Projectrelease(tag))
@@ -672,6 +693,147 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Projectrole */
   lazy val Projectrole = new TableQuery(tag => new Projectrole(tag))
+
+  /** Entity class storing rows of table Releaseauthorization
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param releaseid Database column ReleaseId SqlType(INT)
+   *  @param releaseauthorityid Database column ReleaseAuthorityId SqlType(INT)
+   *  @param login Database column login SqlType(VARCHAR), Length(20,true)
+   *  @param approveddate Database column approvedDate SqlType(DATETIME), Default(None)
+   *  @param rejecteddate Database column rejectedDate SqlType(DATETIME), Default(None)
+   *  @param isapproved Database column isApproved SqlType(BIT), Default(None)
+   *  @param notes Database column notes SqlType(TEXT), Default(None) */
+  final case class ReleaseauthorizationRow(id: Int, releaseid: Int, releaseauthorityid: Int, login: String, approveddate: Option[java.sql.Timestamp] = None, rejecteddate: Option[java.sql.Timestamp] = None, isapproved: Option[Boolean] = None, notes: Option[String] = None)
+  /** GetResult implicit for fetching ReleaseauthorizationRow objects using plain SQL queries */
+  implicit def GetResultReleaseauthorizationRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Timestamp]], e3: GR[Option[Boolean]], e4: GR[Option[String]]): GR[ReleaseauthorizationRow] = GR{
+    prs => import prs._
+    ReleaseauthorizationRow.tupled((<<[Int], <<[Int], <<[Int], <<[String], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[Boolean], <<?[String]))
+  }
+  /** Table description of table ReleaseAuthorization. Objects of this class serve as prototypes for rows in queries. */
+  class Releaseauthorization(_tableTag: Tag) extends profile.api.Table[ReleaseauthorizationRow](_tableTag, Some("project_db"), "ReleaseAuthorization") {
+    def * = (id, releaseid, releaseauthorityid, login, approveddate, rejecteddate, isapproved, notes) <> (ReleaseauthorizationRow.tupled, ReleaseauthorizationRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(releaseid), Rep.Some(releaseauthorityid), Rep.Some(login), approveddate, rejecteddate, isapproved, notes).shaped.<>({r=>import r._; _1.map(_=> ReleaseauthorizationRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column ReleaseId SqlType(INT) */
+    val releaseid: Rep[Int] = column[Int]("ReleaseId")
+    /** Database column ReleaseAuthorityId SqlType(INT) */
+    val releaseauthorityid: Rep[Int] = column[Int]("ReleaseAuthorityId")
+    /** Database column login SqlType(VARCHAR), Length(20,true) */
+    val login: Rep[String] = column[String]("login", O.Length(20,varying=true))
+    /** Database column approvedDate SqlType(DATETIME), Default(None) */
+    val approveddate: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("approvedDate", O.Default(None))
+    /** Database column rejectedDate SqlType(DATETIME), Default(None) */
+    val rejecteddate: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("rejectedDate", O.Default(None))
+    /** Database column isApproved SqlType(BIT), Default(None) */
+    val isapproved: Rep[Option[Boolean]] = column[Option[Boolean]]("isApproved", O.Default(None))
+    /** Database column notes SqlType(TEXT), Default(None) */
+    val notes: Rep[Option[String]] = column[Option[String]]("notes", O.Default(None))
+
+    /** Foreign key referencing Releaseauthorizationtype (database name ReleaseAuth_type) */
+    lazy val releaseauthorizationtypeFk = foreignKey("ReleaseAuth_type", releaseauthorityid, Releaseauthorizationtype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Projectrelease (database name ReleaseAuth_rel) */
+    lazy val projectreleaseFk = foreignKey("ReleaseAuth_rel", releaseid, Projectrelease)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Releaseauthorization */
+  lazy val Releaseauthorization = new TableQuery(tag => new Releaseauthorization(tag))
+
+  /** Entity class storing rows of table Releaseauthorizationtype
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(255,true)
+   *  @param description Database column description SqlType(TEXT), Default(None) */
+  final case class ReleaseauthorizationtypeRow(id: Int, name: String, description: Option[String] = None)
+  /** GetResult implicit for fetching ReleaseauthorizationtypeRow objects using plain SQL queries */
+  implicit def GetResultReleaseauthorizationtypeRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[String]]): GR[ReleaseauthorizationtypeRow] = GR{
+    prs => import prs._
+    ReleaseauthorizationtypeRow.tupled((<<[Int], <<[String], <<?[String]))
+  }
+  /** Table description of table ReleaseAuthorizationType. Objects of this class serve as prototypes for rows in queries. */
+  class Releaseauthorizationtype(_tableTag: Tag) extends profile.api.Table[ReleaseauthorizationtypeRow](_tableTag, Some("project_db"), "ReleaseAuthorizationType") {
+    def * = (id, name, description) <> (ReleaseauthorizationtypeRow.tupled, ReleaseauthorizationtypeRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), description).shaped.<>({r=>import r._; _1.map(_=> ReleaseauthorizationtypeRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(255,true) */
+    val name: Rep[String] = column[String]("name", O.Length(255,varying=true))
+    /** Database column description SqlType(TEXT), Default(None) */
+    val description: Rep[Option[String]] = column[Option[String]]("description", O.Default(None))
+
+    /** Uniqueness Index over (name) (database name name) */
+    val index1 = index("name", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Releaseauthorizationtype */
+  lazy val Releaseauthorizationtype = new TableQuery(tag => new Releaseauthorizationtype(tag))
+
+  /** Entity class storing rows of table Releasetype
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(255,true)
+   *  @param emailalias Database column emailAlias SqlType(VARCHAR), Length(255,true) */
+  final case class ReleasetypeRow(id: Int, name: String, emailalias: String)
+  /** GetResult implicit for fetching ReleasetypeRow objects using plain SQL queries */
+  implicit def GetResultReleasetypeRow(implicit e0: GR[Int], e1: GR[String]): GR[ReleasetypeRow] = GR{
+    prs => import prs._
+    ReleasetypeRow.tupled((<<[Int], <<[String], <<[String]))
+  }
+  /** Table description of table ReleaseType. Objects of this class serve as prototypes for rows in queries. */
+  class Releasetype(_tableTag: Tag) extends profile.api.Table[ReleasetypeRow](_tableTag, Some("project_db"), "ReleaseType") {
+    def * = (id, name, emailalias) <> (ReleasetypeRow.tupled, ReleasetypeRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(emailalias)).shaped.<>({r=>import r._; _1.map(_=> ReleasetypeRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(255,true) */
+    val name: Rep[String] = column[String]("name", O.Length(255,varying=true))
+    /** Database column emailAlias SqlType(VARCHAR), Length(255,true) */
+    val emailalias: Rep[String] = column[String]("emailAlias", O.Length(255,varying=true))
+
+    /** Uniqueness Index over (name) (database name name) */
+    val index1 = index("name", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Releasetype */
+  lazy val Releasetype = new TableQuery(tag => new Releasetype(tag))
+
+  /** Entity class storing rows of table Releasetypeauthorizationpeople
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param releasetypeid Database column ReleaseTypeId SqlType(INT)
+   *  @param releaseauthorityid Database column ReleaseAuthorityId SqlType(INT)
+   *  @param login Database column login SqlType(VARCHAR), Length(20,true)
+   *  @param isprimary Database column isPrimary SqlType(BIT) */
+  final case class ReleasetypeauthorizationpeopleRow(id: Int, releasetypeid: Int, releaseauthorityid: Int, login: String, isprimary: Boolean)
+  /** GetResult implicit for fetching ReleasetypeauthorizationpeopleRow objects using plain SQL queries */
+  implicit def GetResultReleasetypeauthorizationpeopleRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Boolean]): GR[ReleasetypeauthorizationpeopleRow] = GR{
+    prs => import prs._
+    ReleasetypeauthorizationpeopleRow.tupled((<<[Int], <<[Int], <<[Int], <<[String], <<[Boolean]))
+  }
+  /** Table description of table ReleaseTypeAuthorizationPeople. Objects of this class serve as prototypes for rows in queries. */
+  class Releasetypeauthorizationpeople(_tableTag: Tag) extends profile.api.Table[ReleasetypeauthorizationpeopleRow](_tableTag, Some("project_db"), "ReleaseTypeAuthorizationPeople") {
+    def * = (id, releasetypeid, releaseauthorityid, login, isprimary) <> (ReleasetypeauthorizationpeopleRow.tupled, ReleasetypeauthorizationpeopleRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(releasetypeid), Rep.Some(releaseauthorityid), Rep.Some(login), Rep.Some(isprimary)).shaped.<>({r=>import r._; _1.map(_=> ReleasetypeauthorizationpeopleRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column ReleaseTypeId SqlType(INT) */
+    val releasetypeid: Rep[Int] = column[Int]("ReleaseTypeId")
+    /** Database column ReleaseAuthorityId SqlType(INT) */
+    val releaseauthorityid: Rep[Int] = column[Int]("ReleaseAuthorityId")
+    /** Database column login SqlType(VARCHAR), Length(20,true) */
+    val login: Rep[String] = column[String]("login", O.Length(20,varying=true))
+    /** Database column isPrimary SqlType(BIT) */
+    val isprimary: Rep[Boolean] = column[Boolean]("isPrimary")
+
+    /** Foreign key referencing Releaseauthorizationtype (database name ReleaseAuthorizationType_fk1) */
+    lazy val releaseauthorizationtypeFk = foreignKey("ReleaseAuthorizationType_fk1", releaseauthorityid, Releaseauthorizationtype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Releasetype (database name ReleaseAuthorizationPPL_fk1) */
+    lazy val releasetypeFk = foreignKey("ReleaseAuthorizationPPL_fk1", releasetypeid, Releasetype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Releasetypeauthorizationpeople */
+  lazy val Releasetypeauthorizationpeople = new TableQuery(tag => new Releasetypeauthorizationpeople(tag))
 
   /** Entity class storing rows of table Resourcepool
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey

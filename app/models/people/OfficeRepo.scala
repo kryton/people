@@ -21,6 +21,7 @@ import javax.inject.Inject
 
 import models.Db
 import offline.Tables
+import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import slick.basic.DatabaseConfig
@@ -46,11 +47,12 @@ class OfficeRepo @Inject()( @NamedDatabase("default")  protected val dbConfigPro
 
   def findOrCreate( city:Option[String], street:Option[String], POBox:Option[String],
                     region:Option[String], zipcode:Option[String], country:Option[String]):Future[OfficeRow] = {
-    val qry = Office.filter(_.city === city || city.isEmpty)
+   
+    val qry = Office.filter( m => ( m.city === city && m.city.isDefined) || ( m.city.isEmpty && city.isEmpty ) )
       .filter(_.country === country || country.isEmpty)
       .filter(_.street === street || street.isEmpty)
       .filter(_.pobox === POBox || POBox.isEmpty)
-      .filter(_.region === region || region.isEmpty)
+      .filter(m=> (m.region === region && m.region.isDefined) || ( m.region.isEmpty && region.isEmpty ))
       .filter(_.zipcode === zipcode || zipcode.isEmpty)
 
     db.run(qry.result.headOption).map{

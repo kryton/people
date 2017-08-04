@@ -104,7 +104,7 @@ object LDAPAuth {
   }
   def hasPermission(perm:String)(implicit request:Request[_]): Boolean = {
     val isAdmin = request.session.get("isAdmin") match {
-      case Some(x) => x.equalsIgnoreCase("true")
+      case Some(x) => x.equalsIgnoreCase("Y")
       case None => false
     }
     if (isAdmin) {

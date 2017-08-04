@@ -70,7 +70,7 @@ object ObjectiveForm {
   case class Data(objective:String)
 }
 
-object KudosForm{
+object KudosForm {
 
   val form = Form(
     mapping(
@@ -135,4 +135,14 @@ object AwardForm {
     )(Data.apply)(Data.unapply)
   )
   case class Data(login:String, description:String)
+}
+
+object AuthorizationTypeForm {
+  val form = Form(
+    mapping(
+      "name" -> nonEmptyText,
+      "description" -> optional(text)
+    )(Data.apply)(Data.unapply)
+  )
+  case class Data(name:String, description:Option[String])
 }

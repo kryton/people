@@ -163,7 +163,7 @@
                         @office.map { off =>
                                 <tr><td>Office:</td><td><a href="@routes.OfficeController.id(off.id)">@person.office.dispOffice(off,true)</a></td></tr>
                         }
-                        @if( request.session.get("isAdmin") || request.session.get("permSeeAgency").getOrElse("N").contentEquals("Y") ) {
+                        @if( request.session.get("isAdmin").getOrElse("N").contentEquals("Y") || request.session.get("permSeeAgency").getOrElse("N").contentEquals("Y") ) {
                                 @if(!emp.agency.trim.isEmpty) {
                                         <tr>
                                         <td>Agency:</td>

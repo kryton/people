@@ -6,6 +6,8 @@ INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('AuthorizeAwa
 INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('AuthorizeAwards', 'After HR Authorizes, allows award to be \'public\'');
 INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('TeamHireDate', 'Display hire date panel on Resource pages');
 INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('SeeAgency', 'allow viewing of Agency details for contractors, and see list of contractors for an agency');
+INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('TeamPoolBreakdown', 'See breakdown of teams/pools by vendors and geographies');
+INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('ReleaseAuthType', 'Edit Metadata around releases');
 
 INSERT INTO `AuthRolePermission` (`permissionID`, `roleID`) VALUES (2, 2);
 INSERT INTO `AuthRolePermission` (`permissionID`, `roleID`) VALUES (1, 1);
