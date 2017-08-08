@@ -50,7 +50,14 @@
             <!-- x_title -->
             <div class="x_content">
                 <div class="container">
-                    @releaseAuthorization.name
+                    @if( LDAPAuth.hasPermission("")) {
+                        <span class="RAT editable editable-click" data-type="text" data-pk="@releaseAuthorization.id"
+                        data-name="name" data-title="Release Authorization Name"
+                        data-url="@routes.ReleaseController.releaseAuthorizationTypeUPD(releaseAuthorization.id)">
+                        @releaseAuthorization.name</span>
+                    } else {
+                        @releaseAuthorization.name
+                    }
                 </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->
@@ -164,10 +171,25 @@
             </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->
-
-
     </div ><!-- col -->
 </div> <!-- row -->
+    <script nonce="PMAN">
+            <!--
+            window.onload = function () {
+                //turn to inline mode
+                $.fn.editable.defaults.mode = 'inline';
+                $(document).ready(function() {
+                    $('.RAT').editable({
+                        params: function(params) {
+                            //originally params contain pk, name and value
+                            params.@play.filters.csrf.CSRF.getToken.map{ x => @x.name }.getOrElse("noname") = @play.filters.csrf.CSRF.getToken.map{ x => "@x.value" }.getOrElse("\"-no token-\"");
+                            return params;
+                            }
+                        });
+                });
 
+            }
+            -->
+    </script>
 }
 

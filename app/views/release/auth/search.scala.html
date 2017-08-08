@@ -36,7 +36,7 @@
         <div class="x_panel">
             <div class="x_title">
                 <h2>Authorization Types
-                    @if( request.session.get("isAdmin").getOrElse("N").contentEquals("Y") || request.session.get("permReleaseAuthType").getOrElse("N").contentEquals("Y") ) {
+                    @if( LDAPAuth.hasPermission("ReleaseAuthType")) {
                         <a id="addRAT" href="#"><i class="fa fa-plus" title="Add a new Authorization Type"></i></a>
                     }
                 </h2>

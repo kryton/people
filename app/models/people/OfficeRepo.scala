@@ -47,7 +47,7 @@ class OfficeRepo @Inject()( @NamedDatabase("default")  protected val dbConfigPro
 
   def findOrCreate( city:Option[String], street:Option[String], POBox:Option[String],
                     region:Option[String], zipcode:Option[String], country:Option[String]):Future[OfficeRow] = {
-   
+
     val qry = Office.filter( m => ( m.city === city && m.city.isDefined) || ( m.city.isEmpty && city.isEmpty ) )
       .filter(_.country === country || country.isEmpty)
       .filter(_.street === street || street.isEmpty)

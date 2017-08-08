@@ -46,8 +46,13 @@
     @request.session.get("light").map{ x =>
             @if( x.equals("Y")) {
 <link href='@assets.path( "/stylesheets/light.css")' rel="stylesheet">
+            } else {
+                <link href='@assets.path( "/stylesheets/dark.css")' rel="stylesheet" />
             }
+    }.getOrElse {
+        <link href='@assets.path("/stylesheets/dark.css")' rel="stylesheet" />
     }
+
     <!-- LIGHT=@request.session.get("light") -->
  @request.session.get("speciallogo").map{ x =>
             @if( x.equals("true")) {

@@ -40,6 +40,7 @@ ADD	    app/assets/images/noFace.jpg /root/app/assets/images
 ADD	    app/assets/images/cat/*.jpg /root/app/assets/images/cat/
 ADD	    app/assets/images/noFace.jpg /root/target/universal/stage/app/assets/images
 ADD	    app/assets/images/cat/*.jpg /root/target/universal/stage/app/assets/images/cat/
+ADD	    internal/assets/stylesheets/dark.css /root/target/universal/stage/app/assets/stylesheets/
 
 RUN         cd  /root/conf; cp secret.conf.docker secret.conf
 RUN         cd  /root/conf; cp logback.xml.docker logback.xml

@@ -95,7 +95,7 @@ class ReleaseController @Inject()
       )
     }
   }
-  def releaseAuthorizationTypeUPD(id:Int) = LDAPAuthPermission("ReleaseAuthType") {
+  def XreleaseAuthorizationTypeUPD(id:Int) = LDAPAuthPermission("ReleaseAuthType") {
     Action.async { implicit request =>
       forms.AuthorizationTypeForm.form.bindFromRequest.fold(
         form => {
@@ -112,5 +112,38 @@ class ReleaseController @Inject()
       )
     }
   }
+
+  def releaseAuthorizationTypeUPD(id:Int) = LDAPAuthPermission("ReleaseAuthType") {
+    Action.async { implicit request =>
+      request.body.asFormUrlEncoded match {
+        case None => Future.successful(NotFound("No Fields"))
+        case Some((keys: Map[String, Seq[String]])) =>
+          releaseAuthorizationTypeRepo.find(id).map {
+                case Some(rat) =>
+                  val fieldName: String = keys.getOrElse("name", Seq("x")).head.toLowerCase
+                  val valueSeq: Seq[String] = keys.getOrElse("value", Seq.empty)
+                  val res: Future[Result] = valueSeq.headOption match {
+                    case None => Future.successful(NotAcceptable("Missing value"))
+                    case Some(value) =>
+                      val upd: Future[Boolean] = if (fieldName.equals("name")) {
+                        releaseAuthorizationTypeRepo.update(id, rat.copy(name = value))
+                      } else {
+                        Future.successful(false)
+                      }
+                      upd.map { r =>
+                        if (r) {
+                          Ok("Updated")
+                        } else {
+                          NotFound("Invalid Value/Not Updated")
+                        }
+                      }
+                  }
+                  res
+                case None => Future.successful(NotFound(views.html.page_404("Objective not found")))
+          }.flatMap(identity)
+      }
+    }
+  }
+
 }
 
