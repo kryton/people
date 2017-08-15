@@ -23,6 +23,7 @@ ADD         project/plugins.sbt /root/project/
 ADD         project/build.properties /root/project/
 #RUN         mkdir  -p /pic/cache  /pic/source && chown 777 /pic/cache /pic/source
 
+ADD	    internal/assets/stylesheets/dark.css /root/app/assets/stylesheets/
 # TEST AND BUILD THE PROJECT -- FAILURE WILL HALT IMAGE CREATION
 #RUN         cd /root; /usr/local/activator/activator test stage
 RUN         cd /root; /usr/local/activator/bin/activator package stage
@@ -40,6 +41,7 @@ ADD	    app/assets/images/noFace.jpg /root/app/assets/images
 ADD	    app/assets/images/cat/*.jpg /root/app/assets/images/cat/
 ADD	    app/assets/images/noFace.jpg /root/target/universal/stage/app/assets/images
 ADD	    app/assets/images/cat/*.jpg /root/target/universal/stage/app/assets/images/cat/
+RUN	    cd /root/target/universal/stage/app/assets/stylesheets ; rm -f dark.css
 ADD	    internal/assets/stylesheets/dark.css /root/target/universal/stage/app/assets/stylesheets/
 
 RUN         cd  /root/conf; cp secret.conf.docker secret.conf
