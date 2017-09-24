@@ -16,7 +16,7 @@
  *@
 
 @import projectdb.Tables.ProductfeatureRow
-@import util.Page
+@import utl.Page
 @import java.sql.Date
 @import projectdb.Tables.ResourceteamRow
 @import projectdb.Tables.ResourcepoolRow
@@ -28,7 +28,7 @@
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
-        ldap: util.LDAP)
+        ldap: utl.LDAP)
 
 
 @main(s"${if (teamLevel.getOrElse("N").equalsIgnoreCase("Y")) {"Team"} else {"Team/Pool"} } Breakdown!") {

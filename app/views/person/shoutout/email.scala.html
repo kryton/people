@@ -20,7 +20,7 @@
 @import models.people.EmpRelationsRowUtils._
 @(obj:KudostoRow, from:Option[EmprelationsRow], to:Option[EmprelationsRow],
         host:String, admins:Seq[EmprelationsRow],
-        emailDomain:String)(implicit  ldap: util.LDAP )
+        emailDomain:String)(implicit  ldap: utl.LDAP )
 
 <h1>A Shoutout from @from.map{ x => @x.fullName }.getOrElse{
     @obj.fromperson

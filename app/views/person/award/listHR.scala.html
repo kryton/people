@@ -20,9 +20,9 @@
 @import offline.Tables.EmprelationsRow
 @import offline.Tables.AwardnominationtoRow
 @import offline.Tables.EmphistoryRow
-@(  page: util.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow, Option[EmprelationsRow], Option[EmphistoryRow])],
-    rejected: util.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow)]
-       )(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+@(  page: utl.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow, Option[EmprelationsRow], Option[EmphistoryRow])],
+    rejected: utl.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow)]
+       )(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 
 @main("HR Review/Approval needed") {

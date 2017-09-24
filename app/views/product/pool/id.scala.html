@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@import util.Page
+@import utl.Page
 @import projectdb.Tables.ResourceteamRow
 @import projectdb.Tables.ResourcepoolRow
 @import models.product.EfficencyMonth
@@ -29,7 +29,7 @@
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
-        ldap: util.LDAP)
+        ldap: utl.LDAP)
 
 
 @main(s"Resource Pool ${resourcePool.name}!") {

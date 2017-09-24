@@ -17,7 +17,7 @@
 
 @import offline.Tables.CostcenterRow
 @import offline.Tables.EmprelationsRow
-@import util.Page
+@import utl.Page
 @import people.EmpRelationsRowUtils._
 @import offline.Tables.ProfitcenterRow
 @import offline.Tables.FunctionalareaRow
@@ -27,7 +27,7 @@
         profits: Seq[ProfitcenterRow])(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
-        ldap: util.LDAP)
+        ldap: utl.LDAP)
 
 
 @main(s"Functional Area:${function.functionalarea} - ${function.shortname.getOrElse("-None-")}") {

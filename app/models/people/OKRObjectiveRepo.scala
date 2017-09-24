@@ -27,7 +27,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcBackend, JdbcProfile}
-import util.Conversions
+import utl.Conversions
 
 import scala.concurrent.{ExecutionContext, Future}
 

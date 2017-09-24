@@ -18,7 +18,7 @@
 @import projectdb.Tables.ProducttrackRow
 @import projectdb.Tables.ProducttrackfeatureRow
 @import projectdb.Tables.ProductfeatureRow
-@import util.Page
+@import utl.Page
 @import projectdb.Tables.ResourceteamRow
 @import projectdb.Tables.ResourcepoolRow
 @import projectdb.Tables.ResourceteamproductfeatureRow
@@ -39,7 +39,7 @@
         assets: AssetsFinder,
           messages: Messages,
         request: Request[_],
-        ldap: util.LDAP)
+        ldap: utl.LDAP)
 
 @poolLink( poolO: Option[ResourcepoolRow]) = @{
     poolO.map { pool:ResourcepoolRow =>

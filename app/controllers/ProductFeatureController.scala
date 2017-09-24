@@ -39,8 +39,8 @@ import play.utils.Conversions
 import projectdb.Tables
 import projectdb.Tables._
 import slick.jdbc.JdbcProfile
-import util.importFile.{ProjectMPPImport, ProjectXLSImport, SAPImport}
-import util.{LDAP, Page, User}
+import utl.importFile.{ProjectMPPImport, ProjectXLSImport, SAPImport}
+import utl.{LDAP, Page, User}
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -211,7 +211,7 @@ class ProductFeatureController @Inject()
 
             val minX: Date = x._2.flatMap { p => p._3.keys }.minBy(_.getTime)
             val maxX: Date = x._2.flatMap { p => p._3.keys }.maxBy(_.getTime)
-            val monthRange: Seq[Date] = util.Conversions.monthRange(minX, maxX)
+            val monthRange: Seq[Date] = utl.Conversions.monthRange(minX, maxX)
 
             val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM-YYYY")
 
@@ -261,7 +261,7 @@ class ProductFeatureController @Inject()
         val dates: Seq[Date] = lines.flatMap(r => r._4.flatMap(_._3.keys))
         val minX: Date = dates.minBy(_.getTime)
         val maxX: Date = dates.maxBy(_.getTime)
-        val monthRange: Seq[Date] = util.Conversions.monthRange(minX, maxX)
+        val monthRange: Seq[Date] = utl.Conversions.monthRange(minX, maxX)
 
         val allocatedTally: Seq[(String, Boolean, String, Double, String, Iterable[(Either[ResourceteamRow, ResourcepoolRow], Double, Seq[(Date, Double)])])] = lines.map{ (line: (String, Seq[(Boolean, String, Double)], String, Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Int, Map[Date, Double])])) =>
           val resDTFull: Iterable[(Either[ResourceteamRow, ResourcepoolRow], Int, Seq[(Date, Double)])] = line._4.map{ rtDates =>

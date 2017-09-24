@@ -18,8 +18,8 @@
 @import offline.Tables.KudostoRow
 @import people.EmpRelationsRowUtils._
 @import offline.Tables.EmprelationsRow
-@(page: util.Page[(KudostoRow,Option[EmprelationsRow],Option[EmprelationsRow])],
-        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+@(page: utl.Page[(KudostoRow,Option[EmprelationsRow],Option[EmprelationsRow])],
+        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 
 @main("Shoutouts") {

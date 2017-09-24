@@ -1,4 +1,4 @@
-package util.images;
+package utl.images;
 
 import jjil.algorithm.RgbAvgGray;
 import jjil.core.*;

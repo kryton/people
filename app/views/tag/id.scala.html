@@ -24,10 +24,10 @@
 @import offline.Tables.EmptagRow
 @import offline.Tables.MatrixteamRow
 @(      tag:String,
-        members:util.Page[(EmptagRow,Option[EmprelationsRow])])(implicit  webJarAssets: WebJarAssets,
+        members:utl.Page[(EmptagRow,Option[EmprelationsRow])])(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
-        ldap: util.LDAP)
+        ldap: utl.LDAP)
 
 @main(s"${tag} (${members.total} members)") {
 

@@ -27,7 +27,7 @@ import play.db.NamedDatabase
 import projectdb.Tables
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcBackend, JdbcProfile}
-import util.importFile.FeatureImport
+import utl.importFile.FeatureImport
 
 import scala.concurrent.{ExecutionContext, Future}
 

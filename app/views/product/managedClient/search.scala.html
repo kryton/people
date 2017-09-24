@@ -17,10 +17,10 @@
 
 @import projectdb.Tables.ProducttrackRow
 @import projectdb.Tables.ManagedclientRow
-@(page: util.Page[ManagedclientRow],
+@(page: utl.Page[ManagedclientRow],
         searchTerm:Option[String],
         isAdmin:Boolean,
-        rpForm: Form[forms.ManagedClientForm.Data])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, messages: Messages, request: Request[_], ldap: util.LDAP )
+        rpForm: Form[forms.ManagedClientForm.Data])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, messages: Messages, request: Request[_], ldap: utl.LDAP )
 
 
 @main("Managed Clients") {

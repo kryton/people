@@ -29,7 +29,7 @@ import play.db.NamedDatabase
 import projectdb.Tables
 import projectdb.Tables.ManagedclientRow
 import slick.jdbc.JdbcProfile
-import util.{LDAP, Page, User}
+import utl.{LDAP, Page, User}
 
 import scala.concurrent.{ExecutionContext, Future}
 

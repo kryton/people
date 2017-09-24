@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package util
+package utl
 
 import java.security.cert.X509Certificate
 import javax.inject.Singleton

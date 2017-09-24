@@ -28,10 +28,10 @@
 @(      id:Long,
         objective:OkrobjectiveRow,
         emp: EmprelationsRow,
-        results:util.Page[OkrkeyresultRow])(implicit  webJarAssets: WebJarAssets,
+        results:utl.Page[OkrkeyresultRow])(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
-        ldap: util.LDAP)
+        ldap: utl.LDAP)
 
 
 @main(s"${objective.login} (${objective.quarterdate})") {

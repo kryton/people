@@ -22,11 +22,12 @@
 @import projectdb.Tables.ReleasetypeRow
 @import projectdb.Tables.ProjectreleaseRow
 @(      id:Int,
-        releaseAuthorization:ReleaseauthorizationtypeRow,
-        rauthPPl:Page[(ReleasetypeauthorizationpeopleRow,ReleasetypeRow)],
-        rauth:Page[(ReleaseauthorizationRow, ProjectreleaseRow)],
+        release: ProjectreleaseRow,
+        releaseTypeO: Option[ReleasetypeRow],
+        releaseAuthorization:Seq[(ReleaseauthorizationRow, ReleaseauthorizationtypeRow)],
         form: Form[forms.ReleaseAuthPeopleForm.Data],
-        rtSelect:Seq[(String,String)]
+        ratSelect:Seq[(String,String)],
+        missing: Map[ReleaseauthorizationtypeRow, Seq[(ReleasetypeauthorizationpeopleRow, ReleaseauthorizationtypeRow)]]
 
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
@@ -35,13 +36,13 @@
         ldap: utl.LDAP)
 
 
-@main(s"Release Authorization ${releaseAuthorization.name}!") {
+@main(s"Release ${release.name}!") {
 
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Details (<a href="@routes.ReleaseController.releaseAuthorizationTypeSearch()">All Release Authorizations Types</a>)</h2>
+                <h2>Details (<a href="@routes.ReleaseController.releaseAuthorizationTypeSearch()">All Releases #TBD</a>)</h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
                     <li><a class="close-link"><i class="fa fa-close"></i></a></li>
@@ -51,21 +52,23 @@
             <!-- x_title -->
             <div class="x_content">
                 <div class="container">
-                    @if( LDAPAuth.hasPermission("ReleaseAuthType")) {
-                        <span class="RAT editable editable-click" data-type="text" data-pk="@releaseAuthorization.id"
-                        data-name="name" data-title="Release Authorization Name"
-                        data-url="@routes.ReleaseController.releaseAuthorizationTypeUPD(releaseAuthorization.id)">
-                        @releaseAuthorization.name</span>
-                    } else {
-                        @releaseAuthorization.name
-                    }
+                    <pre>
+                    Release: @release.name
+                    Deployed: @release.deployed.map{ x => @x.format("d-MMM-yyyy") }
+                    Planned: @release.planned
+                    ReleaseType: @releaseTypeO.map{ x =>  @x.name - email: @x.emailalias }
+                    Change Ticket: @release.changeticket
+                    URL: @release.releasefileurl
+                    Notes: @release.releasenotes
+                    Rolled Back: @release.rolledback
+                    </pre>
                 </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->
 
         <div class="x_panel">
             <div class="x_title">
-                <h2>R Auth People
+                <h2>Release Auth
                     @if( LDAPAuth.hasPermission("ReleaseAuthType")) {
                         <a id="addRPPL" href="#"><i class="fa fa-plus" title="Add a new Person"></i></a>
                     }
@@ -80,102 +83,69 @@
             <div class="x_content">
                 <div class="container">
                 <div class="row">
-                @Option(rauthPPl.items).filterNot(_.isEmpty).map { results =>
+
                     <div class="container">
                         <div class="row">
                             <div class="col-xs-12">
                                 <table class="table table-responsive">
                                     <thead>
                                         <tr><th>Release Type</th>
-                                            <th>Is Primary</th>
-                                            <th>login</th>
-                                        </tr>
-                                    </thead>
-                        @results.map { item =>
-                            <tr>
-                                <td ><a href="@routes.ReleaseController.releaseType(item._2.id)">@item._2.name</a></td>
-                                <td >@item._1.isprimary</td>
-                                <td ><a href="@routes.ReleaseController.login(item._1.login)">@item._1.login</a></td>
-                            </tr>
-                        }
-                                </table>
-                            </div>
-
-                        </div>
-                    </div>
-                }
-                </div>
-                <div class="row">
-                    @rauthPPl.prev.map { x =>
-                        <a href="@routes.ReleaseController.releaseAuthorizationType(id,x, rauth.page)">... prev ...</a>
-                    }
-                    @rauthPPl.next.map { x =>
-                        <a href="@routes.ReleaseController.releaseAuthorizationType(id,x, rauth.page)">... next ...</a>
-                    }
-
-                </div>
-            </div>
-            </div> <!-- x_content -->
-        </div ><!-- x_panel -->
-
-        <div class="x_panel">
-            <div class="x_title">
-                <h2>R Auth</h2>
-                <ul class="nav navbar-right panel_toolbox">
-                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
-                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
-                </ul>
-                <div class="clearfix"></div>
-            </div>
-            <!-- x_title -->
-            <div class="x_content">
-                <div class="container">
-                <div class="row">
-                @Option(rauth.items).filterNot(_.isEmpty).map { results =>
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <table class="table table-responsive">
-                                    <thead>
-                                        <tr><th>Release</th>
-                                            <th>Approved Date</th>
-                                            <th>Rejected Date</th>
                                             <th>Login</th>
-                                            <th>Is Approved</th>
+                                            <th>Approved/Rejected</th>
+                                            <th>On</th>
                                             <th>Notes</th>
                                         </tr>
                                     </thead>
+                                    @releaseAuthorization.map { item =>
+                                        <tr>
+                                            <td ><a href="@routes.ReleaseController.releaseAuthorizationType(item._2.id)">@item._2.name</a></td>
+                                            <td ><a href="@routes.ReleaseController.login(item._1.login)">@item._1.login</a></td>
+                                            @if(item._1.isapproved) {
+                                                <td>Approved</td>
+                                                <td>@item._1.approveddate.map{ x => @x.format("d-MMM-yyyy")} </td>
+                                            } else {
+                                                <td><b>REJECTED</b></td>
+                                                <td>@item._1.rejecteddate.map{ x => @x.format("d-MMM-yyyy")} </td>
+                                            }
+                                            <td>@item._1.notes.map{ x => @x} </td>
+                                        </tr>
+                                    }
+                                    </table>
 
-                        @results.map { item =>
-                            <tr>
-                                <td><a href="@routes.ReleaseController.release(item._2.id)">@item._2.name</a></td>
-                                <td >@item._1.approveddate.map{ x => @x.format("d-MMM-yyyy") }</td>
-                                <td >@item._1.rejecteddate.map{ x => @x.format("d-MMM-yyyy") }</td>
-                                <td ><a href="@routes.ReleaseController.login(item._1.login)">@item._1.login</a></td>
-                                <td >@item._1.isapproved.getOrElse("N")</td>
-                                <td >@item._1.notes.map{ x => @x }</td>
-                            </tr>
-                        }
-
-                                </table>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <h3>Missing Authorizations for this release</h3>
 
+                                @missing.map { row =>
+                                        <h4>@row._1.name </h4>
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>Primary</th>
+                                            <th>Login</th>
+                                        </tr>
+                                    </thead>
+                                  @row._2.sortBy(!_._1.isprimary).map{ row2 =>
+                                          <tr>
+                                              <td>@row2._1.isprimary</td>
+                                              <td>@row2._1.login</td>
+                                          </tr>
+                                  }
+                                </table>
+                                }
+
+                            </div>
                         </div>
                     </div>
-                }
-                </div>
-                <div class="row">
-                    @rauth.prev.map { x =>
-                        <a href="@routes.ReleaseController.releaseAuthorizationType(id,rauthPPl.page,x)">... prev ...</a>
-                    }
-                    @rauth.next.map { x =>
-                        <a href="@routes.ReleaseController.releaseAuthorizationType(id,rauthPPl.page,x)">... next ...</a>
-                    }
 
                 </div>
+
             </div>
             </div> <!-- x_content -->
         </div ><!-- x_panel -->
+
     </div ><!-- col -->
     <div id="addNewRPPL" class="modal fade">
         <div class="modal-dialog">
@@ -190,7 +160,7 @@
                         @helper.CSRF.formField
                         <input type="hidden" name="releaseauthoritytypeid" value="@id" />
                         <input type="hidden" name="releasetypeid" value="@id" />
-                        @helper.select(form("releasetypeid"), options= rtSelect)
+                        @helper.select(form("releasetypeid"), options= ratSelect)
                         @helper.inputText(form("login"), '_label -> "Login", 'placeholder -> "Login", 'class -> "form-control" )
                         @helper.checkbox(form("isprimary"),'_label -> "Is Primary", 'placeholder -> "Is Primary Authority", 'class ->"form-control")
 
@@ -206,7 +176,7 @@
         </div>
     </div>
 </div> <!-- row -->
-    <script nonce="PMAN">
+    <xscript nonce="PMAN">
             <!--
             window.onload = function () {
                 //turn to inline mode
@@ -226,6 +196,6 @@
                 });
             }
             -->
-    </script>
+    </xscript>
 }
 

@@ -15,18 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package util.importFile
+package utl.importFile
 
+
+import projectdb.Tables._
 /**
   * Created by iholsman on 4/15/2017.
   * All Rights reserved
   */
-case class FeatureImport(feature: String,
-                         program: Option[String],
-                         isCID: Boolean,
-                         isAnchor: Boolean,
-                         priority: Int,
-                         start: java.sql.Date,
-                         finish: java.sql.Date,
-                         projects: List[ProjectImport])
-
+case class ProjectImport(row:Int,  predecessor:Seq[(Int,String)], disabled:Boolean, program:Option[String], isCID:Boolean,
+                         isAnchor:Boolean, priority:Int, feature:String,task:String, resource:String, resourceNumber:Int,
+                         devEstimate:Double, bufferedEstimate:Double, work:Double, duration:Double,
+                         start:java.sql.Date, finish:java.sql.Date,
+                         percentComplete:Double /*, notes:String, percentWorkComplete:Double */,
+                         resourceTeam:Option[(ResourceteamRow,Option[ResourcepoolRow])],
+                         constraint:String, constraintDate:Option[java.sql.Date])

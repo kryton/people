@@ -20,7 +20,7 @@
 @import offline.Tables.EmprelationsRow
 @import offline.Tables.OkrobjectiveRow
 @(page: Seq[( (Option[java.sql.Date], EmprelationsRow), Seq[(OkrobjectiveRow, EmprelationsRow)] )]
-)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 
 @main("OKRs") {
@@ -50,8 +50,8 @@
                                 <a href="@routes.PersonController.id(mtm._1._2.login)">@mtm._1._2.fullName</a>
                             </div>
                             <div class="col-xs-1">
-                                <a href="@routes.OKRController.login(mtm._1._2.login,Some(util.Conversions.quarterS(mtm._1._1)))">
-                                @util.Conversions.quarterS( mtm._1._1)</a>
+                                <a href="@routes.OKRController.login(mtm._1._2.login,Some(utl.Conversions.quarterS(mtm._1._1)))">
+                                @utl.Conversions.quarterS( mtm._1._1)</a>
                             </div>
 
                             <div class="col-xs-9">

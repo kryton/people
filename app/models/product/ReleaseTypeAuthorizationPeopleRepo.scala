@@ -39,8 +39,16 @@ class ReleaseTypeAuthorizationPeopleRepo @Inject()(@NamedDatabase("projectdb")  
 
   def find(id:Int):Future[Option[ReleasetypeauthorizationpeopleRow]] = db.run(Releasetypeauthorizationpeople.filter(_.id === id).result.headOption)
   def findByLogin(login:String):Future[Seq[ReleasetypeauthorizationpeopleRow]] = db.run(Releasetypeauthorizationpeople.filter(_.login === login ).result)
-  def findByReleaseType(releaseType:Int):Future[Seq[ReleasetypeauthorizationpeopleRow]] = db.run(Releasetypeauthorizationpeople.filter(_.releasetypeid === releaseType ).result)
-  def findByReleaseAuthorizationType(auth:Int):Future[Seq[ReleasetypeauthorizationpeopleRow]] = db.run(Releasetypeauthorizationpeople.filter(_.releaseauthorityid === auth ).result)
+  def findByReleaseType(releaseType:Int):Future[Seq[(ReleasetypeauthorizationpeopleRow,ReleaseauthorizationtypeRow)]] =
+    db.run(Releasetypeauthorizationpeople.filter(_.releasetypeid === releaseType )
+        .join(Releaseauthorizationtype).on(_.releaseauthorityid === _.id)
+      .result)
+
+  def findByReleaseAuthorizationType(auth:Int):Future[Seq[(ReleasetypeauthorizationpeopleRow, ReleasetypeRow)]] =
+    db.run(Releasetypeauthorizationpeople.filter(_.releaseauthorityid === auth )
+        .join(Releasetype).on(_.releasetypeid === _.id)
+      .result)
+
   def find(releaseType:Int, login:String):Future[Option[ReleasetypeauthorizationpeopleRow]] = db.run(Releasetypeauthorizationpeople.filter(_.login === login ).filter(_.releasetypeid === releaseType).result.headOption)
   def findOrCreate(releaseType:Int, login:String, authorityId:Int):Future[ReleasetypeauthorizationpeopleRow] = {
     find(releaseType,login).map {

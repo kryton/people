@@ -25,7 +25,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import projectdb.Tables
 import slick.jdbc.JdbcProfile
-import util.importFile.ProjectImport
+import utl.importFile.ProjectImport
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -251,7 +251,7 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
             (l._2,l._3)
           }
           if (p._1.started.nonEmpty && p._1.finished.nonEmpty) {
-            (p._1, reduced, util.Conversions.explodeDateRange(p._1.started.get, p._1.finished.get))
+            (p._1, reduced, utl.Conversions.explodeDateRange(p._1.started.get, p._1.finished.get))
           } else {
             (p._1,reduced, (0, Seq.empty))
           }

@@ -58,5 +58,5 @@ class ReleaseTypeRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCon
   }
 
   def delete(id: Int) =
-    db.run(Projectrelease.filter(_.id === id).delete) map { _ > 0 }
+    db.run(Releasetype.filter(_.id === id).delete) map { _ > 0 }
 }

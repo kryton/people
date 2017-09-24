@@ -17,13 +17,13 @@
 
 @import projectdb.Tables.ResourceteamRow
 @import projectdb.Tables.ResourcepoolRow
-@(page: util.Page[(ResourceteamRow,Option[ResourcepoolRow])],
+@(page: utl.Page[(ResourceteamRow,Option[ResourcepoolRow])],
         searchTerm:Option[String],
         isAdmin:Boolean
   )(implicit  webJarAssets: WebJarAssets,
               messages: Messages,
               assets: AssetsFinder,
-              request: Request[_], ldap: util.LDAP )
+              request: Request[_], ldap: utl.LDAP )
 
 
 @main("Resources") {

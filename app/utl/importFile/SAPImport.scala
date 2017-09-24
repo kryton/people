@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package util.importFile
+package utl.importFile
 
 import java.io.File
 import java.net.URI
@@ -27,7 +27,7 @@ import java.util.Calendar
 import models.people.{CostCenterRepo, EmpHistoryRepo, OfficeRepo, PositionTypeRepo}
 import offline.Tables.{EmphistoryRow, EmprelationsRow}
 import play.api.Logger
-import util.Conversions
+import utl.Conversions
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.{BufferedSource, Codec, Source}

@@ -48,6 +48,10 @@ class ReleaseRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
     }
   }.flatMap(identity)
 
+  def findByReleaseType( releaseTypeId: Int): Future[Seq[ProjectreleaseRow]] = {
+    db.run(Projectrelease.filter( _.releasetypeid === releaseTypeId).result )
+  }
+
   def all = db.run(Projectrelease.sortBy( _.name).result)
   def search(term:String) = db.run(Projectrelease.filter(_.name startsWith term).sortBy( _.name).result)
 

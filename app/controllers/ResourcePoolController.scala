@@ -33,7 +33,7 @@ import play.db.NamedDatabase
 import projectdb.Tables
 import projectdb.Tables._
 import slick.jdbc.JdbcProfile
-import util.{LDAP, Page, User}
+import utl.{LDAP, Page, User}
 
 import scala.concurrent.{ExecutionContext, Future}
 import offline.Tables.EmprelationsRow
@@ -348,7 +348,7 @@ class ResourcePoolController @Inject()
           } else {
             val minX: Date = dates.minBy(_.getTime)
             val maxX: Date = dates.maxBy(_.getTime)
-            util.Conversions.monthRange(minX, maxX)
+            utl.Conversions.monthRange(minX, maxX)
           }
           val monthsLimit: Seq[Date] = monthRange.sortBy(_.getTime).slice(0,15) //16 dates = 5Q
           //=  util.Conversions.monthRange(minX, maxX)
@@ -379,7 +379,7 @@ class ResourcePoolController @Inject()
       } else {
         val minX = dates.minBy(_.getTime)
         val maxX = dates.maxBy(_.getTime)
-        util.Conversions.monthRange(minX,maxX)
+        utl.Conversions.monthRange(minX,maxX)
       }
       val monthsLimit = monthRange.sortBy(_.getTime).slice(0,15)
       val setReduced: Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Int, Map[Date, Double])])] = set.map{ s =>

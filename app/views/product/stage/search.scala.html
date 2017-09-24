@@ -19,8 +19,8 @@
 @import offline.Tables.EmprelationsRow
 @import projectdb.Tables.ProducttrackRow
 @import projectdb.Tables.StageRow
-@(page: util.Page[StageRow],
-        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+@(page: utl.Page[StageRow],
+        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 
 @main("Stages") {

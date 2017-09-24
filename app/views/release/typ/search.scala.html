@@ -15,25 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@import projectdb.Tables.ResourceteamRow
-@import projectdb.Tables.ResourcepoolRow
-@(page: utl.Page[ResourcepoolRow],
+@import projectdb.Tables.ReleaseauthorizationtypeRow
+@import projectdb.Tables.ReleasetypeRow
+@(page: utl.Page[ReleasetypeRow],
         searchTerm:Option[String],
-        isAdmin:Boolean,
-        rpForm: Form[forms.ResourcePoolForm.Data]
+        form: Form[forms.ReleaseTypeForm.Data]
 )(implicit  webJarAssets: WebJarAssets,
-            assets: AssetsFinder,
-            request: Request[_],
-            messages: Messages, ldap: utl.LDAP )
+        assets: AssetsFinder,
+        request: Request[_],
+        messages: Messages,
+        ldap: utl.LDAP )
 
-@main("Resource Pools") {
+
+@main("Release Types") {
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Resource Pools @if( isAdmin ) {
-                    <a id="newRP"><i class="fa fa-plus" title="Add new Resource Pool"></i></a>
-                }</h2>
+                <h2>Release Types
+                    @if( LDAPAuth.hasPermission("ReleaseType")) {
+                        <a id="addRAT" href="#"><i class="fa fa-plus" title="Add a new Authorization Type"></i></a>
+                    }
+                </h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                     </li>
@@ -46,86 +49,73 @@
             <div class="x_content">
             @Option(page.items).filterNot(_.isEmpty).map { results =>
                 <div class="container">
-                    <table class="table table-striped">
-                        <thead><th>PoolName</th>
-                        @if(isAdmin) {
-                            <th>Action</th>
-                        }
+                    <table class="table">
+                        <thead><tr>
+                            <th>Release Type</th>
+                            <th>eMail Alias</th>
+                            @if( LDAPAuth.hasPermission("ReleaseType")) {
+                                <th>Actions</th>
+                            }
+                        </tr>
                         </thead>
-
-
+                    <tbody>
                     @results.map { mtm =>
                         <tr>
                             <td>
-                                <a href="@routes.ResourcePoolController.id(mtm.id)">@mtm.name</a>
+                                <a href="@routes.ReleaseController.releaseType(mtm.id)">@mtm.name</a>
                             </td>
-                            @if(isAdmin) {
-                                <td><a href="@routes.ResourcePoolController.deleteRP(mtm.id)"><i class="fa fa-eraser" title="Delete Pool (if empty)"></i></a></td>
+                            <td>@mtm.emailalias</td>
+                            @if( LDAPAuth.hasPermission("ReleaseAuthType")) {
+                                <td><a href="@routes.ReleaseController.releaseTypeDel(mtm.id)"><i class="fa fa-trash" title="Delete"></i></a></td>
                             }
-                        </tr>
+                    </tr>
                     }
+                    </tbody>
                     </table>
 
-               <div class="row">
-
-
-                @page.prev.map { x =>
-                    <a href="@routes.ResourcePoolController.search(x,searchTerm)">... prev ...</a>
-                }
-                @page.next.map { x =>
-                    <a href="@routes.ResourcePoolController.search(x,searchTerm)">... next ...</a>
-                }
-
-               </div>
                 </div>
             }
             </div>
         </div>
-    </div>
-</div>
-
-    @if(isAdmin) {
-        <div id="addNewRP" class="modal fade">
+        <div id="addNewRAT" class="modal fade">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title">Add a new Resource Pool</h4>
+                        <h4 class="modal-title">Add a new Release Type</h4>
                     </div>
-                    @helper.form(action = helper.CSRF(routes.ResourcePoolController.newRP)) {
+                    @helper.form( action = routes.ReleaseController.releaseTypeNew()) {
 
                         <div class="modal-body">
-                            <input type="hidden" name="poolsize" value="0" />
-                          
-                            @helper.inputText(rpForm("name"), '_label -> "Name", 'class -> "form-control")
-                              @helper.inputText(rpForm("ordering"), '_label -> "Sort Ordering", 'class -> "form-control")
+                            @helper.CSRF.formField
+                            @helper.inputText(form("name"), '_label -> "Name", 'placeholder -> "Name", 'class -> "form-control" )
+                            @helper.inputText(form("emailalias"),'_label -> "eMail Alias", 'placeholder -> "email Alias", 'class ->"form-control")
+
                             <p>Do you want to save changes you made to document before closing?</p>
-                            <p class="text-warning"><small>
-                                If you don't save, your changes will be lost.</small></p>
+                            <p class="text-warning"><small>If you don't save, your changes will be lost.</small></p>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-primary">Save changes</button>
                         </div>
                     }
-
                 </div>
             </div>
         </div>
-        <script nonce="PMAN">
-    <!--
-    window.onload = function () {
-         //turn to inline mode
-         //$.fn.editable.defaults.mode = 'inline';
-         $(document).ready(function() {
+    </div>
+</div>
+    <script nonce="PMAN">
+<!--
+window.onload = function () {
+    //turn to inline mode
+    //$.fn.editable.defaults.mode = 'inline';
+    $(document).ready(function() {
+        $("#addRAT").click( function() {
+            $("#addNewRAT").modal('show');
+        });
+    });
 
-             $("#newRP").click( function() {
-                         $("#addNewRP").modal('show');
-                 });
-
-         });
-     }
-    -->
-</script>
     }
+-->
+</script>
 }

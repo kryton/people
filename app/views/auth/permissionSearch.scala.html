@@ -16,12 +16,12 @@
  *@
 
 @import offline.Tables.AuthpermissionRow
-@(page: util.Page[AuthpermissionRow],
+@(page: utl.Page[AuthpermissionRow],
         searchTerm:Option[String],
         canEdit:Boolean,
         form: Form[forms.AuthPermissionForm.Data]
 )(implicit
-        webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP, messages: Messages )
+        webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP, messages: Messages )
 
 
 @main("Permissions") {

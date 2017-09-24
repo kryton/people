@@ -34,7 +34,7 @@ import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc._
 import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
-import util.{Conversions, LDAP, Page, User}
+import utl.{Conversions, LDAP, Page, User}
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}

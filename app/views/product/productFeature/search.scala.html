@@ -17,10 +17,10 @@
 
 @import projectdb.Tables.ProducttrackRow
 @import projectdb.Tables.ProductfeatureRow
-@(page: util.Page[ProductfeatureRow],
+@(page: utl.Page[ProductfeatureRow],
         searchTerm:Option[String],
         filterType:String="All"
-)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 
 @main("Product Features") {

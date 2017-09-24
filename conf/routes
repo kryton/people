@@ -161,10 +161,21 @@ GET         /auth/permission/:id                            controllers.AuthCont
 POST        /auth/permission/new                            controllers.AuthController.newPermission
 
 ## Release URLs
-GET /release/authorization/type/    controllers.ReleaseController.releaseAuthorizationTypeSearch()
-GET /release/authorization/type/:id controllers.ReleaseController.releaseAuthorizationType(id:Int, page:Int ?= 0, page2:Int ?= 0)
-POST /release/authorization/type/new controllers.ReleaseController.releaseAuthorizationTypeNew
-POST /release/authorization/type/:id controllers.ReleaseController.releaseAuthorizationTypeUPD(id:Int)
+GET         /release/authorization/type/                    controllers.ReleaseController.releaseAuthorizationTypeSearch()
+GET         /release/authorization/type/:id                 controllers.ReleaseController.releaseAuthorizationType(id:Int, page:Int ?= 0, page2:Int ?= 0)
+POST        /release/authorization/type/new                 controllers.ReleaseController.releaseAuthorizationTypeNew
+GET         /release/authorization/type/:id/delete          controllers.ReleaseController.releaseAuthorizationTypeDel(id:Int)
+POST        /release/authorization/type/:id                 controllers.ReleaseController.releaseAuthorizationTypeUPD(id:Int)
+#
+GET         /release/type/                                  controllers.ReleaseController.releaseTypeSearch()
+GET         /release/type/:id                               controllers.ReleaseController.releaseType(id:Int, page:Int ?= 0, page2:Int ?= 0)
+POST        /release/type/new                               controllers.ReleaseController.releaseTypeNew
+GET         /release/type/:id/delete                        controllers.ReleaseController.releaseTypeDel(id:Int)
+POST        /release/type/:id                               controllers.ReleaseController.releaseTypeUPD(id:Int)
+
+GET         /release/id/:id                                 controllers.ReleaseController.release(id:Int)
+GET         /release/login/:login                           controllers.ReleaseController.login(login:String)
+POST        /release/ppl/new                                controllers.ReleaseController.pplNew
 
 # Map static resources from the /public folder to the /assets URL path
 

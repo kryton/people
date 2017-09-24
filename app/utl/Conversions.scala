@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package util
+package utl
 
 import java.sql.Date
 import java.util.Calendar

@@ -18,7 +18,7 @@
 @import projectdb.Tables.ProducttrackRow
 @import projectdb.Tables.ProducttrackfeatureRow
 @import projectdb.Tables.ProductfeatureRow
-@import util.Page
+@import utl.Page
 @import projectdb.Tables.ManagedclientRow
 @import projectdb.Tables.ManagedclientproductfeatureRow
 @(      id:Int,
@@ -32,7 +32,7 @@
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,
-        ldap: util.LDAP)
+        ldap: utl.LDAP)
 
 
 @main(s"Managed Client ${mc.name}!") {

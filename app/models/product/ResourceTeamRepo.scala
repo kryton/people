@@ -226,7 +226,7 @@ class ResourceTeamRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
             (l._2, l._3)
           }
           if (p._1.started.nonEmpty && p._1.finished.nonEmpty) {
-            (p._1, reduced, util.Conversions.explodeDateRange(p._1.started.get, p._1.finished.get))
+            (p._1, reduced, utl.Conversions.explodeDateRange(p._1.started.get, p._1.finished.get))
           } else {
             (p._1, reduced, (0, Seq.empty))
           }

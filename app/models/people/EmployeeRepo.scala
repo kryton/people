@@ -122,7 +122,7 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
         } else {
           val res = managedBy(l).map(_.toSet)
           val loginsNew = res.map(x => x.map(_.login))
-          val newAcc = util.Helpers.mergeFutureSets(acc, res)
+          val newAcc = utl.Helpers.mergeFutureSets(acc, res)
           managementTreeDownI(loginsNew, newAcc)
         }
       }.flatMap(identity)
@@ -225,28 +225,28 @@ object EmpRelationsRowUtils {
     def isContractor: Boolean = {
       emp.employeegroup.equalsIgnoreCase("External employee")
     }
-    def interOfficePhone( LDAPPerson:Option[SearchResultEntry]=None)(implicit ldap:util.LDAP):Option[String] = {
+    def interOfficePhone( LDAPPerson:Option[SearchResultEntry]=None)(implicit ldap:utl.LDAP):Option[String] = {
       val LDAPPerson2: Option[SearchResultEntry] = LDAPPerson //ldap.getPersonByAccount(URLDecoder.decode(emp.login, "UTF-8")).headOption
       LDAPPerson2 match {
         case Some(ldapPerson) => Option( ldapPerson.getAttributeValue("otherTelephone"))
         case None => None
       }
     }
-    def deskPhone( LDAPPerson:Option[SearchResultEntry]=None)(implicit ldap:util.LDAP):Option[String] = {
+    def deskPhone( LDAPPerson:Option[SearchResultEntry]=None)(implicit ldap:utl.LDAP):Option[String] = {
       val LDAPPerson2: Option[SearchResultEntry] = LDAPPerson //ldap.getPersonByAccount(URLDecoder.decode(emp.login, "UTF-8")).headOption
       LDAPPerson2 match {
         case Some(ldapPerson) => Option( ldapPerson.getAttributeValue("telephoneNumber"))
         case None => None
       }
     }
-    def eMail( LDAPPerson:Option[SearchResultEntry]=None)(implicit ldap:util.LDAP):Option[String] = {
+    def eMail( LDAPPerson:Option[SearchResultEntry]=None)(implicit ldap:utl.LDAP):Option[String] = {
       val LDAPPerson2: Option[SearchResultEntry] = LDAPPerson //ldap.getPersonByAccount(URLDecoder.decode(emp.login, "UTF-8")).headOption
       LDAPPerson2 match {
         case Some(ldapPerson) => Option( ldapPerson.getAttributeValue("mail"))
         case None => None
       }
     }
-    def cellPhone( LDAPPerson:Option[SearchResultEntry]=None)(implicit ldap:util.LDAP):Option[String] = {
+    def cellPhone( LDAPPerson:Option[SearchResultEntry]=None)(implicit ldap:utl.LDAP):Option[String] = {
       val LDAPPerson2 = LDAPPerson // ldap.getPersonByAccount(URLDecoder.decode(emp.login, "UTF-8")).headOption
       LDAPPerson2 match {
         case Some(ldapPerson) => Option( ldapPerson.getAttributeValue("mobile"))
@@ -254,7 +254,7 @@ object EmpRelationsRowUtils {
       }
     }
 
-    def getLDAPPerson()(implicit ldap:util.LDAP): Option[SearchResultEntry] = {
+    def getLDAPPerson()(implicit ldap:utl.LDAP): Option[SearchResultEntry] = {
       ldap.getPersonByAccount(URLDecoder.decode(emp.login, "UTF-8")).headOption
     }
 

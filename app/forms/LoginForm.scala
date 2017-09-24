@@ -136,13 +136,3 @@ object AwardForm {
   )
   case class Data(login:String, description:String)
 }
-
-object AuthorizationTypeForm {
-  val form = Form(
-    mapping(
-      "name" -> nonEmptyText,
-      "description" -> optional(text)
-    )(Data.apply)(Data.unapply)
-  )
-  case class Data(name:String, description:Option[String])
-}

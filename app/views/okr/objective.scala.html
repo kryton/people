@@ -29,7 +29,7 @@
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,
-        ldap: util.LDAP )
+        ldap: utl.LDAP )
 @scoreC(krs:Seq[OkrkeyresultRow]) = {
     @if(krs.exists(_.completed)) {
         @{krs.filter(_.completed).flatMap{ _.score }.sum/krs.count(_.completed)}

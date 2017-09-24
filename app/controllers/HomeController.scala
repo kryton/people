@@ -26,7 +26,7 @@ import models.auth.{PermissionRepo, UserPrefRepo}
 import models.people._
 import models.product.{ProductFeatureRepo, ProductTrackRepo}
 import offline.Tables.{EmphistoryRow, EmprelationsRow, KudostoRow}
-import util.{LDAP, Page, User}
+import utl.{LDAP, Page, User}
 import play.api._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.mvc._

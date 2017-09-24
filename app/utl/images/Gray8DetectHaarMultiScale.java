@@ -1,4 +1,4 @@
-package util.images;
+package utl.images;
 /*
  * Gray8DetectHaarMultiScale.java
  *

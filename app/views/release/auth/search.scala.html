@@ -15,19 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@import offline.Tables.KudostoRow
-@import offline.Tables.EmprelationsRow
-@import projectdb.Tables.ProducttrackRow
-@import projectdb.Tables.StageRow
+@import projectdb.Tables.ReleasetypeRow
 @import projectdb.Tables.ReleaseauthorizationtypeRow
-@(page: util.Page[ReleaseauthorizationtypeRow],
+@(page: utl.Page[ReleaseauthorizationtypeRow],
         searchTerm:Option[String],
         form: Form[forms.AuthorizationTypeForm.Data]
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,
-        ldap: util.LDAP )
+        ldap: utl.LDAP )
 
 
 @main("Authorization Types") {
@@ -52,14 +49,27 @@
             <div class="x_content">
             @Option(page.items).filterNot(_.isEmpty).map { results =>
                 <div class="container">
-
+                    <table class="table">
+                        <thead><tr>
+                            <th>Release Authorization Type</th>
+                            @if( LDAPAuth.hasPermission("ReleaseAuthType")) {
+                                <th>Actions</th>
+                            }
+                        </tr>
+                        </thead>
+                    <tbody>
                     @results.map { mtm =>
-                        <div class="row">
-                            <div class="col-sm-12">
+                        <tr>
+                            <td>
                                 <a href="@routes.ReleaseController.releaseAuthorizationType(mtm.id)">@mtm.name</a>
-                            </div>
-                    </div>
+                            </td>
+                            @if( LDAPAuth.hasPermission("ReleaseType")) {
+                                <td><a href="@routes.ReleaseController.releaseAuthorizationTypeDel(mtm.id)"><i class="fa fa-trash" title="Delete"></i></a></td>
+                            }
+                    </tr>
                     }
+                    </tbody>
+                    </table>
 
                 </div>
             }
@@ -77,7 +87,7 @@
                         <div class="modal-body">
                             @helper.CSRF.formField
                             @helper.inputText(form("name"), '_label -> "Name", 'placeholder -> "Name", 'class -> "form-control" )
-                            @helper.textarea(form("description"),'_label -> "Description", 'placeholder -> "Description", 'class ->"form-control")
+                            @helper.textarea(form("description"),'_label -> "description", 'placeholder -> "description", 'class ->"form-control")
 
                             <p>Do you want to save changes you made to document before closing?</p>
                             <p class="text-warning"><small>If you don't save, your changes will be lost.</small></p>

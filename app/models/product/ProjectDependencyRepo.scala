@@ -23,7 +23,7 @@ import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
-import util.importFile.ProjectImport
+import utl.importFile.ProjectImport
 
 import scala.concurrent.{ExecutionContext, Future}
 

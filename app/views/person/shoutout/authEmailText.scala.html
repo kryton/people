@@ -20,7 +20,7 @@
 @import models.people.EmpRelationsRowUtils._
 @(obj:KudostoRow, from:EmprelationsRow, to:EmprelationsRow,
         host:String, url:String, admins:Seq[EmprelationsRow],
-        emailDomain:String)(implicit  ldap: util.LDAP )
+        emailDomain:String)(implicit  ldap: utl.LDAP )
 
 A Shoutout was received for @to.fullName on @obj.dateadded
 @from.fullName  wrote the following:

@@ -26,11 +26,11 @@
 @import offline.Tables.TeamdescriptionRow
 @(      id:Long,
         matrix:MatrixteamRow,
-        members:util.Page[EmprelationsRow],
+        members:utl.Page[EmprelationsRow],
         teams: Map[String, Option[TeamdescriptionRow]])(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
-        ldap: util.LDAP)
+        ldap: utl.LDAP)
 
 
 @main(s"${matrix.name} (${members.total} members)") {

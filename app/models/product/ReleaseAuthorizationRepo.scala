@@ -39,8 +39,14 @@ class ReleaseAuthorizationRepo @Inject()(@NamedDatabase("projectdb")  protected 
 
   def find(id:Int):Future[Option[ReleaseauthorizationRow]] = db.run(Releaseauthorization.filter(_.id === id).result.headOption)
   def findByLogin(login:String):Future[Seq[ReleaseauthorizationRow]] = db.run(Releaseauthorization.filter(_.login === login ).result)
-  def findByReleaseType(release:Int):Future[Seq[ReleaseauthorizationRow]] = db.run(Releaseauthorization.filter(_.releaseid === release ).result)
-  def findByReleaseAuthorityType(auth:Int):Future[Seq[ReleaseauthorizationRow]] = db.run(Releaseauthorization.filter(_.releaseauthorityid === auth ).result)
+  def findByRelease(release:Int):Future[Seq[(ReleaseauthorizationRow,ReleaseauthorizationtypeRow)]] =
+    db.run(Releaseauthorization.filter(_.releaseid === release )
+        .join(Releaseauthorizationtype).on(_.releaseauthorityid === _.id )
+      .result)
+  def findByReleaseAuthorityType(auth:Int):Future[Seq[(ReleaseauthorizationRow, ProjectreleaseRow) ]] =
+    db.run(Releaseauthorization.filter(_.releaseauthorityid === auth )
+              .join(Projectrelease).on( _.releaseid === _.id )
+      .result)
   def find(release:Int, login:String):Future[Option[ReleaseauthorizationRow]] = db.run(Releaseauthorization.filter(_.login === login ).filter(_.releaseid === release).result.headOption)
   def findOrCreate(release:Int, login:String, authority:Int):Future[ReleaseauthorizationRow] = {
     find(release,login).map {

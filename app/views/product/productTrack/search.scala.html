@@ -18,8 +18,8 @@
 @import offline.Tables.KudostoRow
 @import offline.Tables.EmprelationsRow
 @import projectdb.Tables.ProducttrackRow
-@(page: util.Page[ProducttrackRow],
-        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP )
+@(page: utl.Page[ProducttrackRow],
+        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 
 @main("Product Tracks") {

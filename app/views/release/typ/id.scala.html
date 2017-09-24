@@ -19,14 +19,14 @@
 @import projectdb.Tables.ReleasetypeauthorizationpeopleRow
 @import projectdb.Tables.ReleaseauthorizationtypeRow
 @import projectdb.Tables.ReleaseauthorizationRow
-@import projectdb.Tables.ReleasetypeRow
 @import projectdb.Tables.ProjectreleaseRow
+@import projectdb.Tables.ReleasetypeRow
 @(      id:Int,
-        releaseAuthorization:ReleaseauthorizationtypeRow,
-        rauthPPl:Page[(ReleasetypeauthorizationpeopleRow,ReleasetypeRow)],
-        rauth:Page[(ReleaseauthorizationRow, ProjectreleaseRow)],
-        form: Form[forms.ReleaseAuthPeopleForm.Data],
-        rtSelect:Seq[(String,String)]
+        releaseType:ReleasetypeRow,
+        rauthPPl:Page[(ReleasetypeauthorizationpeopleRow, ReleaseauthorizationtypeRow)],
+        projectReleases:Page[ProjectreleaseRow],
+        form:Form[forms.ReleaseAuthPeopleForm.Data],
+        ratSelect: Seq[(String,String)]
 
 )(implicit  webJarAssets: WebJarAssets,
         assets: AssetsFinder,
@@ -35,13 +35,13 @@
         ldap: utl.LDAP)
 
 
-@main(s"Release Authorization ${releaseAuthorization.name}!") {
+@main(s"Release Type ${releaseType.name}!") {
 
 <div class="row">
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Details (<a href="@routes.ReleaseController.releaseAuthorizationTypeSearch()">All Release Authorizations Types</a>)</h2>
+                <h2>Details (<a href="@routes.ReleaseController.releaseTypeSearch()">All Release Types</a>)</h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
                     <li><a class="close-link"><i class="fa fa-close"></i></a></li>
@@ -51,13 +51,22 @@
             <!-- x_title -->
             <div class="x_content">
                 <div class="container">
-                    @if( LDAPAuth.hasPermission("ReleaseAuthType")) {
-                        <span class="RAT editable editable-click" data-type="text" data-pk="@releaseAuthorization.id"
-                        data-name="name" data-title="Release Authorization Name"
-                        data-url="@routes.ReleaseController.releaseAuthorizationTypeUPD(releaseAuthorization.id)">
-                        @releaseAuthorization.name</span>
+                    @if( LDAPAuth.hasPermission("ReleaseType")) {
+                        <span class="RAT editable editable-click" data-type="text" data-pk="@releaseType.id"
+                        data-name="name" data-title="Release Type Name"
+                        data-url="@routes.ReleaseController.releaseTypeUPD(releaseType.id)">
+                        @releaseType.name</span>
                     } else {
-                        @releaseAuthorization.name
+                        @releaseType.name
+                    }
+                    eMail:
+                    @if( LDAPAuth.hasPermission("ReleaseType")) {
+                        <span class="RAT editable editable-click" data-type="text" data-pk="@releaseType.id"
+                        data-name="emailAlias" data-title="eMail alias"
+                        data-url="@routes.ReleaseController.releaseTypeUPD(releaseType.id)">
+                        @releaseType.emailalias</span>
+                    } else {
+                        @releaseType.emailalias
                     }
                 </div>
             </div> <!-- x_content -->
@@ -86,14 +95,14 @@
                             <div class="col-xs-12">
                                 <table class="table table-responsive">
                                     <thead>
-                                        <tr><th>Release Type</th>
+                                        <tr><th>Release Authority</th>
                                             <th>Is Primary</th>
                                             <th>login</th>
                                         </tr>
                                     </thead>
                         @results.map { item =>
                             <tr>
-                                <td ><a href="@routes.ReleaseController.releaseType(item._2.id)">@item._2.name</a></td>
+                                <td ><a href="@routes.ReleaseController.releaseAuthorizationType(item._2.id)">@item._2.name</a></td>
                                 <td >@item._1.isprimary</td>
                                 <td ><a href="@routes.ReleaseController.login(item._1.login)">@item._1.login</a></td>
                             </tr>
@@ -107,10 +116,10 @@
                 </div>
                 <div class="row">
                     @rauthPPl.prev.map { x =>
-                        <a href="@routes.ReleaseController.releaseAuthorizationType(id,x, rauth.page)">... prev ...</a>
+                        <a href="@routes.ReleaseController.releaseType(id,x, projectReleases.page)">... prev ...</a>
                     }
                     @rauthPPl.next.map { x =>
-                        <a href="@routes.ReleaseController.releaseAuthorizationType(id,x, rauth.page)">... next ...</a>
+                        <a href="@routes.ReleaseController.releaseType(id,x, projectReleases.page)">... next ...</a>
                     }
 
                 </div>
@@ -131,29 +140,31 @@
             <div class="x_content">
                 <div class="container">
                 <div class="row">
-                @Option(rauth.items).filterNot(_.isEmpty).map { results =>
+                @Option(projectReleases.items).filterNot(_.isEmpty).map { results =>
                     <div class="container">
                         <div class="row">
                             <div class="col-xs-12">
                                 <table class="table table-responsive">
                                     <thead>
-                                        <tr><th>Release</th>
-                                            <th>Approved Date</th>
-                                            <th>Rejected Date</th>
-                                            <th>Login</th>
-                                            <th>Is Approved</th>
+                                        <tr><th>Release Name</th>
+                                            <th>Planned Date</th>
+                                            <th>Deployed Date</th>
+                                            <th>Rolled Back Date</th>
+                                            <th>Change Ticket</th>
+                                            <th>Release URL</th>
                                             <th>Notes</th>
                                         </tr>
                                     </thead>
 
                         @results.map { item =>
                             <tr>
-                                <td><a href="@routes.ReleaseController.release(item._2.id)">@item._2.name</a></td>
-                                <td >@item._1.approveddate.map{ x => @x.format("d-MMM-yyyy") }</td>
-                                <td >@item._1.rejecteddate.map{ x => @x.format("d-MMM-yyyy") }</td>
-                                <td ><a href="@routes.ReleaseController.login(item._1.login)">@item._1.login</a></td>
-                                <td >@item._1.isapproved.getOrElse("N")</td>
-                                <td >@item._1.notes.map{ x => @x }</td>
+                                <td ><a href="@routes.ReleaseController.release(item.id)">@item.name</a></td>
+                                <td >@item.planned.map{ x => @x.format("d-MMM-yyyy") }</td>
+                                <td >@item.deployed.map{ x => @x.format("d-MMM-yyyy") }</td>
+                                <td >@item.rolledback.map{ x => @x.format("d-MMM-yyyy") }</td>
+                                <td >@item.changeticket</td>
+                                <td >@item.releasefileurl</td>
+                                <td >@item.releasenotes.map{ x => @x } </td>
                             </tr>
                         }
 
@@ -165,11 +176,11 @@
                 }
                 </div>
                 <div class="row">
-                    @rauth.prev.map { x =>
-                        <a href="@routes.ReleaseController.releaseAuthorizationType(id,rauthPPl.page,x)">... prev ...</a>
+                    @projectReleases.prev.map { x =>
+                        <a href="@routes.ReleaseController.releaseType(id,rauthPPl.page,x)">... prev ...</a>
                     }
-                    @rauth.next.map { x =>
-                        <a href="@routes.ReleaseController.releaseAuthorizationType(id,rauthPPl.page,x)">... next ...</a>
+                    @projectReleases.next.map { x =>
+                        <a href="@routes.ReleaseController.releaseType(id,rauthPPl.page,x)">... next ...</a>
                     }
 
                 </div>
@@ -188,9 +199,8 @@
 
                     <div class="modal-body">
                         @helper.CSRF.formField
-                        <input type="hidden" name="releaseauthoritytypeid" value="@id" />
                         <input type="hidden" name="releasetypeid" value="@id" />
-                        @helper.select(form("releasetypeid"), options= rtSelect)
+                        @helper.select(form("releaseauthoritytypeid"), options= ratSelect)
                         @helper.inputText(form("login"), '_label -> "Login", 'placeholder -> "Login", 'class -> "form-control" )
                         @helper.checkbox(form("isprimary"),'_label -> "Is Primary", 'placeholder -> "Is Primary Authority", 'class ->"form-control")
 
@@ -219,11 +229,11 @@
                             return params;
                             }
                         });
-
                 });
                 $("#addRPPL").click( function() {
                     $("#addNewRPPL").modal('show');
                 });
+
             }
             -->
     </script>

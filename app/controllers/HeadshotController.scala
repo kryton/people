@@ -36,8 +36,8 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.mvc.{AbstractController, ControllerComponents}
 import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
-import util.images.FaceDetect
-import util.User
+import utl.images.FaceDetect
+import utl.User
 
 import scala.concurrent.{ExecutionContext, Future}
 

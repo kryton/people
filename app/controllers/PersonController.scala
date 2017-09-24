@@ -33,11 +33,11 @@ import play.api.i18n.I18nSupport
 import play.api.libs.json.{JsObject, Json, Writes}
 import play.api.mvc._
 import play.db.NamedDatabase
-import util.{FileIO, LDAP, User}
+import utl.{FileIO, LDAP, User}
 
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.JdbcProfile
-import util.importFile.SAPImport
+import utl.importFile.SAPImport
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -108,7 +108,7 @@ class PersonController @Inject()
         if (emps.size == 1) {
           Redirect(routes.PersonController.id(emps.head.login))
         } else {
-          Ok(views.html.person.search(search.getOrElse(""), util.Page(emps, page = page)))
+          Ok(views.html.person.search(search.getOrElse(""), utl.Page(emps, page = page)))
         }
       }
     }
@@ -305,7 +305,7 @@ class PersonController @Inject()
   def byAgency(agency: String, page: Int) = LDAPAuthPermission("SeeAgency") {
     Action.async { implicit request =>
       employeeRepo.findByAgency(agency).map { seq =>
-        Ok(views.html.person.byAgency(agency, util.Page(seq, page = page)))
+        Ok(views.html.person.byAgency(agency, utl.Page(seq, page = page)))
       }
     }
   }

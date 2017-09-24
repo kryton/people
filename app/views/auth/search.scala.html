@@ -16,11 +16,11 @@
  *@
 
 @import offline.Tables.AuthroleRow
-@(page: util.Page[AuthroleRow],
+@(page: utl.Page[AuthroleRow],
         searchTerm:Option[String],
         canEdit:Boolean,
         form: Form[forms.AuthRoleForm.Data]
-)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: util.LDAP, messages: Messages )
+)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP, messages: Messages )
 
 
 @main("Roles") {

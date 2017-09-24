@@ -29,7 +29,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
-import util.{LDAP, Page, User}
+import utl.{LDAP, Page, User}
 
 import scala.concurrent.{ExecutionContext, Future}
 

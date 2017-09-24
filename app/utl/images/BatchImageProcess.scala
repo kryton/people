@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package util.images
+package utl.images
 
 import java.awt.image.BufferedImage
 import java.io.File

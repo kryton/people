@@ -24,7 +24,7 @@ import play.Logger
 import play.api.libs.typedmap.TypedKey
 import play.api.mvc._
 import play.shaded.ahc.org.asynchttpclient.netty.handler.intercept.Unauthorized401Interceptor
-import util.{LDAP, basicAuth}
+import utl.{LDAP, basicAuth}
 
 import scala.concurrent.{ExecutionContext, Future}
 

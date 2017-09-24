@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package util.importFile
+package utl.importFile
 
 import java.io.{File, FileInputStream}
 import java.net.URI
@@ -29,7 +29,7 @@ import org.apache.poi.ss.usermodel._
 import play.api.Logger
 import projectdb.Tables
 import projectdb.Tables.ResourcepoolRow
-import util.Conversions
+import utl.Conversions
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
