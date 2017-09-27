@@ -684,11 +684,6 @@ class KudosController @Inject()
     )
   }
 
-  implicit val seqKudosExtWrites = new Writes[Seq[forms.KudosExt]] {
-    def writes( s: Seq[KudosExt]) :JsObject = Json.obj(
-      "a" -> ""
-    )
-  }
 
   implicit val KudosExtWrites = new Writes[KudosExt] {
     def writes(k: KudosExt): JsObject = Json.obj(

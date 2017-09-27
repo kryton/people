@@ -31,3 +31,4 @@ dist
 /app/assets/images/specific/*.jpg
 /app/assets/images/specific/*.png
 /internal
+/db_*.sql
