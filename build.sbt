@@ -1,5 +1,5 @@
 
-import de.heikoseeberger.sbtheader.license.GPLv3
+// import de.heikoseeberger.sbtheader.license.GPLv3
 import play.twirl.sbt.Import.TwirlKeys
 
 
@@ -88,11 +88,14 @@ slickGenerate := {
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "com.zilbo.binders._"
 
-headers := Map(
-  "scala" -> GPLv3("2014", "Ian Holsman"),
-  "conf" -> GPLv3("2014", "Ian Holsman", "#"),
-  "html" -> GPLv3("2014", "Ian Holsman", "@*")
-)
+organizationName := "Ian Holsman"
+startYear := Some(2014)
+licenses += ("GPL-3.0", new URL("http://www.gnu.org/licenses/gpl-3.0.en.html"))
+//headers := Map(
+//  "scala" -> GPLv3("2014", "Ian Holsman"),
+//  "conf" -> GPLv3("2014", "Ian Holsman", "#"),
+//  "html" -> GPLv3("2014", "Ian Holsman", "@*")
+// )
 
 //TwirlKeys.compileTemplates  += baseDirectory.value / "internal"
 //val internalDir = baseDirectory / "internal"
@@ -104,4 +107,4 @@ sourceDirectories in (Compile,TwirlKeys.compileTemplates)  ++= Seq(baseDirectory
 
 sourceDirectories in (Compile, TwirlKeys.compileTemplates) ++= (unmanagedSourceDirectories in Compile).value // ++ internalDir.value
 
-unmanagedSources.in(Compile, createHeaders) ++= sources.in(Compile, TwirlKeys.compileTemplates).value
+// unmanagedSources.in(Compile, createHeaders) ++= sources.in(Compile, TwirlKeys.compileTemplates).value
