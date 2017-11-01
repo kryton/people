@@ -17,13 +17,11 @@
 
 package utl
 
-import play.api.Logger
-
 /**
 *  Created by iholsman on 11/08/2014.
 *  All Rights reserved
 */
-
+// scalastyle:off magic.number
 case class Page[A](itemsIn: Seq[A], page: Int = 0,  pageSize:Int = 10) {
   val offset: Int = page * pageSize
   lazy val items: Seq[A] = itemsIn.slice(offset, offset + pageSize)
@@ -32,3 +30,4 @@ case class Page[A](itemsIn: Seq[A], page: Int = 0,  pageSize:Int = 10) {
   val total: Int = itemsIn.size
   lazy val next: Option[Int] = Option(page + 1).filter(_ => (offset + items.size) < total)
 }
+// scalastyle:on magic.number

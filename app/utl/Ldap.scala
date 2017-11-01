@@ -404,7 +404,7 @@ object LDAP {
     LDAP.accountTypeAliasObject -> "Aliases"
   )
 
-  def apply() = new LDAP
+  def apply() : LDAP = new LDAP
 
 }
 
@@ -412,6 +412,6 @@ object LDAP {
 object testLDAP extends App {
   val ldap: LDAP = new LDAP
 
-  val r = ldap.authenticateAccount("iholsman","XYZsldfjsl")
-  System.out.println(s"IHOLSMAN AUTH = $r")
+  val result: Boolean = ldap.authenticateAccount("iholsman","XYZsldfjsl")
+  System.out.println(s"IHOLSMAN AUTH = $result")
 }

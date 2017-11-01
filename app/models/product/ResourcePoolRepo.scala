@@ -20,14 +20,12 @@ package models.product
 import java.sql.Date
 import javax.inject.Inject
 
-import controllers.LDAPAuth
 import models.people.{MatrixTeamMemberRepo, OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import projectdb.Tables
 import slick.jdbc.JdbcProfile
 
-import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -61,16 +59,16 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
 
   def findTeams(id: Int): Future[Seq[Tables.ResourceteamRow]] = db.run(Resourceteam.filter(_.resourcepoolid === id).result)
 
-  def insert(pt: ResourcepoolRow) = db
+  def insert(pt: ResourcepoolRow): Future[_root_.projectdb.Tables.ResourcepoolRow] = db
     .run(Resourcepool returning Resourcepool.map(_.id) += pt)
     .map(id => pt.copy(id = id))
 
 
-  def update(id: Int, pt: ResourcepoolRow) = {
+  def update(id: Int, pt: ResourcepoolRow): Future[Boolean] = {
     db.run(Resourcepool.filter(_.id === id).update(pt.copy(id = id))) map { _ > 0 }
   }
 
-  def delete(id: Int) =
+  def delete(id: Int): Future[Boolean] =
     db.run(Resourcepool.filter(_.id === id).delete) map { _ > 0 }
 
   def getTeamSummaryByVendorCountry(id: Int
@@ -135,7 +133,8 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
     }.flatMap(identity)
   }
 
-  def breakDownPool(poolId:Int): Future[(Iterable[(ProductfeatureRow, Int, Map[Date, Double])], Iterable[(ProjectRow, Int, Map[Date, Double])])] = {
+  def breakDownPool(poolId:Int): Future[(Iterable[(ProductfeatureRow, Int, Map[Date, Double])],
+                                         Iterable[(ProjectRow, Int, Map[Date, Double])])] = {
 
     (for {
     // p <-  this.findByFeatureEx(featureId )

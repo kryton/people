@@ -309,7 +309,7 @@ class ResourceTeamRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
 
 case class EfficencyMonth( t0:BigDecimal, t3:BigDecimal, t6:BigDecimal, t9:BigDecimal, t12:BigDecimal ) {
   def add(  e:EfficencyMonth):EfficencyMonth = {
-    EfficencyMonth( t0 + e.t0, t3+ e.t3, t6 + e.t6, t9 + e.t9, t12 + e.t12 )
+    EfficencyMonth( t0 + e.t0, t3 + e.t3, t6 + e.t6, t9 + e.t9, t12 + e.t12 )
   }
 
 }

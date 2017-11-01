@@ -80,7 +80,7 @@ object SAPImport {
                              empHistoryRepo: EmpHistoryRepo,
                              positionTypeRepo: PositionTypeRepo,
                              executionContext: ExecutionContext): Future[Seq[EmprelationsRow]] = {
-    implicit val codec = Codec("UTF-8")
+    implicit val codec: Codec = Codec("UTF-8")
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
@@ -94,7 +94,7 @@ object SAPImport {
                             empHistoryRepo: EmpHistoryRepo,
                             positionTypeRepo: PositionTypeRepo,
                             executionContext: ExecutionContext): Future[Seq[EmprelationsRow]] = {
-    implicit val codec = Codec("UTF-8")
+    implicit val codec: Codec = Codec("UTF-8")
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
       importFile(scala.io.Source.fromFile(file))
