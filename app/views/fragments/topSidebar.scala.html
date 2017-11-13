@@ -60,11 +60,13 @@
                             @if(LDAPAuth.hasPermission("ReleaseAuthType")) {
                                 <li><a href="@routes.ReleaseController.releaseAuthorizationTypeSearch()">Release Authorization Type</a></li>
                             }
+                            @if(LDAPAuth.hasPermission("ImportSAPFile")) {
+                                <li><a href="@routes.PersonController.importFileDir()">Import a new SAP File</a></li>
+                            }
 
                             @request.session.get("isAdmin").map { isAdmin =>
                                 @if( isAdmin.equalsIgnoreCase("Y")) {
                                     <li><b>Admin</b></li>
-                                    <li><a href="@routes.PersonController.importFileDir()">Import a new SAP File</a></li>
                                     <li><a href="@routes.ProductFeatureController.importFile()">Import a new MS Project File</a></li>
                                 }
                             }

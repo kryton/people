@@ -11,6 +11,7 @@ INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('SeeAgency', 
 INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('TeamPoolBreakdown', 'See breakdown of teams/pools by vendors and geographies');
 INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('ReleaseAuthType', 'Edit Metadata around releases auth types');
 INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('ReleaseType', 'Edit Metadata around releases type');
+INSERT INTO `AuthPermission` (`permission`, `description`) VALUES ('ImportSAPFile', 'Import SAP file generated from HR');
 
 INSERT INTO `AuthRolePermission` (`permissionID`, `roleID`) VALUES (2, 2);
 INSERT INTO `AuthRolePermission` (`permissionID`, `roleID`) VALUES (1, 1);
