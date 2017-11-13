@@ -25,23 +25,18 @@ import javax.inject._
 import com.typesafe.config.ConfigFactory
 import models.people.TeamDescriptionRepo
 import models.product._
-import offline.Tables
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.db.NamedDatabase
-import projectdb.Tables
 import projectdb.Tables._
 import slick.jdbc.JdbcProfile
 import utl.{LDAP, Page, User}
 
 import scala.concurrent.{ExecutionContext, Future}
-import offline.Tables.EmprelationsRow
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.{Row, Sheet, Workbook}
-import play.api.Logger
 
-import scala.collection.immutable
 /**
  * This controller creates an `Action` to handle HTTP requests to the
  * application's home page.
@@ -66,6 +61,8 @@ class ResourcePoolController @Inject()
     assets: AssetsFinder,
     ldap:LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
+
+  final val WORKDAYSINQUARTER: Int = 3 * 20
 
 //  implicit val ldap: LDAP = new LDAP
   /**
@@ -152,7 +149,7 @@ class ResourcePoolController @Inject()
     }.flatMap(identity)
   }
 
-  def doFullBreakdown(format:Option[String]=None, teamLevel:Option[String]) =LDAPAuthPermission("TeamPoolBreakdown") {
+  def doFullBreakdown(format:Option[String]=None, teamLevel:Option[String]): LDAPAuthPermission[AnyContent] =LDAPAuthPermission("TeamPoolBreakdown") {
     Action.async { implicit request =>
       val x: Future[Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[TeamSummary])]] = resourceTeamRepo.allEx.map { rtOs =>
         val teamOrPool: Seq[Either[ResourceteamRow, ResourcepoolRow]] = rtOs.map { rtO =>
@@ -362,7 +359,7 @@ class ResourcePoolController @Inject()
     }.flatMap(identity)
   }
 
-  def rpBreakdown(format:Option[String]) = Action.async { implicit request =>
+  def rpBreakdown(format:Option[String]): Action[AnyContent] = Action.async { implicit request =>
     val resultSet: Future[(Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Int, Map[Date, Double])])], Seq[Date])] = resourcePoolRepo.allPoolsTeams.map { set =>
       Future.sequence( set.map {
         case rtrp@Left(rt) => resourceTeamRepo.breakDownTeam(rt.id).map { i => (rtrp, i) }
@@ -444,7 +441,7 @@ class ResourcePoolController @Inject()
     f
   }
 
-  def roadmap(rpId:Int) = Action.async { implicit request =>
+  def roadmap(rpId:Int): Action[AnyContent] = Action.async { implicit request =>
     (for {
       rp <- resourcePoolRepo.find(rpId)
       r <-  resourcePoolRepo.roadMap(rpId)
@@ -469,32 +466,22 @@ class ResourcePoolController @Inject()
             ( byFeature._1.ordering, Some(byFeature._1), remaining, BigDecimal(0),teamEffortMap )
           }.filter( p => p._3 >0).toSeq.sortBy(_._1)
 
-          val teams: Seq[ResourceteamRow] =    x._2.groupBy(_._1).keys.toSeq.sortBy(_.ordering)
-
+          val teams: Seq[ResourceteamRow] =  x._2.groupBy(_._1).keys.toSeq.sortBy(_.ordering)
 
           val t: Option[ProductfeatureRow] = None
           val s:Map[Int, BigDecimal] = Map.empty
 
           val cumSize = features.scanLeft( (0, t, BigDecimal(0), BigDecimal(0), s)   )( (b,z) => ( z._1, z._2, z._3, b._4 + z._3, z._5)).drop(1)
 
-
-         // val emps = x._3
           val prodTeamDet: (Int,EfficencyMonth) = devStats
             .foldLeft( (0,EfficencyMonth(0, 0, 0 ,0, 0))) ((z:(Int,EfficencyMonth), i) => (z._1 + 1, z._2.add( i._2)))
           // 3 months * 20 days/month * a bit of slack to allow unforseen
           val devDaysPerQ: (BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal) = (
-            prodTeamDet._2.t0 * 3 * 20 * slack.getOrElse(1,BigDecimal(1.0)),
-            prodTeamDet._2.t3 * 3 * 20 * slack.getOrElse(2,BigDecimal(1.0)),
-            prodTeamDet._2.t6 * 3 * 20 * slack.getOrElse(3,BigDecimal(1.0)),
-            prodTeamDet._2.t9 * 3 * 20 * slack.getOrElse(4,BigDecimal(1.0)),
-            prodTeamDet._2.t12* 3 * 20 * slack.getOrElse(5,BigDecimal(1.0))
-          )
-          val cumDaysPerQ = (
-            devDaysPerQ._1,
-            devDaysPerQ._1 + devDaysPerQ._2,
-            devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3,
-            devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3 + devDaysPerQ._4,
-            devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3 + devDaysPerQ._4 + devDaysPerQ._5
+            prodTeamDet._2.t0 * WORKDAYSINQUARTER * slack.getOrElse(1,BigDecimal(1.0)),
+            prodTeamDet._2.t3 * WORKDAYSINQUARTER * slack.getOrElse(2,BigDecimal(1.0)),
+            prodTeamDet._2.t6 * WORKDAYSINQUARTER * slack.getOrElse(3,BigDecimal(1.0)),
+            prodTeamDet._2.t9 * WORKDAYSINQUARTER * slack.getOrElse(4,BigDecimal(1.0)),
+            prodTeamDet._2.t12 * WORKDAYSINQUARTER * slack.getOrElse(5,BigDecimal(1.0))
           )
 
           val cumSize2:Seq[(Int, ProductfeatureRow, BigDecimal, BigDecimal,Map[Int, BigDecimal], String)] = cumSize.map{ line =>
@@ -502,27 +489,8 @@ class ResourcePoolController @Inject()
               case Some(pf) => pf.name
               case None => "-None-"
             }
-            val q = if ( line._4 < cumDaysPerQ._1 ) {
-              "Q-now"
-            } else {
-              if ( line._4 < cumDaysPerQ._2) {
-                "Q+1"
-              } else {
-                if ( line._4 < cumDaysPerQ._3) {
-                  "Q+2"
-                } else {
-                  if ( line._4 < cumDaysPerQ._4) {
-                    "Q+3"
-                  } else {
-                    if ( line._4 < cumDaysPerQ._5 ) {
-                      "Q+4"
-                    } else {
-                      "Q++"
-                    }
-                  }
-                }
-              }
-            }
+            val q = tallyToQuarter( line._4, devDaysPerQ )
+
             (line._1, line._2.get, line._3, line._4,line._5, q)
           }
 
@@ -531,5 +499,37 @@ class ResourcePoolController @Inject()
       }
     }
   }
+
+  def tallyToQuarter( currentTally: BigDecimal, devDaysPerQ: (BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal) ): String = {
+    val quarterRanges: (BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal) = (
+      devDaysPerQ._1,
+      devDaysPerQ._1 + devDaysPerQ._2,
+      devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3,
+      devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3 + devDaysPerQ._4,
+      devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3 + devDaysPerQ._4 + devDaysPerQ._5
+    )
+    if ( currentTally < quarterRanges._1 ) {
+      "Q-Now"
+    } else {
+      if ( currentTally< quarterRanges._2) {
+        "Q+1"
+      } else {
+        if ( currentTally < quarterRanges._3) {
+          "Q+2"
+        } else {
+          if ( currentTally < quarterRanges._4) {
+            "Q+3"
+          } else {
+            if ( currentTally < quarterRanges._5 ) {
+              "Q+4"
+            } else {
+              "Q++"
+            }
+          }
+        }
+      }
+    }
+  }
+
 }
 

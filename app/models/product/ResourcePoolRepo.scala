@@ -222,8 +222,7 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
                           teamDescriptionRepo: TeamDescriptionRepo,
                           matrixTeamMemberRepo: models.people.MatrixTeamMemberRepo,
                           officeRepo:models.people.OfficeRepo,
-                          positionTypeRepo:models.people.PositionTypeRepo):Future[
-                                                        Seq[(ResourceteamRow,
+                          positionTypeRepo:models.people.PositionTypeRepo):Future[Seq[(ResourceteamRow,
                                                           Seq[(offline.Tables.EmprelationsRow, Int, EfficencyMonth)],
                                                           Seq[TeamSummary])]
                                                         ] = {
