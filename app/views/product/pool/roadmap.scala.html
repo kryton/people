@@ -107,7 +107,7 @@
                             @sizes.map { p =>
                               <tr>
                                   <td align="right">@p._1</td>
-                                  <td >@p._2.name</td>
+                                  <td ><a href='@routes.ProductFeatureController.id(p._2.id)'>@p._2.name</a></td>
                                   <td align="right">@p._3.formatted("%.0f")</td>
                                   <td align="right">@p._4.formatted("%.0f")</td>
                                   <td>@p._6</td>
