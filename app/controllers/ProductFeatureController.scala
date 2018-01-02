@@ -165,7 +165,7 @@ class ProductFeatureController @Inject()
                 ffs))
             }
 
-        case None => Future.successful(NotFound(views.html.page_404("Login not found")))
+        case None => Future.successful(NotFound(views.html.page_404("Feature not found")))
       }
     }.flatMap(identity)
   }
