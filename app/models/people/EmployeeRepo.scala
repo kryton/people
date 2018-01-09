@@ -114,20 +114,20 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
     managementTreeUpI(login, Future(Seq.empty))
   }
 
-  def managementTreeDown(login:String):Future[Set[EmprelationsRow]] = {
-    def managementTreeDownI( logins:Future[Set[String]], acc:Future[Set[EmprelationsRow]] ):Future[Set[EmprelationsRow]] = {
+  def managementTreeDown(login:String):Future[Set[(EmprelationsRow,Int)]] = {
+    def managementTreeDownI( logins:Future[Set[String]], acc:Future[Set[(EmprelationsRow,Int)]] , level:Int):Future[Set[(EmprelationsRow,Int)]] = {
       logins.map { l =>
         if (l.isEmpty) {
           acc
         } else {
-          val res = managedBy(l).map(_.toSet)
-          val loginsNew = res.map(x => x.map(_.login))
+          val res: Future[Set[(EmprelationsRow, Int)]] = managedBy(l).map(_.toSet).map{ r => r.map{ y => (y,level )}}
+          val loginsNew: Future[Set[String]] = res.map(x => x.map(_._1.login))
           val newAcc = utl.Helpers.mergeFutureSets(acc, res)
-          managementTreeDownI(loginsNew, newAcc)
+          managementTreeDownI(loginsNew, newAcc, level + 1)
         }
       }.flatMap(identity)
     }
-    managementTreeDownI(Future(Set(login.toLowerCase)), Future(Set.empty))
+    managementTreeDownI(Future(Set(login.toLowerCase)), Future(Set.empty),1)
   }
 
   def agencies():Future[Seq[(String,Int)]] = {

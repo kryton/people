@@ -70,7 +70,7 @@ object SAPImport {
       if (duplicateLogins.isEmpty) { None } else {Some( s"Multiple Logins for ${duplicateLogins.mkString(",")}") },
       if (numCEOs.size != 1) { None } else {Some( s"Missing Manager for more than 1 person (should only be CEO) ${numCEOs.mkString(",")}")},
       if (missingManager.isEmpty) { None } else {Some(s"Manager id for ${missingManager.mkString(",")} is missing from file")},
-      if ( emps.size > 1400 ) { None} else {Some( s"File seems too small ${emps.size} should have at least 1,400 employees") }
+      if ( emps.size > 1000 ) { None} else {Some( s"File seems too small ${emps.size} should have at least 1,400 employees") }
     ).flatten
 
    errors

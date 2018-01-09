@@ -34,6 +34,7 @@ GET         /person/admin/importFile/:filename              controllers.PersonCo
 
 
 GET         /orgchart/hier                                  controllers.PersonController.personHierarchy(login:Option[String]?=None)
+GET         /orgchart/list/:manager                          controllers.PersonController.byManagerList(manager:String, formatO:Option[String]?=None)
 GET         /orgchart                                       controllers.PersonController.personOrgChart(login:Option[String]?=None)
 
 GET         /matrix/                                        controllers.MatrixTeamController.search( p:Int ?= 0, search: Option[String] ?= None)

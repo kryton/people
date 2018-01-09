@@ -25,6 +25,7 @@ import com.typesafe.config.ConfigFactory
 import models.people.EmpRelationsRowUtils._
 import models.people._
 import models.product.ProductTrackRepo
+import offline.Tables
 import offline.Tables.{EmprelationsRow, OfficeRow}
 import play.api._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -348,6 +349,52 @@ class PersonController @Inject()
       }.flatMap(identity)
     }
   }
+
+
+  def execMap( people:Set[(String,String,Int)], manager:String) = {
+    val directs:Set[String] = people.filter( p => p._2.equalsIgnoreCase(manager)).map( x => x._1)
+
+
+  }
+
+  def byManagerList(manager: String, formatO:Option[String]) =  LDAPAuthAction {
+    Action.async { implicit request =>
+      val loggedIn = LDAPAuth.getUser().get
+      (for {
+        u <- user.isOwnerManagerOrAdmin(manager, Some(loggedIn))
+        emp <- employeeRepo.findByLogin(manager)
+        mgdBy <- employeeRepo.managedBy(manager)
+        tree <- employeeRepo.managementTreeDown(manager)
+      } yield (u, emp, mgdBy)).map { result =>
+        if (result._1) {
+          result._2 match {
+            case None => Future.successful(NotFound("Manager not found"))
+            case Some(emp) =>
+              val mgdBy = result._3
+              val dDown: Future[Set[(EmprelationsRow, Set[(EmprelationsRow, Int)])]] = Future.sequence(mgdBy.map{ direct =>
+                employeeRepo.managementTreeDown(direct.login).map{ result => ( direct, result )}
+              })
+              dDown.map{ resultSet: Set[(Tables.EmprelationsRow, Set[(EmprelationsRow, Int)])] =>
+
+                val flatR :Set[ (EmprelationsRow, EmprelationsRow, Int)] = resultSet.flatMap { line =>
+                  val l: (EmprelationsRow, EmprelationsRow, Int) = (emp, line._1, 1)
+                  //val l2 = line._2.map(e => (line._1, e._1, e._2)
+                  val l2 :Set[ (EmprelationsRow, EmprelationsRow, Int)] = line._2.map{ e =>
+                    ( line._1, e._1, e._2+1 )
+                  }
+                  val l3:Set[ (EmprelationsRow, EmprelationsRow, Int)] = l2 + l
+                  l3
+                }
+                Ok(views.html.person.listAndDirect(emp, flatR ))
+              }
+          }
+        } else {
+          Future.successful(NotFound("No Access"))
+        }
+      }.flatMap(identity)
+    }
+  }
+
 
   def personHierarchy(login:Option[String]): Action[AnyContent] = Action.async { implicit request =>
     val empF = login match {
