@@ -52,3 +52,9 @@ for the most part it should be
 # Gotchas
 * Auth is done via LDAP and storing stuff in the session cookie. It also uses the shoutout auth email to log you in. This may be a 'security' issue in your organisation. I judged the risk as low, but I put this note in the readme in case you might not.
 * we also reset the session/user details in the preferences area.
+
+
+# LEGAL NOTICE
+
+This code is licensed under [![GNU GPL v3.0](http://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl.html)
+The exception to this is [Digital River](https://www.digitalriver.com/), who has licensed this under a [MIT](https://opensource.org/licenses/MIT) license.
