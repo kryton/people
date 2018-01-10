@@ -51,7 +51,7 @@ class PersonController @Inject()
    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
    //officeRepo: OfficeRepo,
-   employeeRepo: EmployeeRepo,
+
    empBioRepo: EmpBioRepo,
    teamDescriptionRepo: TeamDescriptionRepo,
    empTagRepo: EmpTagRepo,
@@ -59,7 +59,9 @@ class PersonController @Inject()
    matrixTeamRepo: MatrixTeamRepo,
    matrixTeamMemberRepo: MatrixTeamMemberRepo,
    user: User
-  )(implicit    costCenterRepo: CostCenterRepo,
+  )(implicit
+    employeeRepo: EmployeeRepo,
+    costCenterRepo: CostCenterRepo,
     officeRepo: OfficeRepo,
     empHistoryRepo: EmpHistoryRepo,
     positionTypeRepo: PositionTypeRepo,
@@ -385,8 +387,24 @@ class PersonController @Inject()
                   val l3:Set[ (EmprelationsRow, EmprelationsRow, Int)] = l2 + l
                   l3
                 }
-                Ok(views.html.person.listAndDirect(emp, flatR ))
-              }
+                // we now have a full list of people in the person's org.
+                // grab team name, position type, & office
+                val pPositionTeam = Future.sequence( flatR.map{ line =>
+                  (for {
+                    ptF <- positionTypeRepo.find( line._2.position)
+                    teamF <- teamDescriptionRepo.findTeamForLogin(line._2.login)
+                    offF <- officeRepo.find(line._2.officeid.getOrElse(0L))
+                  } yield (ptF,teamF,offF)).map { x=>
+                    (line._1, line._2, line._3, x._1, x._2, x._3)
+                  }
+                })
+                pPositionTeam.map{
+                  result =>
+                    Ok(views.html.person.listAndDirect(emp, result ))
+                }
+                // developer, position, title, country, team
+
+              }.flatMap(identity)
           }
         } else {
           Future.successful(NotFound("No Access"))
