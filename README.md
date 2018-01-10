@@ -57,4 +57,5 @@ for the most part it should be
 # LEGAL NOTICE
 
 This code is licensed under [![GNU GPL v3.0](http://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl.html)
+
 The exception to this is [Digital River](https://www.digitalriver.com/), who has licensed this under a [MIT](https://opensource.org/licenses/MIT) license.
