@@ -31,7 +31,7 @@
         formPermission: Form[forms.AuthRolePermissionForm.Data],
         remainingPermissions:Seq[AuthpermissionRow],
         formUser: Form[forms.AuthUserRoleForm.Data]
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,

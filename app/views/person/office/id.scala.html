@@ -24,7 +24,7 @@
 @import offline.Tables.OfficeRow
 @(      id:Long,
         office:OfficeRow,
-        emps:Page[EmprelationsRow] )(implicit  webJarAssets: WebJarAssets,
+        emps:Page[EmprelationsRow] )(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

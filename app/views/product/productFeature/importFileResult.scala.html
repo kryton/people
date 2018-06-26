@@ -17,7 +17,9 @@
 
 @import projectdb.Tables.ProductfeatureRow
 @(  inserts:Seq[ProductfeatureRow]
-     )(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+     )(implicit request: Request[_],
+        webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder)
 
 @import helper._
 

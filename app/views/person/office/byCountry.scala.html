@@ -23,7 +23,7 @@
 @import offline.Tables.FunctionalareaRow
 @import offline.Tables.OfficeRow
 @(      country:String,
-        emps:Page[(OfficeRow,EmprelationsRow)] )(implicit  webJarAssets: WebJarAssets,
+        emps:Page[(OfficeRow,EmprelationsRow)] )(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

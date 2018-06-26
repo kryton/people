@@ -26,7 +26,7 @@
         teamMakeup:Seq[TeamSummary],
         teams:Page[(ResourceteamRow, (Int, EfficencyMonth))],
         isAdmin:Boolean
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

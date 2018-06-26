@@ -35,7 +35,7 @@
         office:Option[OfficeRow],
         matrix:Seq[MatrixteamRow],
         canEdit:Boolean
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

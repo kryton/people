@@ -24,7 +24,7 @@
 @import offline.Tables.EmptagRow
 @import offline.Tables.MatrixteamRow
 @(      tag:String,
-        members:utl.Page[(EmptagRow,Option[EmprelationsRow])])(implicit  webJarAssets: WebJarAssets,
+        members:utl.Page[(EmptagRow,Option[EmprelationsRow])])(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

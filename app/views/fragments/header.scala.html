@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@(title:String, styles:Html = Html(""))(implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: RequestHeader)
+@(title:String, styles:Html = Html(""))(implicit  webJarsUtil: org.webjars.play.WebJarsUtil, assets: AssetsFinder, request: RequestHeader)
 
 @* Here's where we render the page title `String`. *@
 <head>
@@ -36,12 +36,11 @@
 
     <link rel="icon" href='/assets/images/businessman-32-6072.png' sizes="32x32" />
 
-<link rel="stylesheet" media="screen" href='@routes.WebJarAssets.at(webJarAssets.locate("/vendors/bootstrap/dist/css/bootstrap.min.css"))'>
-<link rel="stylesheet" media="print"  href='@routes.WebJarAssets.at(webJarAssets.locate("/vendors/bootstrap/dist/css/bootstrap.min.css"))'>
-<link rel="stylesheet" media="screen"  href='@routes.WebJarAssets.at(webJarAssets.locate("bootstrap-editable.css"))'>
-<link rel="stylesheet" href='@routes.WebJarAssets.at(webJarAssets.locate("font-awesome","font-awesome.min.css" ))'>
-<link rel="stylesheet" href='@routes.WebJarAssets.at(webJarAssets.locate("nprogress.css" ))'>
-<link href='@routes.WebJarAssets.at(webJarAssets.locate( "animate.css"))' rel="stylesheet">
+    @webJarsUtil.locate("/vendors/bootstrap/dist/css/bootstrap.min.css").css()
+    @webJarsUtil.locate("bootstrap-editable.css").css() <!-- screen -->
+    @webJarsUtil.locate("font-awesome","font-awesome.min.css").css()
+    @webJarsUtil.locate("nprogress.css").css()
+    @webJarsUtil.locate("animate.css").css()
 <link href='@assets.path( "/stylesheets/custom.css")' rel="stylesheet">
     @request.session.get("light").map{ x =>
             @if( x.equals("Y")) {

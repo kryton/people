@@ -28,7 +28,7 @@
                 Seq[(ProducttrackRow,ProducttrackfeatureRow)])
                 ],
         canEdit:Boolean
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,

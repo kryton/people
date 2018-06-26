@@ -25,7 +25,7 @@
 @(      monthRange: Seq[Date],
         summary: Map[(String, Boolean, String), Map[Either[ResourceteamRow, ResourcepoolRow], Map[Date, Double]]],
         dateFormat:DateTimeFormatter
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

@@ -2,7 +2,7 @@
 @import offline.Tables.AuthpreferenceRow
 @(login:String,
         allPerms:Map[String,AuthpermissionRow],
-        userPerms:Map[String,AuthpermissionRow])(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+        userPerms:Map[String,AuthpermissionRow])(implicit request: Request[_],  webJarsUtil: org.webjars.play.WebJarsUtil, assets: AssetsFinder)
 @main(s"Active Preferences & Permissions for $login"){
 
     <div class="row">

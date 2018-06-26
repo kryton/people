@@ -30,7 +30,7 @@
         teams: Seq[ResourceteamRow],
         sizes:Seq[(Int, ProductfeatureRow, BigDecimal, BigDecimal,Map[Int, BigDecimal], String)],
         slack: Map[Int, BigDecimal]
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

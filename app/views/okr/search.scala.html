@@ -27,7 +27,8 @@
     directsObjectives:Iterable[(String, EmprelationsRow, Seq[OkrobjectiveRow])],
     qtrDate:Seq[(java.sql.Date,String)],
     canEdit:Boolean,
-    form:Form[forms.ObjectiveForm.Data])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], messages: Messages, ldap: utl.LDAP )
+    form:Form[forms.ObjectiveForm.Data])(implicit  webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, request: Request[_], messages: Messages, ldap: utl.LDAP )
 
 @score( objectiveKR:Seq[(OkrobjectiveRow, Seq[OkrkeyresultRow])]) = {
     @if( !objectiveKR.forall(p => p._1.retired) ) {

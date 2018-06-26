@@ -21,7 +21,7 @@
 @import utl.Page
 @(      id:Int,
         productTrack:ProducttrackRow,
-        features:Page[(ProductfeatureRow, ProducttrackfeatureRow)] )(implicit  webJarAssets: WebJarAssets,
+        features:Page[(ProductfeatureRow, ProducttrackfeatureRow)] )(implicit  webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

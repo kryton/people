@@ -105,7 +105,10 @@ object Conversions {
     try {
       Some(s.trim.toLong)
     } catch {
-      case e: Exception => println(s"TOLONG:$s - ${e.getMessage}"); None
+      case e: Exception => {
+        println(s"TOLONG:$s - ${e.getMessage}")
+        None
+      }
     }
   }
   def toLong( s:String, default:Long):Long = {

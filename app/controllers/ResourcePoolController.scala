@@ -57,7 +57,8 @@ class ResourcePoolController @Inject()
     ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
-    webJarAssets: WebJarAssets,
+    webJarAssets: org.webjars.play.WebJarAssets,
+    webJarsUtil: org.webjars.play.WebJarsUtil,
     assets: AssetsFinder,
     ldap:LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{

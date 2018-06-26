@@ -20,7 +20,9 @@
 @(page: utl.Page[ManagedclientRow],
         searchTerm:Option[String],
         isAdmin:Boolean,
-        rpForm: Form[forms.ManagedClientForm.Data])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, messages: Messages, request: Request[_], ldap: utl.LDAP )
+        rpForm: Form[forms.ManagedClientForm.Data])(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, messages: Messages,
+        request: Request[_], ldap: utl.LDAP )
 
 
 @main("Managed Clients") {

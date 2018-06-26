@@ -28,7 +28,7 @@
         form:Form[forms.ReleaseAuthPeopleForm.Data],
         ratSelect: Seq[(String,String)]
 
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,

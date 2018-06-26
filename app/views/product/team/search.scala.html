@@ -20,7 +20,7 @@
 @(page: utl.Page[(ResourceteamRow,Option[ResourcepoolRow])],
         searchTerm:Option[String],
         isAdmin:Boolean
-  )(implicit  webJarAssets: WebJarAssets,
+  )(implicit  webJarsUtil: org.webjars.play.WebJarsUtil,
               messages: Messages,
               assets: AssetsFinder,
               request: Request[_], ldap: utl.LDAP )

@@ -19,8 +19,8 @@ package controllers
 
 import java.io.File
 import java.nio.file.Path
-import javax.inject._
 
+import javax.inject._
 import com.typesafe.config.ConfigFactory
 import models.people.EmpRelationsRowUtils._
 import models.people._
@@ -37,7 +37,7 @@ import utl.{LDAP, User}
 
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.JdbcProfile
-import utl.importFile.SAPImport
+import utl.importFile.{SAPImport, WDImport}
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -65,7 +65,8 @@ class PersonController @Inject()
     ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
-    webJarAssets: WebJarAssets,
+    webJarAssets: org.webjars.play.WebJarAssets,
+    webJarsUtil: org.webjars.play.WebJarsUtil,
     assets: AssetsFinder,
     ldap: LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport {
@@ -175,6 +176,12 @@ class PersonController @Inject()
     }
   }
 
+  def importWorkdayFile(): LDAPAuthPermission[AnyContent] = LDAPAuthPermission("ImportWorkdayFile") {
+    Action.async { implicit request =>
+      Future.successful(Ok(views.html.person.importWDFile()))
+    }
+  }
+
 
   def importFileDir(): LDAPAuthPermission[AnyContent] = LDAPAuthPermission("ImportSAPFile") {
     Action.async { implicit request =>
@@ -209,6 +216,34 @@ class PersonController @Inject()
 
           }.getOrElse {
             Future.successful(Redirect(routes.PersonController.importFile()).flashing(
+              "error" -> "Missing file"))
+          }
+    }
+  }
+
+  def doImportWorkday(): LDAPAuthPermission[MultipartFormData[Files.TemporaryFile]] = LDAPAuthPermission("ImportWorkdayFile") {
+    Action.async(parse.multipartFormData) { implicit request =>
+          request.body.file("importFile").map { picture =>
+           // val filename = picture.filename
+            val path: Path = picture.ref.path
+
+            WDImport.importFile(path).map {
+              employees =>
+                WDImport.validate(employees) match {
+                  case Nil =>
+
+                    employeeRepo.repopulate(employees).map { x =>
+                      Future.successful(Ok(views.html.person.importFileResult(x._1.toList.sortBy(_.login), x._2, x._3.toList)))
+                    }
+
+                    // Future.successful(Future.successful(Ok(views.html.person.importFileResult(List.empty, 0, List.empty))))
+                  case x: Seq[String] => Future.successful(Future.successful(InternalServerError(s"Failed to Validate:\n ${x.mkString("\n")}")))
+
+                }
+            }.flatMap(identity).flatMap(identity)
+
+          }.getOrElse {
+            Future.successful(Redirect(routes.PersonController.importWorkdayFile()).flashing(
               "error" -> "Missing file"))
           }
     }
@@ -252,8 +287,8 @@ class PersonController @Inject()
           }
         //  }
       }
-
   }
+
 
 
   def personOrgChart(login: Option[String]): Action[AnyContent] = Action.async { implicit request =>

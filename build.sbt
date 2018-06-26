@@ -6,15 +6,15 @@ import play.twirl.sbt.Import.TwirlKeys
 name := """people"""
 organization := "com.zilbo"
 
-version := "1.0-SNAPSHOT"
+version := "1.1-SNAPSHOT"
 
-val slickVersion = "3.2.0"
+val slickVersion = "3.2.3"
 
 resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.11.12"
 lazy val slickGenerate = taskKey[Seq[File]]("slick code generation from an existing database")
 
 libraryDependencies ++= Seq(
@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
   ws,
   guice,
   // jdbc,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0-M2" % Test,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
   "com.typesafe.play" %% "play-slick" % "3.0.1",
   //"com.typesafe.play" %% "play-slick-evolutions" % "3.0.1",
   "com.typesafe.slick" %% "slick" % slickVersion,
@@ -30,30 +30,23 @@ libraryDependencies ++= Seq(
   "com.unboundid" % "unboundid-ldapsdk" % "3.2.1",
   "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.8",
   "com.sksamuel.scrimage" %% "scrimage-filters" % "2.1.8",
-  "org.apache.poi" % "poi" % "3.15",
-  "org.apache.poi" % "poi-ooxml" % "3.15",
-  "org.apache.poi" % "poi-scratchpad" % "3.15",
-  // https://mvnrepository.com/artifact/net.sf.mpxj/mpxj
-  "net.sf.mpxj" % "mpxj" % "5.8.0",
-  "com.typesafe.play" %% "play-mailer" % "6.0.0-M1",
-  //"be.objectify" %% "deadbolt-scala" % "2.5.1",
-  // "org.slf4j" % "slf4j-nop" % "1.6.4",
-  // "com.typesafe.slick" %% "slick-hikaricp" %  slickVersion
+  "org.apache.poi" % "poi" % "3.17",
+  "org.apache.poi" % "poi-ooxml" % "3.17",
+  "org.apache.poi" % "poi-scratchpad" % "3.17",
+  "net.sf.mpxj" % "mpxj" % "7.5.0",
+  //"net.sf.mpxj" % "mpxj" % "5.8.0",
+  "com.typesafe.play" %% "play-mailer" % "6.0.0",
+  "com.typesafe.play" %% "play-mailer-guice" % "6.0.0",
   "mysql" % "mysql-connector-java" % "5.1.41",
-  "org.webjars" %% "webjars-play" % "2.6.0-M1",
-  "com.github.nscala-time" %% "nscala-time" % "2.16.0",
-  //"org.webjars" % "html5shiv" % "3.7.2",
-  //"org.webjars" % "requirejs" % "2.1.16",
-  //"org.webjars" % "respond" % "1.4.2",
-  //"org.webjars" % "bootstrap" % "3.3.7-1",
-  //"org.webjars" % "Bootstrap-3-Typeahead" % "3.1.1",
+//  "org.webjars" % "webjars-locator-core" % "0.35",
+  "org.webjars" %% "webjars-play" % "2.6.3",
+  "com.github.nscala-time" %% "nscala-time" % "2.20.0",
   "org.abstractj.kalium" % "kalium" % "0.4.0",
   "org.webjars" % "x-editable-bootstrap3" % "1.5.1-1",
   //"org.webjars.bower" % "bootstrap-3-datepicker" % "1.5.0",
   "org.webjars.bower" % "gentelella" % "1.4.0",
-  "org.webjars" % "font-awesome" % "4.7.0"
-  //"org.webjars" % "jquery" % "3.2.0",
-  //"org.webjars" % "jquery-ui" % "1.12.1"
+  "org.webjars" % "font-awesome" % "4.7.0",
+  "com.univocity" % "univocity-parsers" % "2.6.4"
 
 )
 

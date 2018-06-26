@@ -20,7 +20,9 @@
         searchTerm:Option[String],
         canEdit:Boolean,
         form: Form[forms.AuthRoleForm.Data]
-)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP, messages: Messages )
+)(implicit  webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, request: Request[_],
+        ldap: utl.LDAP, messages: Messages )
 
 
 @main("Roles") {

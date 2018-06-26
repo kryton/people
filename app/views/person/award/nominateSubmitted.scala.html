@@ -1,6 +1,7 @@
 @import models.people.EmpRelationsRowUtils._
 @import offline.Tables.EmprelationsRow
-@(emp:EmprelationsRow)(implicit  webJarAssets: WebJarAssets,
+@(emp:EmprelationsRow)(implicit
+        webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

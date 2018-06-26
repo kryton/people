@@ -30,6 +30,7 @@
 @import projectdb.Tables.ProjectRow
 @import projectdb.Tables.StatuscolorRow
 @import projectdb.Tables.ProjectdependencyRow
+@import org.webjars.play.WebJarsUtil
 @(      id:Int,
         productFeature:ProductfeatureRow,
         tracks:Seq[(ProducttrackRow, ProducttrackfeatureRow)],
@@ -44,7 +45,7 @@
         mcs: Seq[(String, String)],
         ffs: Seq[(String,String)]
 
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit  webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,
@@ -52,9 +53,9 @@
 
 
 @main(styles=Html("""
-<link href='"""+ routes.WebJarAssets.at(webJarAssets.locate("/vendors/switchery/dist/switchery.min.css"))+"""' rel="stylesheet">
+<link href='"""+ webJarsUtil.locate("/vendors/switchery/dist/switchery.min.css")+"""' rel="stylesheet">
 """), scripts = Html("""
-<script src='"""+routes.WebJarAssets.at(webJarAssets.locate("/vendors/switchery/dist/switchery.min.js"))+"""' type="text/javascript"></script>
+<script src='"""+webJarsUtil.locate("/vendors/switchery/dist/switchery.min.js")+"""' type="text/javascript"></script>
 """),title=s"Product Feature ${productFeature.name}!") {
 
 <div class="row">

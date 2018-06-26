@@ -16,7 +16,9 @@
  *@
 
 @(title: String, tab: String = "", styles: Html = Html(""), scripts: Html = Html(""), modals: Html = Html(""))(content: Html)(
-        implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_] )
+        implicit assets: AssetsFinder,
+        webJarsUtil: org.webjars.play.WebJarsUtil,
+        request: Request[_] )
 
 <!DOCTYPE html>
 <html lang="en">

@@ -1,7 +1,7 @@
 @import models.people.EmpRelationsRowUtils._
 @import offline.Tables.EmprelationsRow
 @(emp:EmprelationsRow,
-        form:Form[forms.AwardForm.Data])(implicit  webJarAssets: WebJarAssets,
+        form:Form[forms.AwardForm.Data])(implicit  webJarAssets: org.webjars.play.WebJarAssets,
         assets: AssetsFinder,
         request: Request[_],
         messages:Messages,

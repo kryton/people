@@ -27,7 +27,7 @@
 @(      id:Long,
         matrix:MatrixteamRow,
         members:utl.Page[EmprelationsRow],
-        teams: Map[String, Option[TeamdescriptionRow]])(implicit  webJarAssets: WebJarAssets,
+        teams: Map[String, Option[TeamdescriptionRow]])(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

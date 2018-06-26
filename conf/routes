@@ -28,9 +28,12 @@ GET         /person/:login/matrix/:id/:enable               controllers.PersonCo
 GET         /person/:login/matrix                           controllers.PersonController.matrix(login:String)
 GET         /person/id/:id                                  controllers.PersonController.personNumber(id:Long)
 GET         /person/admin/import                            controllers.PersonController.importFile
+GET         /person/admin/importWD                          controllers.PersonController.importWorkdayFile()
 POST        /person/admin/import                            controllers.PersonController.doImport
+POST        /person/admin/importWorkday                     controllers.PersonController.doImportWorkday
 GET         /person/admin/importDir                         controllers.PersonController.importFileDir
 GET         /person/admin/importFile/:filename              controllers.PersonController.doImportFile(filename:String)
+
 
 
 GET         /orgchart/hier                                  controllers.PersonController.personHierarchy(login:Option[String]?=None)
@@ -181,4 +184,4 @@ POST        /release/ppl/new                                controllers.ReleaseC
 
 GET         /assets/*file                                   controllers.Assets.at(file)
 GET         /versionedAssets/*file                          controllers.Assets.versioned(file)
-GET         /webjars/*file                                  controllers.WebJarAssets.at(file)
+->          /webjars                webjars.Routes

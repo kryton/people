@@ -22,7 +22,7 @@
 @import projectdb.Tables.StageRow
 @(      id:Int,
         stage:StageRow,
-        features:Page[(ProductfeatureRow, Seq[(ProducttrackRow,ProducttrackfeatureRow)])])(implicit  webJarAssets: WebJarAssets,
+        features:Page[(ProductfeatureRow, Seq[(ProducttrackRow,ProducttrackfeatureRow)])])(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

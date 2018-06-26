@@ -16,7 +16,9 @@
  *@
 
 @import forms.headShotUpload
-@(login:String, theForm: Form[headShotUpload])(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+@(login:String, theForm: Form[headShotUpload])(implicit request: Request[_],
+        webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder)
 
 @import helper._
 

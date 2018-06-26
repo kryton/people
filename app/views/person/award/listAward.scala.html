@@ -23,7 +23,8 @@
 @(  page: utl.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow, Option[EmprelationsRow], Option[EmphistoryRow])],
     rejected: utl.Page[(AwardnominationtoRow,EmprelationsRow,EmprelationsRow)],
     approved: utl.Page[(AwardnominationtoRow,EmprelationsRow,Option[EmprelationsRow])]
-       )(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
+       )(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 
 @main("Award Committee Review/Approval needed") {

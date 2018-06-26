@@ -1,4 +1,4 @@
-FROM        docker-registry-v2.digitalriver-external.com/playbase:latest as BUILD
+FROM        kryton/playbase:latest as BUILD
 
 MAINTAINER  Ian Holsman <kryton@gmail.com>
 
@@ -28,7 +28,7 @@ ADD	    internal/assets/stylesheets/dark.css /root/app/assets/stylesheets/
 #RUN         cd /root; /usr/local/activator/activator test stage
 RUN         cd /root; /usr/local/activator/bin/activator package stage
 
-FROM        docker-registry-v2.digitalriver-external.com/playbase:latest
+FROM        kryton/playbase:latest
 COPY --from=BUILD  /root/target/ /root/target
 COPY --from=BUILD  /root/conf/ /root/conf
 COPY --from=BUILD  /root/play /root/play

@@ -47,9 +47,10 @@ class CostCenterController @Inject()
   user: User
 )(implicit
   ec: ExecutionContext,
+  webJarsUtil: org.webjars.play.WebJarsUtil,
   //override val messagesApi: MessagesApi,
   cc: ControllerComponents,
-  webJarAssets: WebJarAssets,
+  webJarAssets: org.webjars.play.WebJarAssets,
   assets: AssetsFinder,
   ldap: LDAP
 ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport {

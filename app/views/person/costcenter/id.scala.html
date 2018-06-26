@@ -25,7 +25,7 @@
         costc:CostcenterRow,
         func:Option[FunctionalareaRow],
         profit:Option[ProfitcenterRow],
-        emps:Page[EmprelationsRow] )(implicit  webJarAssets: WebJarAssets,
+        emps:Page[EmprelationsRow] )(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

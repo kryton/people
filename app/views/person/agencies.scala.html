@@ -21,7 +21,8 @@
 @import projectdb.Tables.ProductfeatureRow
 @import utl.Page
 @(agencies:Seq[(String,Int)]
-)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 @main( s"Agencies") {
 

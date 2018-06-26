@@ -25,7 +25,7 @@
 @import models.product.TeamSummary
 @(      breakdown:Seq[(Either[ResourceteamRow, ResourcepoolRow], Seq[TeamSummary])],
         teamLevel:Option[String]
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

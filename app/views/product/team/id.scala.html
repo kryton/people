@@ -35,7 +35,7 @@
         isAdmin:Boolean,
         teamMakeup: Seq[TeamSummary],
         rpoolLookup: Seq[(Int,String)]
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
           messages: Messages,
         request: Request[_],

@@ -19,7 +19,7 @@
 @import models.people.EmpRelationsRowUtils._
 @(title: String,
     emp:EmprelationsRow,
-    manager:Option[EmprelationsRow])(implicit  webJarAssets: WebJarAssets,
+    manager:Option[EmprelationsRow])(implicit  webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

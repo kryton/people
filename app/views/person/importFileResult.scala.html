@@ -19,7 +19,8 @@
 @import offline.Tables.EmprelationsRow
 @(  inserts:List[EmprelationsRow],
     updates:Long,
-    deletes:List[String] )(implicit request: Request[_], webJarAssets: WebJarAssets, assets: AssetsFinder)
+    deletes:List[String] )(implicit request: Request[_],
+        webJarsUtil: org.webjars.play.WebJarsUtil, assets: AssetsFinder)
 
 @import helper._
 
@@ -35,7 +36,7 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Import SAP Extract file results</h2>
+                <h2>Import Workforce file results</h2>
 
                 <div class="clearfix"></div>
             </div>
@@ -43,7 +44,6 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <h1>+@inserts.size new hires  -@deletes.size terms  @updates existing/updated </h1>
-                        <a href="@routes.PersonController.importFile()">Re-Import</a>
                     </div>
                 </div>
                 <div class="col-xs-6">

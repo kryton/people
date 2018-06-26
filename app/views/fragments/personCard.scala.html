@@ -17,7 +17,7 @@
 
 @import offline.Tables.EmprelationsRow
 @import people.EmpRelationsRowUtils._
-@(emp:EmprelationsRow)(implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: RequestHeader,  ldap: utl.LDAP )
+@(emp:EmprelationsRow)(implicit assets: AssetsFinder, request: RequestHeader, webJarsUtil: org.webjars.play.WebJarsUtil, ldap: utl.LDAP )
 
 <div class="panel panel-default">
     <div class="panel-heading">

@@ -50,7 +50,8 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
                                     user: User)
                                    (implicit ec: ExecutionContext,
                                     cc: ControllerComponents,
-                                    webJarAssets: WebJarAssets,
+                                    webJarAssets: org.webjars.play.WebJarAssets,
+                                    webJarsUtil: org.webjars.play.WebJarsUtil,
                                     assets: AssetsFinder)
   extends AbstractController(cc)  with HasDatabaseConfigProvider[JdbcProfile]{
 

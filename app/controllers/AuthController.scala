@@ -18,12 +18,12 @@
 package controllers
 
 import javax.inject._
-
 import forms.AuthPermissionForm
 import models.auth._
 import models.people._
 import offline.Tables
 import offline.Tables.{AuthpermissionRow, AuthroleRow}
+import org.webjars.play.WebJarAssets
 import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
@@ -52,6 +52,7 @@ class AuthController @Inject()
   ec: ExecutionContext,
   //override val messagesApi: MessagesApi,
   cc: ControllerComponents,
+  webJarsUtil: org.webjars.play.WebJarsUtil,
   webJarAssets: WebJarAssets,
   assets: AssetsFinder,
   ldap: LDAP

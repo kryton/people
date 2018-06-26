@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@()(implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: RequestHeader)
+@()(implicit request: RequestHeader)
 
 <div class="navbar nav_title" style="border: 0;">
     @request.session.get("speciallogo").map { x =>

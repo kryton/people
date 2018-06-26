@@ -19,7 +19,8 @@
 @import people.EmpRelationsRowUtils._
 @import offline.Tables.EmprelationsRow
 @(page: utl.Page[(KudostoRow,Option[EmprelationsRow],Option[EmprelationsRow])],
-        searchTerm:Option[String])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
+        searchTerm:Option[String])(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 
 @main("Shoutouts") {

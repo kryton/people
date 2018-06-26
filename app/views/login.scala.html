@@ -16,7 +16,9 @@
  *@
 
 @(title: String, form:Form[forms.LoginForm.Data], tab: String = "", styles: Html = Html(""), scripts: Html = Html(""), modals: Html = Html("") )(
-        implicit request:Request[AnyRef], webJarAssets: WebJarAssets, assets: AssetsFinder,  messages:Messages)
+        implicit request:Request[AnyRef],
+        webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder,  messages:Messages)
 <!DOCTYPE html>
 <html lang="en">
 @fragments.header(title)

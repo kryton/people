@@ -21,7 +21,7 @@
         searchTerm:Option[String],
         isAdmin:Boolean,
         rpForm: Form[forms.ResourcePoolForm.Data]
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit  webJarsUtil: org.webjars.play.WebJarsUtil,
             assets: AssetsFinder,
             request: Request[_],
             messages: Messages, ldap: utl.LDAP )

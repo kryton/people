@@ -17,7 +17,8 @@
 
 import javax.inject.{Inject, Singleton}
 
-import controllers.{AssetsFinder, WebJarAssets}
+//import controllers.AssetsFinder
+//import org.webjars.play.WebJarAssets
 import play.api.{Environment, Logger}
 import play.api.http.{DefaultHttpErrorHandler, HttpErrorHandler}
 import play.api.mvc.{ControllerComponents, RequestHeader, Result}

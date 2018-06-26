@@ -29,7 +29,7 @@
         ratSelect:Seq[(String,String)],
         missing: Map[ReleaseauthorizationtypeRow, Seq[(ReleasetypeauthorizationpeopleRow, ReleaseauthorizationtypeRow)]]
 
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,

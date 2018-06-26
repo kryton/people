@@ -24,7 +24,7 @@
 @(      id:Long,
         function: FunctionalareaRow,
         costc:Page[CostcenterRow],
-        profits: Seq[ProfitcenterRow])(implicit  webJarAssets: WebJarAssets,
+        profits: Seq[ProfitcenterRow])(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

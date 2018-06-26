@@ -57,7 +57,7 @@ case class QuickBookImport(
                             officeCountry:Option[String]
                           ) {
   def isFTE: Boolean = {
-    !employeeGroup.equalsIgnoreCase("External employee")
+    employeeGroup.equalsIgnoreCase("EMPLOYEE_TYPE_PERMANENT")
   }
 
 }

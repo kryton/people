@@ -16,7 +16,8 @@
  *@
 
 @import offline.Tables.OfficeRow
-@(offices:Map[Option[String], Seq[(OfficeRow,Int)]])(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
+@(offices:Map[Option[String], Seq[(OfficeRow,Int)]])(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 @main("Offices") {
 <div class="row">

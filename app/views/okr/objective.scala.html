@@ -25,7 +25,7 @@
         futureObjectives:Seq[OkrobjectiveRow],
         canEdit:Boolean,
         form: Form[forms.KRForm.Data])(implicit
-        webJarAssets: WebJarAssets,
+        webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,

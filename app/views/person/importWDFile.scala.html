@@ -15,7 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@()(implicit request: Request[_], webJarsUtil: org.webjars.play.WebJarsUtil,
+@()(implicit request: Request[_],
+        webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder)
 
 @import helper._
@@ -24,7 +25,7 @@
         FieldConstructor(twitterBootstrapInput.f)
     }
 
-@main("Import SAP Extract file") {
+@main("Import Workday Extract file") {
 
     <!-- Begin page content -->
 
@@ -32,15 +33,15 @@
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Import SAP Extract file</h2>
+                <h2>Import Workday Extract file</h2>
 
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
 
-            @form(action = CSRF(routes.PersonController.doImport()), 'enctype -> "multipart/form-data") {
+            @form(action = CSRF(routes.PersonController.doImportWorkday()), 'enctype -> "multipart/form-data") {
                @* @CSRF.formField *@
-                <label for="importFile">The export file from SAP:</label>
+                <label for="importFile">The export file from Workday:</label>
                 <input id="importFile" type="file" name="importFile">
 
                 <p>

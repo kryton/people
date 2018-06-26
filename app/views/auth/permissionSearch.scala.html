@@ -21,7 +21,8 @@
         canEdit:Boolean,
         form: Form[forms.AuthPermissionForm.Data]
 )(implicit
-        webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP, messages: Messages )
+        webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, request: Request[_], ldap: utl.LDAP, messages: Messages )
 
 
 @main("Permissions") {

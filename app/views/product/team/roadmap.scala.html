@@ -29,7 +29,7 @@
         devDaysPerQ: (BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal),
         sizes:Seq[(Int, ProductfeatureRow, BigDecimal, BigDecimal,String)],
         slack: Map[Int, BigDecimal]
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

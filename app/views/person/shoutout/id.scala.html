@@ -22,7 +22,7 @@
         kudos:KudostoRow,
         from:Option[EmprelationsRow],
         to:Option[EmprelationsRow],
-        isAdmin:Boolean)(implicit  webJarAssets: WebJarAssets,
+        isAdmin:Boolean)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

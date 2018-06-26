@@ -21,7 +21,7 @@
   shoutOuts:Seq[(KudostoRow, EmprelationsRow, Option[EmprelationsRow])],
   anniversaries: Seq[(EmphistoryRow, EmprelationsRow, Long )],
   emp:Option[EmprelationsRow])(implicit
-        webJarAssets: WebJarAssets,
+        webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP )

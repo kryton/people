@@ -20,7 +20,7 @@
 @(page: utl.Page[ReleaseauthorizationtypeRow],
         searchTerm:Option[String],
         form: Form[forms.AuthorizationTypeForm.Data]
-)(implicit  webJarAssets: WebJarAssets,
+)(implicit  webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         messages: Messages,

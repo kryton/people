@@ -28,7 +28,7 @@
 @(      id:Long,
         objective:OkrobjectiveRow,
         emp: EmprelationsRow,
-        results:utl.Page[OkrkeyresultRow])(implicit  webJarAssets: WebJarAssets,
+        results:utl.Page[OkrkeyresultRow])(implicit  webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,
         request: Request[_],
         ldap: utl.LDAP)

@@ -15,14 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@(scripts:Html = Html(""))(implicit webJarAssets: WebJarAssets, assets: AssetsFinder)
+@(scripts:Html = Html(""))(implicit webJarsUtil: org.webjars.play.WebJarsUtil, assets: AssetsFinder)
 
-
-<script src='@routes.WebJarAssets.at(webJarAssets.locate("/vendors/jquery/dist/jquery.min.js"))'></script>
+@webJarsUtil.locate("/vendors/jquery/dist/jquery.min.js").script()
 @* <script src='@routes.WebJarAssets.at(webJarAssets.locate("jquery-ui","1.12.1/jquery-ui.min.js"))'></script> *@
-<script src='@routes.WebJarAssets.at(webJarAssets.locate("/vendors/bootstrap/dist/js/bootstrap.min.js"))'></script>
+@webJarsUtil.locate("/vendors/bootstrap/dist/js/bootstrap.min.js").script()
 @* <script src='@routes.WebJarAssets.at(webJarAssets.locate("bootstrap-3-datepicker" ,"js/bootstrap-datepicker.min.js"))'></script> *@
-<script src="@routes.WebJarAssets.at(webJarAssets.locate("x-editable-bootstrap3","bootstrap-editable.min.js"))"></script>
+@webJarsUtil.locate("x-editable-bootstrap3","bootstrap-editable.min.js").script()
 <script src="@assets.path("js/custom.js")" type="text/javascript"></script>
 
 @scripts

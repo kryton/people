@@ -16,7 +16,7 @@
  *@
 
 @(title: String, tab: String = "", styles: Html = Html(""), scripts: Html = Html(""), modals: Html = Html(""))(content: Html)(
-        implicit webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_])
+        implicit webJarsUtil: org.webjars.play.WebJarsUtil,  assets: AssetsFinder, request: Request[_])
 
 <!DOCTYPE html>
 <html lang="en">
@@ -68,7 +68,7 @@
                 <!-- footer content -->
             <footer>
                 <div class="pull-right">
-                    People Tool by <a href="mailto:ian@@zilbo.com">ian</a> Templates by <a href="https://github.com/puikinsh/gentelella">Gentelella</a>
+                    People Tool by <a href="mailto:ian@@zilbo.com">ian</a>Templates by <a href="https://github.com/puikinsh/gentelella">Gentelella</a>
                 </div>
                 <div class="clearfix"></div>
             </footer>
