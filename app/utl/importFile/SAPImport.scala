@@ -51,7 +51,6 @@ object SAPImport {
         case e: Exception => println(s"Date:$s - ${e.getMessage}"); None
       }
     }
-  //  println(s"SAPImport: $s $result")
     result
   }
 
@@ -223,13 +222,12 @@ object SAPImport {
                   officeid = Some(z._2.id),
                   employeetype = empRecord.employeeType)
 
-                empHistoryRepo.findOrCreate(empRecord.login.get, EmphistoryRow(empRecord.personNumber, empRecord.login,
+                empHistoryRepo.findOrCreate(empRecord.login.get, EmphistoryRow(empRecord.personNumber, empRecord.login.getOrElse("?"),
                   empRecord.firstName, empRecord.nickName, empRecord.lastName, mgrLogin, empRecord.costCenter,
-                  empRel.officeid.getOrElse(0), empRecord.employeeType, Some(empRecord.hireRehireDate.getOrElse(today)), Some(today)))
-//                positionTypeRepo.findOrCreate(empRecord.position,None)
-
-                Some(empRel)
-              }
+                  empRel.officeid.getOrElse(0), empRecord.employeeType, Some(empRecord.hireRehireDate.getOrElse(today)), Some(today))).map { ignore =>
+                  Some(empRel)
+                }
+              }.flatMap(identity)
 
             case None => Future.successful(None)
           }

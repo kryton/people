@@ -24,8 +24,8 @@
 @import java.time.format.DateTimeFormatter
 @(      id:Int,
         productFeature:ProductfeatureRow,
-        byTeam:Iterable[((ResourceteamRow,Option[ResourcepoolRow]), Int, Map[Date, Double])] ,
-        byProject:Iterable[(ProjectRow, Int, Map[Date, Double])],
+        byTeam:Iterable[((ResourceteamRow,Option[ResourcepoolRow]), Long, Map[Date, Double])] ,
+        byProject:Iterable[(ProjectRow, Long, Map[Date, Double])],
         monthRange:Seq[Date],
         dateFormat:DateTimeFormatter
 )(implicit webJarsUtil: org.webjars.play.WebJarsUtil,

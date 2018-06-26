@@ -183,6 +183,7 @@ object WDImport {
             val officeZipCode = trimMatchS(bits(20))
             val officeCountry = trimMatchS(bits(19))
             val loginID = empID.get
+            val hireRehireDate = this.toDateO(stripQuotes(bits(9)))
 
             val record = QuickBookImport(personNumber = Conversions.toLong(loginID, -1),
               firstName = stripQuotes(bits(3)),
@@ -190,7 +191,7 @@ object WDImport {
               lastName = stripQuotes(bits(6)),
               employeeStatus =  isActive,
               companyCode = 0 /*CompanyCode */ ,
-              companyCodeName = stripQuotes(bits(14)),
+              companyCodeName = stripQuotes(bits(13)),
               costCenter = 0 /* costCenter */ ,
               costCenterText = "TBD",
               personalArea = stripQuotes(bits(14)),
@@ -202,7 +203,7 @@ object WDImport {
               managerName = mgr,
               managerLogin =  mgr,
               executiveName = exec,
-              hireRehireDate = this.toDateO(stripQuotes(bits(9))),
+              hireRehireDate = hireRehireDate,
               terminationDate = termDate /*TerminationDate*/ ,
               login = empID,
               officeLocation = workstation,
@@ -215,7 +216,7 @@ object WDImport {
         } else {
           None
         }
-    }.toList
+    }
 
     val byId = employees.map(x => x.personNumber -> x).toMap
 
@@ -258,9 +259,7 @@ object WDImport {
                 c <- ccRowF
                 o <- officeF
               } yield (c, o)).map { z =>
-                if ( empRecord.login.get.equalsIgnoreCase("mhalls")) {
-                  Logger.info("Here")
-                }
+
                 val empRel: EmprelationsRow = EmprelationsRow(empRecord.personNumber,
                   empRecord.login.get.toLowerCase,
                   empRecord.firstName,
@@ -280,13 +279,13 @@ object WDImport {
                   officeid = Some(z._2.id),
                   employeetype = empRecord.employeeType)
 
-                empHistoryRepo.findOrCreate(empRecord.login.get, EmphistoryRow(empRecord.personNumber, empRecord.login,
+                empHistoryRepo.findOrCreate(empRecord.login.get, EmphistoryRow(empRecord.personNumber, empRecord.login.getOrElse("?"),
                   empRecord.firstName, empRecord.nickName, empRecord.lastName, mgrLogin, empRecord.costCenter,
-                  empRel.officeid.getOrElse(0), empRecord.employeeType, Some(empRecord.hireRehireDate.getOrElse(today)), Some(today)))
-//                positionTypeRepo.findOrCreate(empRecord.position,None)
+                  empRel.officeid.getOrElse(0), empRecord.employeeType, Some(empRecord.hireRehireDate.getOrElse(today)), Some(today))).map { ignore =>
+                  Some(empRel)
+                }
 
-                Some(empRel)
-              }
+              }.flatMap(identity)
 
             case None => Future.successful(None)
           }

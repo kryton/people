@@ -359,9 +359,10 @@ class ResourcePoolController @Inject()
       case None => Future.successful(NotFound(views.html.page_404("Feature not found")))
     }.flatMap(identity)
   }
-
+/*
   def rpBreakdown(format:Option[String]): Action[AnyContent] = Action.async { implicit request =>
-    val resultSet: Future[(Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Int, Map[Date, Double])])], Seq[Date])] = resourcePoolRepo.allPoolsTeams.map { set =>
+    val resultSet: Future[(Set[(Either[ResourceteamRow, ResourcepoolRow],
+      Iterable[(ProductfeatureRow, Long, Map[Date, Double])])], Seq[Date])] = resourcePoolRepo.allPoolsTeams.map { set =>
       Future.sequence( set.map {
         case rtrp@Left(rt) => resourceTeamRepo.breakDownTeam(rt.id).map { i => (rtrp, i) }
         case rtrp@Right(rp) => resourcePoolRepo.breakDownPool(rp.id).map { i => (rtrp, i) }
@@ -380,10 +381,10 @@ class ResourcePoolController @Inject()
         utl.Conversions.monthRange(minX,maxX)
       }
       val monthsLimit = monthRange.sortBy(_.getTime).slice(0,15)
-      val setReduced: Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Int, Map[Date, Double])])] = set.map{ s =>
+      val setReduced: Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Long, Map[Date, Double])])] = set.map{ s =>
         ( s._1, s._2._1 )
       }
-      (setReduced,monthsLimit)
+      (setReduced, monthsLimit)
     }
     resultSet.map{ s =>
 
@@ -392,11 +393,10 @@ class ResourcePoolController @Inject()
         .withHeaders(("Access-Control-Allow-Origin", "*"),
           ("Content-Disposition", s"attachment; filename=ResourcePoolList.xls"))
     }
-   // Future(Ok(""))
   }
+*/
 
-
-  def rpBreakdownXLS(result:Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Int, Map[Date, Double])])],
+  def rpBreakdownXLS(result:Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Long, Map[Date, Double])])],
                      monthLimit:Seq[Date]):java.io.File = {
     val wb: Workbook = new HSSFWorkbook()
     val sheet: Sheet = wb.createSheet()
@@ -457,7 +457,7 @@ class ResourcePoolController @Inject()
           val slack1: Map[Int, BigDecimal] = x._4.map{ line => line.ordering -> line.efficiency.getOrElse(BigDecimal(1.0))}.toMap
           val slack: Map[Int, BigDecimal] = (1 to 5).map{ l => l->slack1.getOrElse(l,BigDecimal(1.0))}.toMap
 
-          val features: Seq[(Int, Some[ProductfeatureRow], BigDecimal, BigDecimal, Map[Int, BigDecimal])] = x._2.groupBy(_._4).map{ byFeature =>
+          val features: Seq[(Long, Some[ProductfeatureRow], BigDecimal, BigDecimal, Map[Int, BigDecimal])] = x._2.groupBy(_._4).map{ byFeature =>
             val teamEffortMap = byFeature._2.groupBy(_._1).map { byTeam =>
               val effort = byTeam._2.map{ projectL => projectL._2.featuresizeremaining.getOrElse(BigDecimal(projectL._2.featuresize))}.sum
               byTeam._1.id  -> effort
@@ -472,7 +472,7 @@ class ResourcePoolController @Inject()
           val t: Option[ProductfeatureRow] = None
           val s:Map[Int, BigDecimal] = Map.empty
 
-          val cumSize = features.scanLeft( (0, t, BigDecimal(0), BigDecimal(0), s)   )( (b,z) => ( z._1, z._2, z._3, b._4 + z._3, z._5)).drop(1)
+          val cumSize = features.scanLeft( (0L, t, BigDecimal(0), BigDecimal(0), s)   )( (b,z) => ( z._1, z._2, z._3, b._4 + z._3, z._5)).drop(1)
 
           val prodTeamDet: (Int,EfficencyMonth) = devStats
             .foldLeft( (0,EfficencyMonth(0, 0, 0 ,0, 0))) ((z:(Int,EfficencyMonth), i) => (z._1 + 1, z._2.add( i._2)))
@@ -485,7 +485,7 @@ class ResourcePoolController @Inject()
             prodTeamDet._2.t12 * WORKDAYSINQUARTER * slack.getOrElse(5,BigDecimal(1.0))
           )
 
-          val cumSize2:Seq[(Int, ProductfeatureRow, BigDecimal, BigDecimal,Map[Int, BigDecimal], String)] = cumSize.map{ line =>
+          val cumSize2:Seq[(Long, ProductfeatureRow, BigDecimal, BigDecimal,Map[Int, BigDecimal], String)] = cumSize.map{ line =>
             val s = line._2 match {
               case Some(pf) => pf.name
               case None => "-None-"

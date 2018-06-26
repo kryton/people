@@ -27,7 +27,7 @@
         team:ResourceteamRow,
         prodTeamDet: (Int, EfficencyMonth),
         devDaysPerQ: (BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal),
-        sizes:Seq[(Int, ProductfeatureRow, BigDecimal, BigDecimal,String)],
+        sizes:Seq[(Long, ProductfeatureRow, BigDecimal, BigDecimal,String)],
         slack: Map[Int, BigDecimal]
 )(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
         assets: AssetsFinder,

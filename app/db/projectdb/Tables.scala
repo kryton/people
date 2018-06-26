@@ -1,20 +1,3 @@
-/*
- * Copyright (C) 2014  Ian Holsman
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package projectdb
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
@@ -39,14 +22,14 @@ trait Tables {
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param month Database column month SqlType(INT)
    *  @param efficiency Database column efficiency SqlType(DECIMAL), Default(None) */
-  final case class EmpefficiencyRow(id: Long, month: Int, efficiency: Option[scala.math.BigDecimal] = None)
+  case class EmpefficiencyRow(id: Long, month: Int, efficiency: Option[scala.math.BigDecimal] = None)
   /** GetResult implicit for fetching EmpefficiencyRow objects using plain SQL queries */
   implicit def GetResultEmpefficiencyRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Option[scala.math.BigDecimal]]): GR[EmpefficiencyRow] = GR{
     prs => import prs._
     EmpefficiencyRow.tupled((<<[Long], <<[Int], <<?[scala.math.BigDecimal]))
   }
-  /** Table description of table EmpEfficiency. Objects of this class serve as prototypes for rows in queries. */
-  class Empefficiency(_tableTag: Tag) extends profile.api.Table[EmpefficiencyRow](_tableTag, Some("project_db"), "EmpEfficiency") {
+  /** Table description of table empefficiency. Objects of this class serve as prototypes for rows in queries. */
+  class Empefficiency(_tableTag: Tag) extends profile.api.Table[EmpefficiencyRow](_tableTag, Some("project_db"), "empefficiency") {
     def * = (id, month, efficiency) <> (EmpefficiencyRow.tupled, EmpefficiencyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(month), efficiency).shaped.<>({r=>import r._; _1.map(_=> EmpefficiencyRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -68,11 +51,11 @@ trait Tables {
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column name SqlType(VARCHAR), Length(45,true)
    *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0) */
-  final case class FeatureflagRow(id: Int, name: String, ordering: Int = 0)
+  case class FeatureflagRow(id: Int, name: String, ordering: Long = 0L)
   /** GetResult implicit for fetching FeatureflagRow objects using plain SQL queries */
-  implicit def GetResultFeatureflagRow(implicit e0: GR[Int], e1: GR[String]): GR[FeatureflagRow] = GR{
+  implicit def GetResultFeatureflagRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[FeatureflagRow] = GR{
     prs => import prs._
-    FeatureflagRow.tupled((<<[Int], <<[String], <<[Int]))
+    FeatureflagRow.tupled((<<[Int], <<[String], <<[Long]))
   }
   /** Table description of table featureflag. Objects of this class serve as prototypes for rows in queries. */
   class Featureflag(_tableTag: Tag) extends profile.api.Table[FeatureflagRow](_tableTag, Some("project_db"), "featureflag") {
@@ -85,7 +68,7 @@ trait Tables {
     /** Database column name SqlType(VARCHAR), Length(45,true) */
     val name: Rep[String] = column[String]("name", O.Length(45,varying=true))
     /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
-    val ordering: Rep[Int] = column[Int]("ordering", O.Default(0))
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
 
     /** Uniqueness Index over (name) (database name Name_UNIQUE) */
     val index1 = index("Name_UNIQUE", name, unique=true)
@@ -96,9 +79,9 @@ trait Tables {
   /** Entity class storing rows of table Managedclient
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
-   *  @param ismanaged Database column isManaged SqlType(BIT)
+   *  @param ismanaged Database column isManaged SqlType(BIT), Default(Some(true))
    *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(30,true), Default(None) */
-  final case class ManagedclientRow(id: Int, name: String, ismanaged: Option[Boolean], msprojectname: Option[String] = None)
+  case class ManagedclientRow(id: Int, name: String, ismanaged: Option[Boolean] = Some(true), msprojectname: Option[String] = None)
   /** GetResult implicit for fetching ManagedclientRow objects using plain SQL queries */
   implicit def GetResultManagedclientRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[Boolean]], e3: GR[Option[String]]): GR[ManagedclientRow] = GR{
     prs => import prs._
@@ -114,8 +97,8 @@ trait Tables {
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     /** Database column Name SqlType(VARCHAR), Length(45,true) */
     val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
-    /** Database column isManaged SqlType(BIT) */
-    val ismanaged: Rep[Option[Boolean]] = column[Option[Boolean]]("isManaged")
+    /** Database column isManaged SqlType(BIT), Default(Some(true)) */
+    val ismanaged: Rep[Option[Boolean]] = column[Option[Boolean]]("isManaged", O.Default(Some(true)))
     /** Database column msprojectname SqlType(VARCHAR), Length(30,true), Default(None) */
     val msprojectname: Rep[Option[String]] = column[Option[String]]("msprojectname", O.Length(30,varying=true), O.Default(None))
 
@@ -130,7 +113,7 @@ trait Tables {
    *  @param productfeatureid Database column productFeatureId SqlType(INT)
    *  @param managedclientid Database column managedClientId SqlType(INT)
    *  @param allocation Database column allocation SqlType(DECIMAL UNSIGNED), Default(1.00) */
-  final case class ManagedclientproductfeatureRow(id: Int, productfeatureid: Int, managedclientid: Int, allocation: scala.math.BigDecimal = scala.math.BigDecimal("1.00"))
+  case class ManagedclientproductfeatureRow(id: Int, productfeatureid: Int, managedclientid: Int, allocation: scala.math.BigDecimal = scala.math.BigDecimal("1.00"))
   /** GetResult implicit for fetching ManagedclientproductfeatureRow objects using plain SQL queries */
   implicit def GetResultManagedclientproductfeatureRow(implicit e0: GR[Int], e1: GR[scala.math.BigDecimal]): GR[ManagedclientproductfeatureRow] = GR{
     prs => import prs._
@@ -167,7 +150,7 @@ trait Tables {
    *  @param revertScript Database column revert_script SqlType(TEXT), Default(None)
    *  @param state Database column state SqlType(VARCHAR), Length(255,true), Default(None)
    *  @param lastProblem Database column last_problem SqlType(TEXT), Default(None) */
-  final case class PlayEvolutionsRow(id: Int, hash: String, appliedAt: java.sql.Timestamp, applyScript: Option[String] = None, revertScript: Option[String] = None, state: Option[String] = None, lastProblem: Option[String] = None)
+  case class PlayEvolutionsRow(id: Int, hash: String, appliedAt: java.sql.Timestamp, applyScript: Option[String] = None, revertScript: Option[String] = None, state: Option[String] = None, lastProblem: Option[String] = None)
   /** GetResult implicit for fetching PlayEvolutionsRow objects using plain SQL queries */
   implicit def GetResultPlayEvolutionsRow(implicit e0: GR[Int], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[String]]): GR[PlayEvolutionsRow] = GR{
     prs => import prs._
@@ -204,17 +187,17 @@ trait Tables {
    *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0)
    *  @param stageid Database column stageId SqlType(INT), Default(1)
    *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None)
-   *  @param isactive Database column isActive SqlType(BIT)
-   *  @param iscid Database column isCID SqlType(BIT)
-   *  @param isanchor Database column isAnchor SqlType(BIT)
+   *  @param isactive Database column isActive SqlType(BIT), Default(Some(true))
+   *  @param iscid Database column isCID SqlType(BIT), Default(Some(false))
+   *  @param isanchor Database column isAnchor SqlType(BIT), Default(Some(false))
    *  @param mspriority Database column msPriority SqlType(INT), Default(Some(0))
    *  @param start Database column start SqlType(DATE), Default(None)
    *  @param finish Database column finish SqlType(DATE), Default(None) */
-  final case class ProductfeatureRow(id: Int, name: String, execsummary: String, ordering: Int = 0, stageid: Int = 1, msprojectname: Option[String] = None, isactive: Option[Boolean], iscid: Option[Boolean], isanchor: Option[Boolean], mspriority: Option[Int] = Some(0), start: Option[java.sql.Date] = None, finish: Option[java.sql.Date] = None)
+  case class ProductfeatureRow(id: Int, name: String, execsummary: String, ordering: Long = 0L, stageid: Int = 1, msprojectname: Option[String] = None, isactive: Option[Boolean] = Some(true), iscid: Option[Boolean] = Some(false), isanchor: Option[Boolean] = Some(false), mspriority: Option[Int] = Some(0), start: Option[java.sql.Date] = None, finish: Option[java.sql.Date] = None)
   /** GetResult implicit for fetching ProductfeatureRow objects using plain SQL queries */
-  implicit def GetResultProductfeatureRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[String]], e3: GR[Option[Boolean]], e4: GR[Option[Int]], e5: GR[Option[java.sql.Date]]): GR[ProductfeatureRow] = GR{
+  implicit def GetResultProductfeatureRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long], e3: GR[Option[String]], e4: GR[Option[Boolean]], e5: GR[Option[Int]], e6: GR[Option[java.sql.Date]]): GR[ProductfeatureRow] = GR{
     prs => import prs._
-    ProductfeatureRow.tupled((<<[Int], <<[String], <<[String], <<[Int], <<[Int], <<?[String], <<?[Boolean], <<?[Boolean], <<?[Boolean], <<?[Int], <<?[java.sql.Date], <<?[java.sql.Date]))
+    ProductfeatureRow.tupled((<<[Int], <<[String], <<[String], <<[Long], <<[Int], <<?[String], <<?[Boolean], <<?[Boolean], <<?[Boolean], <<?[Int], <<?[java.sql.Date], <<?[java.sql.Date]))
   }
   /** Table description of table productfeature. Objects of this class serve as prototypes for rows in queries. */
   class Productfeature(_tableTag: Tag) extends profile.api.Table[ProductfeatureRow](_tableTag, Some("project_db"), "productfeature") {
@@ -229,17 +212,17 @@ trait Tables {
     /** Database column execSummary SqlType(TEXT) */
     val execsummary: Rep[String] = column[String]("execSummary")
     /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
-    val ordering: Rep[Int] = column[Int]("ordering", O.Default(0))
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
     /** Database column stageId SqlType(INT), Default(1) */
     val stageid: Rep[Int] = column[Int]("stageId", O.Default(1))
     /** Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None) */
     val msprojectname: Rep[Option[String]] = column[Option[String]]("msprojectname", O.Length(200,varying=true), O.Default(None))
-    /** Database column isActive SqlType(BIT) */
-    val isactive: Rep[Option[Boolean]] = column[Option[Boolean]]("isActive")
-    /** Database column isCID SqlType(BIT) */
-    val iscid: Rep[Option[Boolean]] = column[Option[Boolean]]("isCID")
-    /** Database column isAnchor SqlType(BIT) */
-    val isanchor: Rep[Option[Boolean]] = column[Option[Boolean]]("isAnchor")
+    /** Database column isActive SqlType(BIT), Default(Some(true)) */
+    val isactive: Rep[Option[Boolean]] = column[Option[Boolean]]("isActive", O.Default(Some(true)))
+    /** Database column isCID SqlType(BIT), Default(Some(false)) */
+    val iscid: Rep[Option[Boolean]] = column[Option[Boolean]]("isCID", O.Default(Some(false)))
+    /** Database column isAnchor SqlType(BIT), Default(Some(false)) */
+    val isanchor: Rep[Option[Boolean]] = column[Option[Boolean]]("isAnchor", O.Default(Some(false)))
     /** Database column msPriority SqlType(INT), Default(Some(0)) */
     val mspriority: Rep[Option[Int]] = column[Option[Int]]("msPriority", O.Default(Some(0)))
     /** Database column start SqlType(DATE), Default(None) */
@@ -257,7 +240,7 @@ trait Tables {
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param productfeatureid Database column productFeatureId SqlType(INT)
    *  @param featureflagid Database column featureFlagId SqlType(INT) */
-  final case class ProductfeatureflagRow(id: Int, productfeatureid: Int, featureflagid: Int)
+  case class ProductfeatureflagRow(id: Int, productfeatureid: Int, featureflagid: Int)
   /** GetResult implicit for fetching ProductfeatureflagRow objects using plain SQL queries */
   implicit def GetResultProductfeatureflagRow(implicit e0: GR[Int]): GR[ProductfeatureflagRow] = GR{
     prs => import prs._
@@ -289,11 +272,11 @@ trait Tables {
    *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
    *  @param ordering Database column Ordering SqlType(INT UNSIGNED), Default(0)
    *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(30,true), Default(None) */
-  final case class ProducttrackRow(id: Int, name: String, ordering: Int = 0, msprojectname: Option[String] = None)
+  case class ProducttrackRow(id: Int, name: String, ordering: Long = 0L, msprojectname: Option[String] = None)
   /** GetResult implicit for fetching ProducttrackRow objects using plain SQL queries */
-  implicit def GetResultProducttrackRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[String]]): GR[ProducttrackRow] = GR{
+  implicit def GetResultProducttrackRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long], e3: GR[Option[String]]): GR[ProducttrackRow] = GR{
     prs => import prs._
-    ProducttrackRow.tupled((<<[Int], <<[String], <<[Int], <<?[String]))
+    ProducttrackRow.tupled((<<[Int], <<[String], <<[Long], <<?[String]))
   }
   /** Table description of table producttrack. Objects of this class serve as prototypes for rows in queries. */
   class Producttrack(_tableTag: Tag) extends profile.api.Table[ProducttrackRow](_tableTag, Some("project_db"), "producttrack") {
@@ -306,7 +289,7 @@ trait Tables {
     /** Database column Name SqlType(VARCHAR), Length(45,true) */
     val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
     /** Database column Ordering SqlType(INT UNSIGNED), Default(0) */
-    val ordering: Rep[Int] = column[Int]("Ordering", O.Default(0))
+    val ordering: Rep[Long] = column[Long]("Ordering", O.Default(0L))
     /** Database column msprojectname SqlType(VARCHAR), Length(30,true), Default(None) */
     val msprojectname: Rep[Option[String]] = column[Option[String]]("msprojectname", O.Length(30,varying=true), O.Default(None))
 
@@ -322,7 +305,7 @@ trait Tables {
    *  @param producttrackid Database column productTrackId SqlType(INT)
    *  @param allocation Database column allocation SqlType(DECIMAL UNSIGNED)
    *  @param priority Database column priority SqlType(INT) */
-  final case class ProducttrackfeatureRow(id: Int, productfeatureid: Int, producttrackid: Int, allocation: scala.math.BigDecimal, priority: Int)
+  case class ProducttrackfeatureRow(id: Int, productfeatureid: Int, producttrackid: Int, allocation: scala.math.BigDecimal, priority: Int)
   /** GetResult implicit for fetching ProducttrackfeatureRow objects using plain SQL queries */
   implicit def GetResultProducttrackfeatureRow(implicit e0: GR[Int], e1: GR[scala.math.BigDecimal]): GR[ProducttrackfeatureRow] = GR{
     prs => import prs._
@@ -360,12 +343,12 @@ trait Tables {
    *  @param currentstatusid Database column currentStatusId SqlType(INT)
    *  @param started Database column started SqlType(DATE), Default(None)
    *  @param finished Database column finished SqlType(DATE), Default(None)
-   *  @param isactive Database column isActive SqlType(BIT)
+   *  @param isactive Database column isActive SqlType(BIT), Default(true)
    *  @param productfeatureid Database column productFeatureId SqlType(INT), Default(1)
    *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None)
    *  @param constrainttype Database column constraintType SqlType(CHAR), Length(4,false), Default(ASAP)
    *  @param constraintdate Database column constraintDate SqlType(DATE), Default(None) */
-  final case class ProjectRow(id: Int, name: String, execsummary: String, currentstatusid: Int, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None, isactive: Boolean, productfeatureid: Int = 1, msprojectname: Option[String] = None, constrainttype: String = "ASAP", constraintdate: Option[java.sql.Date] = None)
+  case class ProjectRow(id: Int, name: String, execsummary: String, currentstatusid: Int, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None, isactive: Boolean = true, productfeatureid: Int = 1, msprojectname: Option[String] = None, constrainttype: String = "ASAP", constraintdate: Option[java.sql.Date] = None)
   /** GetResult implicit for fetching ProjectRow objects using plain SQL queries */
   implicit def GetResultProjectRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Date]], e3: GR[Boolean], e4: GR[Option[String]]): GR[ProjectRow] = GR{
     prs => import prs._
@@ -389,8 +372,8 @@ trait Tables {
     val started: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("started", O.Default(None))
     /** Database column finished SqlType(DATE), Default(None) */
     val finished: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("finished", O.Default(None))
-    /** Database column isActive SqlType(BIT) */
-    val isactive: Rep[Boolean] = column[Boolean]("isActive")
+    /** Database column isActive SqlType(BIT), Default(true) */
+    val isactive: Rep[Boolean] = column[Boolean]("isActive", O.Default(true))
     /** Database column productFeatureId SqlType(INT), Default(1) */
     val productfeatureid: Rep[Int] = column[Int]("productFeatureId", O.Default(1))
     /** Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None) */
@@ -413,7 +396,7 @@ trait Tables {
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param projectid Database column projectId SqlType(INT)
    *  @param areaid Database column areaId SqlType(INT) */
-  final case class ProjectareaRow(id: Int, projectid: Int, areaid: Int)
+  case class ProjectareaRow(id: Int, projectid: Int, areaid: Int)
   /** GetResult implicit for fetching ProjectareaRow objects using plain SQL queries */
   implicit def GetResultProjectareaRow(implicit e0: GR[Int]): GR[ProjectareaRow] = GR{
     prs => import prs._
@@ -446,14 +429,14 @@ trait Tables {
    *  @param fromproject Database column fromProject SqlType(INT)
    *  @param toproject Database column toProject SqlType(INT)
    *  @param dependencytype Database column dependencytype SqlType(CHAR), Length(2,false), Default(FS) */
-  final case class ProjectdependencyRow(id: Long, fromproject: Int, toproject: Int, dependencytype: String = "FS")
+  case class ProjectdependencyRow(id: Long, fromproject: Int, toproject: Int, dependencytype: String = "FS")
   /** GetResult implicit for fetching ProjectdependencyRow objects using plain SQL queries */
   implicit def GetResultProjectdependencyRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[String]): GR[ProjectdependencyRow] = GR{
     prs => import prs._
     ProjectdependencyRow.tupled((<<[Long], <<[Int], <<[Int], <<[String]))
   }
-  /** Table description of table ProjectDependency. Objects of this class serve as prototypes for rows in queries. */
-  class Projectdependency(_tableTag: Tag) extends profile.api.Table[ProjectdependencyRow](_tableTag, Some("project_db"), "ProjectDependency") {
+  /** Table description of table projectdependency. Objects of this class serve as prototypes for rows in queries. */
+  class Projectdependency(_tableTag: Tag) extends profile.api.Table[ProjectdependencyRow](_tableTag, Some("project_db"), "projectdependency") {
     def * = (id, fromproject, toproject, dependencytype) <> (ProjectdependencyRow.tupled, ProjectdependencyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(fromproject), Rep.Some(toproject), Rep.Some(dependencytype)).shaped.<>({r=>import r._; _1.map(_=> ProjectdependencyRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -484,8 +467,8 @@ trait Tables {
    *  @param status Database column status SqlType(INT), Default(None)
    *  @param timeline Database column timeLine SqlType(DATE), Default(None)
    *  @param timelinestring Database column timeLineString SqlType(VARCHAR), Length(45,true), Default(None)
-   *  @param hidden Database column hidden SqlType(BIT) */
-  final case class ProjectfeatureRow(id: Int, projectid: Int, releaseid: Int, parentfeatureid: Option[Int] = None, feature: String, status: Option[Int] = None, timeline: Option[java.sql.Date] = None, timelinestring: Option[String] = None, hidden: Option[Boolean])
+   *  @param hidden Database column hidden SqlType(BIT), Default(Some(false)) */
+  case class ProjectfeatureRow(id: Int, projectid: Int, releaseid: Int, parentfeatureid: Option[Int] = None, feature: String, status: Option[Int] = None, timeline: Option[java.sql.Date] = None, timelinestring: Option[String] = None, hidden: Option[Boolean] = Some(false))
   /** GetResult implicit for fetching ProjectfeatureRow objects using plain SQL queries */
   implicit def GetResultProjectfeatureRow(implicit e0: GR[Int], e1: GR[Option[Int]], e2: GR[String], e3: GR[Option[java.sql.Date]], e4: GR[Option[String]], e5: GR[Option[Boolean]]): GR[ProjectfeatureRow] = GR{
     prs => import prs._
@@ -513,8 +496,8 @@ trait Tables {
     val timeline: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("timeLine", O.Default(None))
     /** Database column timeLineString SqlType(VARCHAR), Length(45,true), Default(None) */
     val timelinestring: Rep[Option[String]] = column[Option[String]]("timeLineString", O.Length(45,varying=true), O.Default(None))
-    /** Database column hidden SqlType(BIT) */
-    val hidden: Rep[Option[Boolean]] = column[Option[Boolean]]("hidden")
+    /** Database column hidden SqlType(BIT), Default(Some(false)) */
+    val hidden: Rep[Option[Boolean]] = column[Option[Boolean]]("hidden", O.Default(Some(false)))
 
     /** Foreign key referencing Project (database name ProjectFeature_ibfk_1) */
     lazy val projectFk = foreignKey("ProjectFeature_ibfk_1", projectid, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
@@ -531,7 +514,7 @@ trait Tables {
    *  @param projectid Database column projectId SqlType(INT)
    *  @param updated Database column updated SqlType(DATE)
    *  @param memo Database column memo SqlType(TEXT) */
-  final case class ProjecthighlightRow(id: Int, projectid: Int, updated: java.sql.Date, memo: String)
+  case class ProjecthighlightRow(id: Int, projectid: Int, updated: java.sql.Date, memo: String)
   /** GetResult implicit for fetching ProjecthighlightRow objects using plain SQL queries */
   implicit def GetResultProjecthighlightRow(implicit e0: GR[Int], e1: GR[java.sql.Date], e2: GR[String]): GR[ProjecthighlightRow] = GR{
     prs => import prs._
@@ -565,7 +548,7 @@ trait Tables {
    *  @param alias Database column alias SqlType(VARCHAR), Length(20,true)
    *  @param started Database column started SqlType(DATE), Default(None)
    *  @param finished Database column finished SqlType(DATE), Default(None) */
-  final case class ProjectpersonRow(id: Int, projectid: Int, projectpersontypeid: Int, alias: String, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None)
+  case class ProjectpersonRow(id: Int, projectid: Int, projectpersontypeid: Int, alias: String, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None)
   /** GetResult implicit for fetching ProjectpersonRow objects using plain SQL queries */
   implicit def GetResultProjectpersonRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Date]]): GR[ProjectpersonRow] = GR{
     prs => import prs._
@@ -602,11 +585,11 @@ trait Tables {
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
    *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0) */
-  final case class ProjectpersontypeRow(id: Int, name: String, ordering: Int = 0)
+  case class ProjectpersontypeRow(id: Int, name: String, ordering: Long = 0L)
   /** GetResult implicit for fetching ProjectpersontypeRow objects using plain SQL queries */
-  implicit def GetResultProjectpersontypeRow(implicit e0: GR[Int], e1: GR[String]): GR[ProjectpersontypeRow] = GR{
+  implicit def GetResultProjectpersontypeRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[ProjectpersontypeRow] = GR{
     prs => import prs._
-    ProjectpersontypeRow.tupled((<<[Int], <<[String], <<[Int]))
+    ProjectpersontypeRow.tupled((<<[Int], <<[String], <<[Long]))
   }
   /** Table description of table projectpersontype. Objects of this class serve as prototypes for rows in queries. */
   class Projectpersontype(_tableTag: Tag) extends profile.api.Table[ProjectpersontypeRow](_tableTag, Some("project_db"), "projectpersontype") {
@@ -619,7 +602,7 @@ trait Tables {
     /** Database column Name SqlType(VARCHAR), Length(45,true) */
     val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
     /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
-    val ordering: Rep[Int] = column[Int]("ordering", O.Default(0))
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
 
     /** Uniqueness Index over (name) (database name Name_UNIQUE) */
     val index1 = index("Name_UNIQUE", name, unique=true)
@@ -637,7 +620,7 @@ trait Tables {
    *  @param releasefileurl Database column releasefileURL SqlType(VARCHAR), Length(255,true), Default(None)
    *  @param releasenotes Database column releasenotes SqlType(TEXT), Default(None)
    *  @param rolledback Database column RolledBack SqlType(DATETIME), Default(None) */
-  final case class ProjectreleaseRow(id: Int, name: String, deployed: Option[java.sql.Timestamp] = None, planned: Option[java.sql.Timestamp] = None, releasetypeid: Int, changeticket: Option[String] = None, releasefileurl: Option[String] = None, releasenotes: Option[String] = None, rolledback: Option[java.sql.Timestamp] = None)
+  case class ProjectreleaseRow(id: Int, name: String, deployed: Option[java.sql.Timestamp] = None, planned: Option[java.sql.Timestamp] = None, releasetypeid: Int, changeticket: Option[String] = None, releasefileurl: Option[String] = None, releasenotes: Option[String] = None, rolledback: Option[java.sql.Timestamp] = None)
   /** GetResult implicit for fetching ProjectreleaseRow objects using plain SQL queries */
   implicit def GetResultProjectreleaseRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Timestamp]], e3: GR[Option[String]]): GR[ProjectreleaseRow] = GR{
     prs => import prs._
@@ -680,7 +663,7 @@ trait Tables {
    *  @param roleid Database column roleId SqlType(INT)
    *  @param updated Database column updated SqlType(DATE)
    *  @param headcount Database column headCount SqlType(DECIMAL), Default(None) */
-  final case class ProjectroleRow(id: Int, projectid: Int, roleid: Int, updated: java.sql.Date, headcount: Option[scala.math.BigDecimal] = None)
+  case class ProjectroleRow(id: Int, projectid: Int, roleid: Int, updated: java.sql.Date, headcount: Option[scala.math.BigDecimal] = None)
   /** GetResult implicit for fetching ProjectroleRow objects using plain SQL queries */
   implicit def GetResultProjectroleRow(implicit e0: GR[Int], e1: GR[java.sql.Date], e2: GR[Option[scala.math.BigDecimal]]): GR[ProjectroleRow] = GR{
     prs => import prs._
@@ -720,14 +703,14 @@ trait Tables {
    *  @param rejecteddate Database column rejectedDate SqlType(DATETIME), Default(None)
    *  @param isapproved Database column isApproved SqlType(BIT), Default(None)
    *  @param notes Database column notes SqlType(TEXT), Default(None) */
-  final case class ReleaseauthorizationRow(id: Int, releaseid: Int, releaseauthorityid: Int, login: String, approveddate: Option[java.sql.Timestamp] = None, rejecteddate: Option[java.sql.Timestamp] = None, isapproved: Option[Boolean] = None, notes: Option[String] = None)
+  case class ReleaseauthorizationRow(id: Int, releaseid: Int, releaseauthorityid: Int, login: String, approveddate: Option[java.sql.Timestamp] = None, rejecteddate: Option[java.sql.Timestamp] = None, isapproved: Option[Boolean] = None, notes: Option[String] = None)
   /** GetResult implicit for fetching ReleaseauthorizationRow objects using plain SQL queries */
   implicit def GetResultReleaseauthorizationRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Timestamp]], e3: GR[Option[Boolean]], e4: GR[Option[String]]): GR[ReleaseauthorizationRow] = GR{
     prs => import prs._
     ReleaseauthorizationRow.tupled((<<[Int], <<[Int], <<[Int], <<[String], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[Boolean], <<?[String]))
   }
-  /** Table description of table ReleaseAuthorization. Objects of this class serve as prototypes for rows in queries. */
-  class Releaseauthorization(_tableTag: Tag) extends profile.api.Table[ReleaseauthorizationRow](_tableTag, Some("project_db"), "ReleaseAuthorization") {
+  /** Table description of table releaseauthorization. Objects of this class serve as prototypes for rows in queries. */
+  class Releaseauthorization(_tableTag: Tag) extends profile.api.Table[ReleaseauthorizationRow](_tableTag, Some("project_db"), "releaseauthorization") {
     def * = (id, releaseid, releaseauthorityid, login, approveddate, rejecteddate, isapproved, notes) <> (ReleaseauthorizationRow.tupled, ReleaseauthorizationRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(releaseid), Rep.Some(releaseauthorityid), Rep.Some(login), approveddate, rejecteddate, isapproved, notes).shaped.<>({r=>import r._; _1.map(_=> ReleaseauthorizationRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -749,10 +732,10 @@ trait Tables {
     /** Database column notes SqlType(TEXT), Default(None) */
     val notes: Rep[Option[String]] = column[Option[String]]("notes", O.Default(None))
 
-    /** Foreign key referencing Releaseauthorizationtype (database name ReleaseAuth_type) */
-    lazy val releaseauthorizationtypeFk = foreignKey("ReleaseAuth_type", releaseauthorityid, Releaseauthorizationtype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
     /** Foreign key referencing Projectrelease (database name ReleaseAuth_rel) */
     lazy val projectreleaseFk = foreignKey("ReleaseAuth_rel", releaseid, Projectrelease)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Releaseauthorizationtype (database name ReleaseAuth_type) */
+    lazy val releaseauthorizationtypeFk = foreignKey("ReleaseAuth_type", releaseauthorityid, Releaseauthorizationtype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
   }
   /** Collection-like TableQuery object for table Releaseauthorization */
   lazy val Releaseauthorization = new TableQuery(tag => new Releaseauthorization(tag))
@@ -761,14 +744,14 @@ trait Tables {
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column name SqlType(VARCHAR), Length(255,true)
    *  @param description Database column description SqlType(TEXT), Default(None) */
-  final case class ReleaseauthorizationtypeRow(id: Int, name: String, description: Option[String] = None)
+  case class ReleaseauthorizationtypeRow(id: Int, name: String, description: Option[String] = None)
   /** GetResult implicit for fetching ReleaseauthorizationtypeRow objects using plain SQL queries */
   implicit def GetResultReleaseauthorizationtypeRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[String]]): GR[ReleaseauthorizationtypeRow] = GR{
     prs => import prs._
     ReleaseauthorizationtypeRow.tupled((<<[Int], <<[String], <<?[String]))
   }
-  /** Table description of table ReleaseAuthorizationType. Objects of this class serve as prototypes for rows in queries. */
-  class Releaseauthorizationtype(_tableTag: Tag) extends profile.api.Table[ReleaseauthorizationtypeRow](_tableTag, Some("project_db"), "ReleaseAuthorizationType") {
+  /** Table description of table releaseauthorizationtype. Objects of this class serve as prototypes for rows in queries. */
+  class Releaseauthorizationtype(_tableTag: Tag) extends profile.api.Table[ReleaseauthorizationtypeRow](_tableTag, Some("project_db"), "releaseauthorizationtype") {
     def * = (id, name, description) <> (ReleaseauthorizationtypeRow.tupled, ReleaseauthorizationtypeRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(name), description).shaped.<>({r=>import r._; _1.map(_=> ReleaseauthorizationtypeRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -790,14 +773,14 @@ trait Tables {
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column name SqlType(VARCHAR), Length(255,true)
    *  @param emailalias Database column emailAlias SqlType(VARCHAR), Length(255,true) */
-  final case class ReleasetypeRow(id: Int, name: String, emailalias: String)
+  case class ReleasetypeRow(id: Int, name: String, emailalias: String)
   /** GetResult implicit for fetching ReleasetypeRow objects using plain SQL queries */
   implicit def GetResultReleasetypeRow(implicit e0: GR[Int], e1: GR[String]): GR[ReleasetypeRow] = GR{
     prs => import prs._
     ReleasetypeRow.tupled((<<[Int], <<[String], <<[String]))
   }
-  /** Table description of table ReleaseType. Objects of this class serve as prototypes for rows in queries. */
-  class Releasetype(_tableTag: Tag) extends profile.api.Table[ReleasetypeRow](_tableTag, Some("project_db"), "ReleaseType") {
+  /** Table description of table releasetype. Objects of this class serve as prototypes for rows in queries. */
+  class Releasetype(_tableTag: Tag) extends profile.api.Table[ReleasetypeRow](_tableTag, Some("project_db"), "releasetype") {
     def * = (id, name, emailalias) <> (ReleasetypeRow.tupled, ReleasetypeRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(emailalias)).shaped.<>({r=>import r._; _1.map(_=> ReleasetypeRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -821,14 +804,14 @@ trait Tables {
    *  @param releaseauthorityid Database column ReleaseAuthorityId SqlType(INT)
    *  @param login Database column login SqlType(VARCHAR), Length(20,true)
    *  @param isprimary Database column isPrimary SqlType(BIT) */
-  final case class ReleasetypeauthorizationpeopleRow(id: Int, releasetypeid: Int, releaseauthorityid: Int, login: String, isprimary: Boolean)
+  case class ReleasetypeauthorizationpeopleRow(id: Int, releasetypeid: Int, releaseauthorityid: Int, login: String, isprimary: Boolean)
   /** GetResult implicit for fetching ReleasetypeauthorizationpeopleRow objects using plain SQL queries */
   implicit def GetResultReleasetypeauthorizationpeopleRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Boolean]): GR[ReleasetypeauthorizationpeopleRow] = GR{
     prs => import prs._
     ReleasetypeauthorizationpeopleRow.tupled((<<[Int], <<[Int], <<[Int], <<[String], <<[Boolean]))
   }
-  /** Table description of table ReleaseTypeAuthorizationPeople. Objects of this class serve as prototypes for rows in queries. */
-  class Releasetypeauthorizationpeople(_tableTag: Tag) extends profile.api.Table[ReleasetypeauthorizationpeopleRow](_tableTag, Some("project_db"), "ReleaseTypeAuthorizationPeople") {
+  /** Table description of table releasetypeauthorizationpeople. Objects of this class serve as prototypes for rows in queries. */
+  class Releasetypeauthorizationpeople(_tableTag: Tag) extends profile.api.Table[ReleasetypeauthorizationpeopleRow](_tableTag, Some("project_db"), "releasetypeauthorizationpeople") {
     def * = (id, releasetypeid, releaseauthorityid, login, isprimary) <> (ReleasetypeauthorizationpeopleRow.tupled, ReleasetypeauthorizationpeopleRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(releasetypeid), Rep.Some(releaseauthorityid), Rep.Some(login), Rep.Some(isprimary)).shaped.<>({r=>import r._; _1.map(_=> ReleasetypeauthorizationpeopleRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -857,11 +840,11 @@ trait Tables {
    *  @param name Database column name SqlType(VARCHAR), Length(45,true)
    *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0)
    *  @param poolsize Database column poolsize SqlType(INT UNSIGNED), Default(0) */
-  final case class ResourcepoolRow(id: Int, name: String, ordering: Int = 0, poolsize: Int = 0)
+  case class ResourcepoolRow(id: Int, name: String, ordering: Long = 0L, poolsize: Long = 0L)
   /** GetResult implicit for fetching ResourcepoolRow objects using plain SQL queries */
-  implicit def GetResultResourcepoolRow(implicit e0: GR[Int], e1: GR[String]): GR[ResourcepoolRow] = GR{
+  implicit def GetResultResourcepoolRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[ResourcepoolRow] = GR{
     prs => import prs._
-    ResourcepoolRow.tupled((<<[Int], <<[String], <<[Int], <<[Int]))
+    ResourcepoolRow.tupled((<<[Int], <<[String], <<[Long], <<[Long]))
   }
   /** Table description of table resourcepool. Objects of this class serve as prototypes for rows in queries. */
   class Resourcepool(_tableTag: Tag) extends profile.api.Table[ResourcepoolRow](_tableTag, Some("project_db"), "resourcepool") {
@@ -874,9 +857,9 @@ trait Tables {
     /** Database column name SqlType(VARCHAR), Length(45,true) */
     val name: Rep[String] = column[String]("name", O.Length(45,varying=true))
     /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
-    val ordering: Rep[Int] = column[Int]("ordering", O.Default(0))
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
     /** Database column poolsize SqlType(INT UNSIGNED), Default(0) */
-    val poolsize: Rep[Int] = column[Int]("poolsize", O.Default(0))
+    val poolsize: Rep[Long] = column[Long]("poolsize", O.Default(0L))
 
     /** Uniqueness Index over (name) (database name Name_UNIQUE) */
     val index1 = index("Name_UNIQUE", name, unique=true)
@@ -894,11 +877,11 @@ trait Tables {
    *  @param maximum Database column maximum SqlType(INT UNSIGNED), Default(None)
    *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(30,true), Default()
    *  @param pplteamname Database column pplteamname SqlType(VARCHAR), Length(100,true), Default(None) */
-  final case class ResourceteamRow(id: Int, name: String, ordering: Int = 0, teamsize: Int = 0, resourcepoolid: Option[Int] = None, minimum: Int = 0, maximum: Option[Int] = None, msprojectname: String = "", pplteamname: Option[String] = None)
+  case class ResourceteamRow(id: Int, name: String, ordering: Long = 0L, teamsize: Long = 0L, resourcepoolid: Option[Int] = None, minimum: Long = 0L, maximum: Option[Long] = None, msprojectname: String = "", pplteamname: Option[String] = None)
   /** GetResult implicit for fetching ResourceteamRow objects using plain SQL queries */
-  implicit def GetResultResourceteamRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[Int]], e3: GR[Option[String]]): GR[ResourceteamRow] = GR{
+  implicit def GetResultResourceteamRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long], e3: GR[Option[Int]], e4: GR[Option[Long]], e5: GR[Option[String]]): GR[ResourceteamRow] = GR{
     prs => import prs._
-    ResourceteamRow.tupled((<<[Int], <<[String], <<[Int], <<[Int], <<?[Int], <<[Int], <<?[Int], <<[String], <<?[String]))
+    ResourceteamRow.tupled((<<[Int], <<[String], <<[Long], <<[Long], <<?[Int], <<[Long], <<?[Long], <<[String], <<?[String]))
   }
   /** Table description of table resourceteam. Objects of this class serve as prototypes for rows in queries. */
   class Resourceteam(_tableTag: Tag) extends profile.api.Table[ResourceteamRow](_tableTag, Some("project_db"), "resourceteam") {
@@ -911,15 +894,15 @@ trait Tables {
     /** Database column name SqlType(VARCHAR), Length(45,true) */
     val name: Rep[String] = column[String]("name", O.Length(45,varying=true))
     /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
-    val ordering: Rep[Int] = column[Int]("ordering", O.Default(0))
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
     /** Database column teamsize SqlType(INT UNSIGNED), Default(0) */
-    val teamsize: Rep[Int] = column[Int]("teamsize", O.Default(0))
+    val teamsize: Rep[Long] = column[Long]("teamsize", O.Default(0L))
     /** Database column resourcepoolId SqlType(INT), Default(None) */
     val resourcepoolid: Rep[Option[Int]] = column[Option[Int]]("resourcepoolId", O.Default(None))
     /** Database column minimum SqlType(INT UNSIGNED), Default(0) */
-    val minimum: Rep[Int] = column[Int]("minimum", O.Default(0))
+    val minimum: Rep[Long] = column[Long]("minimum", O.Default(0L))
     /** Database column maximum SqlType(INT UNSIGNED), Default(None) */
-    val maximum: Rep[Option[Int]] = column[Option[Int]]("maximum", O.Default(None))
+    val maximum: Rep[Option[Long]] = column[Option[Long]]("maximum", O.Default(None))
     /** Database column msprojectname SqlType(VARCHAR), Length(30,true), Default() */
     val msprojectname: Rep[String] = column[String]("msprojectname", O.Length(30,varying=true), O.Default(""))
     /** Database column pplteamname SqlType(VARCHAR), Length(100,true), Default(None) */
@@ -941,11 +924,11 @@ trait Tables {
    *  @param resourceteamid Database column resourceTeamId SqlType(INT)
    *  @param productfeatureid Database column productFeatureId SqlType(INT)
    *  @param featuresizeremaining Database column featureSizeRemaining SqlType(DECIMAL), Default(Some(0.00)) */
-  final case class ResourceteamproductfeatureRow(id: Int, featuresize: Int = 0, maxdevs: Int = 0, resourceteamid: Int, productfeatureid: Int, featuresizeremaining: Option[scala.math.BigDecimal] = Some(scala.math.BigDecimal("0.00")))
+  case class ResourceteamproductfeatureRow(id: Int, featuresize: Long = 0L, maxdevs: Long = 0L, resourceteamid: Int, productfeatureid: Int, featuresizeremaining: Option[scala.math.BigDecimal] = Some(scala.math.BigDecimal("0.00")))
   /** GetResult implicit for fetching ResourceteamproductfeatureRow objects using plain SQL queries */
-  implicit def GetResultResourceteamproductfeatureRow(implicit e0: GR[Int], e1: GR[Option[scala.math.BigDecimal]]): GR[ResourceteamproductfeatureRow] = GR{
+  implicit def GetResultResourceteamproductfeatureRow(implicit e0: GR[Int], e1: GR[Long], e2: GR[Option[scala.math.BigDecimal]]): GR[ResourceteamproductfeatureRow] = GR{
     prs => import prs._
-    ResourceteamproductfeatureRow.tupled((<<[Int], <<[Int], <<[Int], <<[Int], <<[Int], <<?[scala.math.BigDecimal]))
+    ResourceteamproductfeatureRow.tupled((<<[Int], <<[Long], <<[Long], <<[Int], <<[Int], <<?[scala.math.BigDecimal]))
   }
   /** Table description of table resourceteamproductfeature. Objects of this class serve as prototypes for rows in queries. */
   class Resourceteamproductfeature(_tableTag: Tag) extends profile.api.Table[ResourceteamproductfeatureRow](_tableTag, Some("project_db"), "resourceteamproductfeature") {
@@ -956,9 +939,9 @@ trait Tables {
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     /** Database column featureSize SqlType(INT UNSIGNED), Default(0) */
-    val featuresize: Rep[Int] = column[Int]("featureSize", O.Default(0))
+    val featuresize: Rep[Long] = column[Long]("featureSize", O.Default(0L))
     /** Database column maxDevs SqlType(INT UNSIGNED), Default(0) */
-    val maxdevs: Rep[Int] = column[Int]("maxDevs", O.Default(0))
+    val maxdevs: Rep[Long] = column[Long]("maxDevs", O.Default(0L))
     /** Database column resourceTeamId SqlType(INT) */
     val resourceteamid: Rep[Int] = column[Int]("resourceTeamId")
     /** Database column productFeatureId SqlType(INT) */
@@ -981,14 +964,14 @@ trait Tables {
    *  @param resourceteamid Database column resourceTeamId SqlType(INT)
    *  @param projectid Database column projectId SqlType(INT)
    *  @param featuresizeremaining Database column featureSizeRemaining SqlType(DECIMAL), Default(Some(0.00)) */
-  final case class ResourceteamprojectRow(id: Int, featuresize: Int = 0, maxdevs: Int = 0, resourceteamid: Int, projectid: Int, featuresizeremaining: Option[scala.math.BigDecimal] = Some(scala.math.BigDecimal("0.00")))
+  case class ResourceteamprojectRow(id: Int, featuresize: Long = 0L, maxdevs: Long = 0L, resourceteamid: Int, projectid: Int, featuresizeremaining: Option[scala.math.BigDecimal] = Some(scala.math.BigDecimal("0.00")))
   /** GetResult implicit for fetching ResourceteamprojectRow objects using plain SQL queries */
-  implicit def GetResultResourceteamprojectRow(implicit e0: GR[Int], e1: GR[Option[scala.math.BigDecimal]]): GR[ResourceteamprojectRow] = GR{
+  implicit def GetResultResourceteamprojectRow(implicit e0: GR[Int], e1: GR[Long], e2: GR[Option[scala.math.BigDecimal]]): GR[ResourceteamprojectRow] = GR{
     prs => import prs._
-    ResourceteamprojectRow.tupled((<<[Int], <<[Int], <<[Int], <<[Int], <<[Int], <<?[scala.math.BigDecimal]))
+    ResourceteamprojectRow.tupled((<<[Int], <<[Long], <<[Long], <<[Int], <<[Int], <<?[scala.math.BigDecimal]))
   }
-  /** Table description of table ResourceTeamProject. Objects of this class serve as prototypes for rows in queries. */
-  class Resourceteamproject(_tableTag: Tag) extends profile.api.Table[ResourceteamprojectRow](_tableTag, Some("project_db"), "ResourceTeamProject") {
+  /** Table description of table resourceteamproject. Objects of this class serve as prototypes for rows in queries. */
+  class Resourceteamproject(_tableTag: Tag) extends profile.api.Table[ResourceteamprojectRow](_tableTag, Some("project_db"), "resourceteamproject") {
     def * = (id, featuresize, maxdevs, resourceteamid, projectid, featuresizeremaining) <> (ResourceteamprojectRow.tupled, ResourceteamprojectRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(featuresize), Rep.Some(maxdevs), Rep.Some(resourceteamid), Rep.Some(projectid), featuresizeremaining).shaped.<>({r=>import r._; _1.map(_=> ResourceteamprojectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -996,9 +979,9 @@ trait Tables {
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     /** Database column featureSize SqlType(INT UNSIGNED), Default(0) */
-    val featuresize: Rep[Int] = column[Int]("featureSize", O.Default(0))
+    val featuresize: Rep[Long] = column[Long]("featureSize", O.Default(0L))
     /** Database column maxDevs SqlType(INT UNSIGNED), Default(0) */
-    val maxdevs: Rep[Int] = column[Int]("maxDevs", O.Default(0))
+    val maxdevs: Rep[Long] = column[Long]("maxDevs", O.Default(0L))
     /** Database column resourceTeamId SqlType(INT) */
     val resourceteamid: Rep[Int] = column[Int]("resourceTeamId")
     /** Database column projectId SqlType(INT) */
@@ -1018,14 +1001,14 @@ trait Tables {
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param ordering Database column ordering SqlType(INT)
    *  @param efficiency Database column efficiency SqlType(DECIMAL), Default(None) */
-  final case class RoadmapslackRow(id: Long, ordering: Int, efficiency: Option[scala.math.BigDecimal] = None)
+  case class RoadmapslackRow(id: Long, ordering: Int, efficiency: Option[scala.math.BigDecimal] = None)
   /** GetResult implicit for fetching RoadmapslackRow objects using plain SQL queries */
   implicit def GetResultRoadmapslackRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Option[scala.math.BigDecimal]]): GR[RoadmapslackRow] = GR{
     prs => import prs._
     RoadmapslackRow.tupled((<<[Long], <<[Int], <<?[scala.math.BigDecimal]))
   }
-  /** Table description of table RoadmapSlack. Objects of this class serve as prototypes for rows in queries. */
-  class Roadmapslack(_tableTag: Tag) extends profile.api.Table[RoadmapslackRow](_tableTag, Some("project_db"), "RoadmapSlack") {
+  /** Table description of table roadmapslack. Objects of this class serve as prototypes for rows in queries. */
+  class Roadmapslack(_tableTag: Tag) extends profile.api.Table[RoadmapslackRow](_tableTag, Some("project_db"), "roadmapslack") {
     def * = (id, ordering, efficiency) <> (RoadmapslackRow.tupled, RoadmapslackRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(ordering), efficiency).shaped.<>({r=>import r._; _1.map(_=> RoadmapslackRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1047,11 +1030,11 @@ trait Tables {
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column name SqlType(VARCHAR), Length(45,true)
    *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0) */
-  final case class StageRow(id: Int, name: String, ordering: Int = 0)
+  case class StageRow(id: Int, name: String, ordering: Long = 0L)
   /** GetResult implicit for fetching StageRow objects using plain SQL queries */
-  implicit def GetResultStageRow(implicit e0: GR[Int], e1: GR[String]): GR[StageRow] = GR{
+  implicit def GetResultStageRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[StageRow] = GR{
     prs => import prs._
-    StageRow.tupled((<<[Int], <<[String], <<[Int]))
+    StageRow.tupled((<<[Int], <<[String], <<[Long]))
   }
   /** Table description of table stage. Objects of this class serve as prototypes for rows in queries. */
   class Stage(_tableTag: Tag) extends profile.api.Table[StageRow](_tableTag, Some("project_db"), "stage") {
@@ -1064,7 +1047,7 @@ trait Tables {
     /** Database column name SqlType(VARCHAR), Length(45,true) */
     val name: Rep[String] = column[String]("name", O.Length(45,varying=true))
     /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
-    val ordering: Rep[Int] = column[Int]("ordering", O.Default(0))
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
 
     /** Uniqueness Index over (name) (database name Name_UNIQUE) */
     val index1 = index("Name_UNIQUE", name, unique=true)
@@ -1076,13 +1059,13 @@ trait Tables {
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
    *  @param cssclassname Database column cssClassName SqlType(VARCHAR), Length(20,true)
-   *  @param isontrack Database column IsOnTrack SqlType(BIT)
-   *  @param iscomplete Database column IsComplete SqlType(BIT)
-   *  @param hasissues Database column HasIssues SqlType(BIT)
-   *  @param isatrisk Database column IsAtRisk SqlType(BIT)
-   *  @param isonhold Database column IsOnHold SqlType(BIT)
-   *  @param hasnotstarted Database column HasNotStarted SqlType(BIT) */
-  final case class StatuscolorRow(id: Int, name: String, cssclassname: String, isontrack: Option[Boolean], iscomplete: Option[Boolean], hasissues: Option[Boolean], isatrisk: Option[Boolean], isonhold: Option[Boolean], hasnotstarted: Option[Boolean])
+   *  @param isontrack Database column IsOnTrack SqlType(BIT), Default(Some(false))
+   *  @param iscomplete Database column IsComplete SqlType(BIT), Default(Some(false))
+   *  @param hasissues Database column HasIssues SqlType(BIT), Default(Some(false))
+   *  @param isatrisk Database column IsAtRisk SqlType(BIT), Default(Some(false))
+   *  @param isonhold Database column IsOnHold SqlType(BIT), Default(Some(false))
+   *  @param hasnotstarted Database column HasNotStarted SqlType(BIT), Default(Some(false)) */
+  case class StatuscolorRow(id: Int, name: String, cssclassname: String, isontrack: Option[Boolean] = Some(false), iscomplete: Option[Boolean] = Some(false), hasissues: Option[Boolean] = Some(false), isatrisk: Option[Boolean] = Some(false), isonhold: Option[Boolean] = Some(false), hasnotstarted: Option[Boolean] = Some(false))
   /** GetResult implicit for fetching StatuscolorRow objects using plain SQL queries */
   implicit def GetResultStatuscolorRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[Boolean]]): GR[StatuscolorRow] = GR{
     prs => import prs._
@@ -1100,18 +1083,18 @@ trait Tables {
     val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
     /** Database column cssClassName SqlType(VARCHAR), Length(20,true) */
     val cssclassname: Rep[String] = column[String]("cssClassName", O.Length(20,varying=true))
-    /** Database column IsOnTrack SqlType(BIT) */
-    val isontrack: Rep[Option[Boolean]] = column[Option[Boolean]]("IsOnTrack")
-    /** Database column IsComplete SqlType(BIT) */
-    val iscomplete: Rep[Option[Boolean]] = column[Option[Boolean]]("IsComplete")
-    /** Database column HasIssues SqlType(BIT) */
-    val hasissues: Rep[Option[Boolean]] = column[Option[Boolean]]("HasIssues")
-    /** Database column IsAtRisk SqlType(BIT) */
-    val isatrisk: Rep[Option[Boolean]] = column[Option[Boolean]]("IsAtRisk")
-    /** Database column IsOnHold SqlType(BIT) */
-    val isonhold: Rep[Option[Boolean]] = column[Option[Boolean]]("IsOnHold")
-    /** Database column HasNotStarted SqlType(BIT) */
-    val hasnotstarted: Rep[Option[Boolean]] = column[Option[Boolean]]("HasNotStarted")
+    /** Database column IsOnTrack SqlType(BIT), Default(Some(false)) */
+    val isontrack: Rep[Option[Boolean]] = column[Option[Boolean]]("IsOnTrack", O.Default(Some(false)))
+    /** Database column IsComplete SqlType(BIT), Default(Some(false)) */
+    val iscomplete: Rep[Option[Boolean]] = column[Option[Boolean]]("IsComplete", O.Default(Some(false)))
+    /** Database column HasIssues SqlType(BIT), Default(Some(false)) */
+    val hasissues: Rep[Option[Boolean]] = column[Option[Boolean]]("HasIssues", O.Default(Some(false)))
+    /** Database column IsAtRisk SqlType(BIT), Default(Some(false)) */
+    val isatrisk: Rep[Option[Boolean]] = column[Option[Boolean]]("IsAtRisk", O.Default(Some(false)))
+    /** Database column IsOnHold SqlType(BIT), Default(Some(false)) */
+    val isonhold: Rep[Option[Boolean]] = column[Option[Boolean]]("IsOnHold", O.Default(Some(false)))
+    /** Database column HasNotStarted SqlType(BIT), Default(Some(false)) */
+    val hasnotstarted: Rep[Option[Boolean]] = column[Option[Boolean]]("HasNotStarted", O.Default(Some(false)))
 
     /** Uniqueness Index over (name) (database name Name_UNIQUE) */
     val index1 = index("Name_UNIQUE", name, unique=true)
@@ -1128,7 +1111,7 @@ trait Tables {
    *  @param issues Database column issues SqlType(TEXT), Default(None)
    *  @param risks Database column risks SqlType(TEXT), Default(None)
    *  @param dependencies Database column dependencies SqlType(TEXT), Default(None) */
-  final case class StatusupdateRow(id: Int, projectid: Int, statusid: Int, updated: java.sql.Date, comments: Option[String] = None, issues: Option[String] = None, risks: Option[String] = None, dependencies: Option[String] = None)
+  case class StatusupdateRow(id: Int, projectid: Int, statusid: Int, updated: java.sql.Date, comments: Option[String] = None, issues: Option[String] = None, risks: Option[String] = None, dependencies: Option[String] = None)
   /** GetResult implicit for fetching StatusupdateRow objects using plain SQL queries */
   implicit def GetResultStatusupdateRow(implicit e0: GR[Int], e1: GR[java.sql.Date], e2: GR[Option[String]]): GR[StatusupdateRow] = GR{
     prs => import prs._
@@ -1169,11 +1152,11 @@ trait Tables {
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
    *  @param ordering Database column Ordering SqlType(INT UNSIGNED), Default(0) */
-  final case class SystemroleRow(id: Int, name: String, ordering: Int = 0)
+  case class SystemroleRow(id: Int, name: String, ordering: Long = 0L)
   /** GetResult implicit for fetching SystemroleRow objects using plain SQL queries */
-  implicit def GetResultSystemroleRow(implicit e0: GR[Int], e1: GR[String]): GR[SystemroleRow] = GR{
+  implicit def GetResultSystemroleRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[SystemroleRow] = GR{
     prs => import prs._
-    SystemroleRow.tupled((<<[Int], <<[String], <<[Int]))
+    SystemroleRow.tupled((<<[Int], <<[String], <<[Long]))
   }
   /** Table description of table systemrole. Objects of this class serve as prototypes for rows in queries. */
   class Systemrole(_tableTag: Tag) extends profile.api.Table[SystemroleRow](_tableTag, Some("project_db"), "systemrole") {
@@ -1186,7 +1169,7 @@ trait Tables {
     /** Database column Name SqlType(VARCHAR), Length(45,true) */
     val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
     /** Database column Ordering SqlType(INT UNSIGNED), Default(0) */
-    val ordering: Rep[Int] = column[Int]("Ordering", O.Default(0))
+    val ordering: Rep[Long] = column[Long]("Ordering", O.Default(0L))
 
     /** Uniqueness Index over (name) (database name Name_UNIQUE) */
     val index1 = index("Name_UNIQUE", name, unique=true)

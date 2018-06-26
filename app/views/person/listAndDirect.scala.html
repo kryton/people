@@ -24,7 +24,8 @@
 @import offline.Tables.OfficeRow
 @( mgr:EmprelationsRow,
         employees:Set[(EmprelationsRow,EmprelationsRow,Int,Option[PositiontypeRow],Option[TeamdescriptionRow],Option[OfficeRow])]
-)(implicit  webJarAssets: WebJarAssets, assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
 
 @main( s"Heirarchy dump for ${mgr.login}") {
 

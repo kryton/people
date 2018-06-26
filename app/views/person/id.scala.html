@@ -79,6 +79,7 @@
                         <tr><td>Position:</td><td>@emp.position</td></tr>
 
                         @manager.map{ m => <tr><td>Manager:</td><td><a href="@routes.PersonController.id(m.login)">@m.fullName</a></td></tr>}
+                        <tr><td>Department:</td><td>@emp.companycodename</td></tr>
                         <tr><td>Cost Center:</td><td><a href="@routes.CostCenterController.id(emp.costcenter)">@emp.costcenter</a></td></tr>
                         <tr><td>Employee#:</td><td><a href="@routes.PersonController.personNumber(emp.personnumber)">@emp.personnumber</a></td></tr>
 

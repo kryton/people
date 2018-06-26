@@ -226,7 +226,8 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
     db.run(Resourceteamproject.filter(_.projectid === projectId).delete) map {  _ > 0  }
 
 
-  def breakDownFeature(featureId:Int): Future[(Iterable[((ResourceteamRow,Option[ResourcepoolRow]), Int, Map[Date, Double])], Iterable[(ProjectRow, Int, Map[Date, Double])])] = {
+  def breakDownFeature(featureId:Int): Future[(Iterable[((ResourceteamRow,Option[ResourcepoolRow]), Long, Map[Date, Double])],
+                                               Iterable[(ProjectRow, Long, Map[Date, Double])])] = {
 
     (for {
      // p <-  this.findByFeatureEx(featureId )
@@ -257,7 +258,7 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
           }
         }
 
-        val byResources: Iterable[(ProjectRow, Seq[( (ResourceteamRow,Option[ResourcepoolRow]), (Int, Seq[(Date, Double)]))], (Int, Seq[(Date, Int)]))] = byMonth.map { p =>
+        val byResources: Iterable[(ProjectRow, Seq[( (ResourceteamRow,Option[ResourcepoolRow]), (Long, Seq[(Date, Double)]))], (Int, Seq[(Date, Int)]))] = byMonth.map { p =>
           val featureByMonth = p._2.map { res =>
             val featureSize = res._1.featuresize
             val totalDays: Double = if (p._3._1 < 1) 0.00001 else p._3._1
@@ -267,13 +268,13 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
           }
           (p._1, featureByMonth, p._3)
         }
-        val byTeam: Iterable[((ResourceteamRow,Option[ResourcepoolRow]), Int, Map[Date, Double])] = byResources.flatMap { proj =>
+        val byTeam: Iterable[((ResourceteamRow,Option[ResourcepoolRow]), Long, Map[Date, Double])] = byResources.flatMap { proj =>
           proj._2.map { res =>
             res
           }
         }.groupBy(_._1).map { teamDetail =>
           val team = teamDetail._1
-          val p2: Iterable[(Int, Seq[(Date, Double)])] = teamDetail._2.map { y =>y._2 }
+          val p2: Iterable[(Long, Seq[(Date, Double)])] = teamDetail._2.map { y =>y._2 }
           val p2_total = p2.map(_._1).sum
           val p2_agg: Map[Date, Double] = p2.flatMap { p3 =>
             p3._2
@@ -284,13 +285,13 @@ class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigP
           }
           (team, p2_total, p2_agg)
         }
-        val byProject: Iterable[(ProjectRow, Int, Map[Date, Double])] = byResources.flatMap { proj =>
+        val byProject: Iterable[(ProjectRow, Long, Map[Date, Double])] = byResources.flatMap { proj =>
           proj._2.map { res =>
             (proj._1, res._2)
           }
         }.groupBy(_._1).map { projDetail =>
           val project = projDetail._1
-          val p2: Iterable[(Int, Seq[(Date, Double)])] = projDetail._2.map { y => y._2}
+          val p2: Iterable[(Long, Seq[(Date, Double)])] = projDetail._2.map { y => y._2}
           val p2_total = p2.map(_._1).sum
           val p2_agg: Map[Date, Double] = p2.flatMap { p3 =>
             p3._2

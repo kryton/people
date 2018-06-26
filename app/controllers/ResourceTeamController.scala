@@ -120,13 +120,13 @@ class ResourceTeamController @Inject()
           val slack: Map[Int, BigDecimal] = (1 to 5).map{ l => l->slack1.getOrElse(l,BigDecimal(1.0))}.toMap
 
           val features: Seq[(ResourceteamRow, ResourceteamprojectRow, ProjectRow, ProductfeatureRow)] = x._2
-          val sizes: Seq[(Int, Option[ProductfeatureRow], BigDecimal, BigDecimal)] = features.map{ line =>
+          val sizes: Seq[(Long, Option[ProductfeatureRow], BigDecimal, BigDecimal)] = features.map{ line =>
             (line._4.ordering, Some(line._4), line._2.featuresizeremaining.getOrElse(BigDecimal(line._2.featuresize)), BigDecimal(0)  )
           }.filter( p => p._3 > 0 ).sortBy(_._1)
 
           val t: Option[ProductfeatureRow] = None
 
-          val cumSize = sizes.scanLeft( (0, t, BigDecimal(0), BigDecimal(0))   )( (b,z) => ( z._1, z._2, z._3, b._4 + z._3)).drop(1)
+          val cumSize = sizes.scanLeft( (0L, t, BigDecimal(0), BigDecimal(0))   )( (b,z) => ( z._1, z._2, z._3, b._4 + z._3)).drop(1)
 
 
           val emps = x._3
@@ -148,7 +148,7 @@ class ResourceTeamController @Inject()
             devDaysPerQ._1 + devDaysPerQ._2 + devDaysPerQ._3 + devDaysPerQ._4 + devDaysPerQ._5
           )
 
-          val cumSize2:Seq[(Int, ProductfeatureRow, BigDecimal, BigDecimal,String)] = cumSize.map{ line =>
+          val cumSize2:Seq[(Long, ProductfeatureRow, BigDecimal, BigDecimal,String)] = cumSize.map{ line =>
             val s = line._2 match {
               case Some(pf) => pf.name
               case None => "-None-"
@@ -177,7 +177,7 @@ class ResourceTeamController @Inject()
             (line._1, line._2.get, line._3, line._4,q)
           }
 
-          Ok(views.html.product.team.roadmap(rtId, rt, prodTeamDet,devDaysPerQ, cumSize2,slack))
+          Ok(views.html.product.team.roadmap(rtId, rt, prodTeamDet,devDaysPerQ, cumSize2, slack))
         case None => NotFound(views.html.page_404(  "Team not found"))
       }
     }

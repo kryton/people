@@ -133,8 +133,8 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
     }.flatMap(identity)
   }
 
-  def breakDownPool(poolId:Int): Future[(Iterable[(ProductfeatureRow, Int, Map[Date, Double])],
-                                         Iterable[(ProjectRow, Int, Map[Date, Double])])] = {
+  def breakDownPool(poolId:Int): Future[(Iterable[(ProductfeatureRow, Long, Map[Date, Double])],
+                                         Iterable[(ProjectRow, Long, Map[Date, Double])])] = {
 
     (for {
     // p <-  this.findByFeatureEx(featureId )
@@ -166,8 +166,8 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
           }
         }
 
-        val byResources: Iterable[(ProjectRow, Seq[(ProductfeatureRow, (Int, Seq[(Date, Double)]))], (Int, Seq[(Date, Int)]))] = byMonth.map { p =>
-          val featureByMonth: Seq[(ProductfeatureRow, (Int, Seq[(Date, Double)]))] = p._2.map { res =>
+        val byResources: Iterable[(ProjectRow, Seq[(ProductfeatureRow, (Long, Seq[(Date, Double)]))], (Int, Seq[(Date, Int)]))] = byMonth.map { p =>
+          val featureByMonth: Seq[(ProductfeatureRow, (Long, Seq[(Date, Double)]))] = p._2.map { res =>
             val featureSize = res._1.featuresize
             val totalDays: Double = if (p._3._1 < 1) 0.00001 else p._3._1
             val daysBreakout: Seq[(Date, Int)] = p._3._2
@@ -179,14 +179,14 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
           (p._1, featureByMonth, p._3)
 
         }
-        val byTeam: Iterable[(ProductfeatureRow, Int, Map[Date, Double])] = byResources.flatMap { proj =>
+        val byTeam: Iterable[(ProductfeatureRow, Long, Map[Date, Double])] = byResources.flatMap { proj =>
 
           proj._2.map { res =>
             res
           }
         }.groupBy(_._1).map { teamDetail =>
           val team = teamDetail._1
-          val p2: Iterable[(Int, Seq[(Date, Double)])] = teamDetail._2.map { y => y._2 }
+          val p2: Iterable[(Long, Seq[(Date, Double)])] = teamDetail._2.map { y => y._2 }
           val p2_total = p2.map(_._1).sum
           val p2_agg: Map[Date, Double] = p2.flatMap { p3 =>
             p3._2
@@ -197,13 +197,13 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
           }
           (team, p2_total, p2_agg)
         }
-        val byProject: Iterable[(ProjectRow, Int, Map[Date, Double])] = byResources.flatMap { proj =>
+        val byProject: Iterable[(ProjectRow, Long, Map[Date, Double])] = byResources.flatMap { proj =>
           proj._2.map { res =>
             (proj._1, res._2)
           }
         }.groupBy(_._1).map { projDetail =>
           val project = projDetail._1
-          val p2: Iterable[(Int, Seq[(Date, Double)])] = projDetail._2.map { y => y._2 }
+          val p2: Iterable[(Long, Seq[(Date, Double)])] = projDetail._2.map { y => y._2 }
           val p2_total = p2.map(_._1).sum
           val p2_agg: Map[Date, Double] = p2.flatMap { p3 =>
             p3._2

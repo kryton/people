@@ -222,19 +222,19 @@ class ProductFeatureController @Inject()
         case None => Future.successful(NotFound(views.html.page_404("Feature not found")))
       }.flatMap(identity)
     }
+
   def doFullBreakdown(format: Option[String] = None) = Action.async { implicit request =>
     productFeatureRepo.all.map{ (features: Seq[ProductfeatureRow]) =>
-      val breakdown: Future[Seq[(String, Seq[(Boolean, String, Double)], String, Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Int, Map[Date, Double])])]] = Future.sequence( features.filter(_.isactive.getOrElse(false)).map{ feature =>
+      val breakdown: Future[Seq[(String, Seq[(Boolean, String, Double)], String, Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Long, Map[Date, Double])])]] = Future.sequence( features.filter(_.isactive.getOrElse(false)).map{ feature =>
         (for{
           mc <- productFeatureRepo.findManagedClientsForFeature(feature.id )
          // flags <- productFeatureRepo.findFeatureFlagsByFeature(feature.id)
           track <- productFeatureRepo.findTracksByFeature(feature.id)
           breakdown <- projectRepo.breakDownFeature(feature.id).map( _._1 )
-        } yield (mc, /*flags, */ track, breakdown )).map { (result: (
+        } yield (mc, /*flags, */ track, breakdown )).map { result: (
           Seq[(ManagedclientRow, ManagedclientproductfeatureRow)],
-          /*  Seq[(FeatureflagRow, ProductfeatureflagRow)], */
             Seq[(ProducttrackRow, ProducttrackfeatureRow)],
-            Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Int, Map[Date, Double])])) =>
+            Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Long, Map[Date, Double])]) =>
           val mc: Seq[(Boolean, String, Double)] = result._1 match {
             case Nil => Seq((false, "NONE", 1.0))
             case mcs => mcs.map(p => (p._1.ismanaged.getOrElse(false), p._1.name, p._2.allocation.toDouble))
@@ -264,9 +264,10 @@ class ProductFeatureController @Inject()
         val maxX: Date = dates.maxBy(_.getTime)
         val monthRange: Seq[Date] = utl.Conversions.monthRange(minX, maxX)
 
-        val allocatedTally: Seq[(String, Boolean, String, Double, String, Iterable[(Either[ResourceteamRow, ResourcepoolRow], Double, Seq[(Date, Double)])])] = lines.map{ (line: (String, Seq[(Boolean, String, Double)], String, Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Int, Map[Date, Double])])) =>
-          val resDTFull: Iterable[(Either[ResourceteamRow, ResourcepoolRow], Int, Seq[(Date, Double)])] = line._4.map{ rtDates =>
-            val adjDates = monthRange.map{ dt =>
+        val allocatedTally: Seq[(String, Boolean, String, Double, String, Iterable[(Either[ResourceteamRow, ResourcepoolRow], Double, Seq[(Date, Double)])])] =
+          lines.map{ line: (String, Seq[(Boolean, String, Double)], String, Iterable[((ResourceteamRow, Option[ResourcepoolRow]), Long, Map[Date, Double])]) =>
+          val resDTFull: Iterable[(Either[ResourceteamRow, ResourcepoolRow], Long, Seq[(Date, Double)])] = line._4.map{ rtDates =>
+            val adjDates: Seq[(Date, Double)] = monthRange.map{ dt =>
               rtDates._3.get(dt) match {
                 case Some(al) => (dt,al)
                 case None => (dt,0.0)
@@ -276,10 +277,10 @@ class ProductFeatureController @Inject()
               case None => Left(rtDates._1._1)
               case Some(rp) =>Right(rp)
             }
-            (rRP,  rtDates._2, adjDates )
+            (rRP,  rtDates._2.longValue(), adjDates )
           }
           (line._1,line._2, line._3, resDTFull)
-        }.flatMap { (fullLine: (String, Seq[(Boolean, String, Double)], String, Iterable[(Either[ResourceteamRow, ResourcepoolRow], Int, Seq[(Date, Double)])])) =>
+        }.flatMap { fullLine: (String, Seq[(Boolean, String, Double)], String, Iterable[(Either[ResourceteamRow, ResourcepoolRow], Long, Seq[(Date, Double)])]) =>
           val total = Math.max(fullLine._2.map(_._3).sum,0.0000001)
           fullLine._2.map { allocLine =>
             val percentage = allocLine._3/total
