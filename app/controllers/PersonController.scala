@@ -25,6 +25,7 @@ import com.typesafe.config.ConfigFactory
 import models.people.EmpRelationsRowUtils._
 import models.people._
 import models.product.ProductTrackRepo
+import offline.Tables
 import offline.Tables.{EmprelationsRow, OfficeRow}
 import play.api._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -50,7 +51,7 @@ class PersonController @Inject()
    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
    //officeRepo: OfficeRepo,
-   employeeRepo: EmployeeRepo,
+
    empBioRepo: EmpBioRepo,
    teamDescriptionRepo: TeamDescriptionRepo,
    empTagRepo: EmpTagRepo,
@@ -58,7 +59,9 @@ class PersonController @Inject()
    matrixTeamRepo: MatrixTeamRepo,
    matrixTeamMemberRepo: MatrixTeamMemberRepo,
    user: User
-  )(implicit    costCenterRepo: CostCenterRepo,
+  )(implicit
+    employeeRepo: EmployeeRepo,
+    costCenterRepo: CostCenterRepo,
     officeRepo: OfficeRepo,
     empHistoryRepo: EmpHistoryRepo,
     positionTypeRepo: PositionTypeRepo,
@@ -383,6 +386,68 @@ class PersonController @Inject()
       }.flatMap(identity)
     }
   }
+
+
+  def execMap( people:Set[(String,String,Int)], manager:String) = {
+    val directs:Set[String] = people.filter( p => p._2.equalsIgnoreCase(manager)).map( x => x._1)
+
+
+  }
+
+  def byManagerList(manager: String, formatO:Option[String]) =  LDAPAuthAction {
+    Action.async { implicit request =>
+      val loggedIn = LDAPAuth.getUser().get
+      (for {
+        u <- user.isOwnerManagerOrAdmin(manager, Some(loggedIn))
+        emp <- employeeRepo.findByLogin(manager)
+        mgdBy <- employeeRepo.managedBy(manager)
+        tree <- employeeRepo.managementTreeDown(manager)
+      } yield (u, emp, mgdBy)).map { result =>
+        if (result._1) {
+          result._2 match {
+            case None => Future.successful(NotFound("Manager not found"))
+            case Some(emp) =>
+              val mgdBy = result._3
+              val dDown: Future[Set[(EmprelationsRow, Set[(EmprelationsRow, Int)])]] = Future.sequence(mgdBy.map{ direct =>
+                employeeRepo.managementTreeDown(direct.login).map{ result => ( direct, result )}
+              })
+              dDown.map{ resultSet: Set[(Tables.EmprelationsRow, Set[(EmprelationsRow, Int)])] =>
+
+                val flatR :Set[ (EmprelationsRow, EmprelationsRow, Int)] = resultSet.flatMap { line =>
+                  val l: (EmprelationsRow, EmprelationsRow, Int) = (emp, line._1, 1)
+                  //val l2 = line._2.map(e => (line._1, e._1, e._2)
+                  val l2 :Set[ (EmprelationsRow, EmprelationsRow, Int)] = line._2.map{ e =>
+                    ( line._1, e._1, e._2+1 )
+                  }
+                  val l3:Set[ (EmprelationsRow, EmprelationsRow, Int)] = l2 + l
+                  l3
+                }
+                // we now have a full list of people in the person's org.
+                // grab team name, position type, & office
+                val pPositionTeam = Future.sequence( flatR.map{ line =>
+                  (for {
+                    ptF <- positionTypeRepo.find( line._2.position)
+                    teamF <- teamDescriptionRepo.findTeamForLogin(line._2.login)
+                    offF <- officeRepo.find(line._2.officeid.getOrElse(0L))
+                  } yield (ptF,teamF,offF)).map { x=>
+                    (line._1, line._2, line._3, x._1, x._2, x._3)
+                  }
+                })
+                pPositionTeam.map{
+                  result =>
+                    Ok(views.html.person.listAndDirect(emp, result ))
+                }
+                // developer, position, title, country, team
+
+              }.flatMap(identity)
+          }
+        } else {
+          Future.successful(NotFound("No Access"))
+        }
+      }.flatMap(identity)
+    }
+  }
+
 
   def personHierarchy(login:Option[String]): Action[AnyContent] = Action.async { implicit request =>
     val empF = login match {
