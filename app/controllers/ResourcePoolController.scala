@@ -359,7 +359,7 @@ class ResourcePoolController @Inject()
       case None => Future.successful(NotFound(views.html.page_404("Feature not found")))
     }.flatMap(identity)
   }
-/*
+
   def rpBreakdown(format:Option[String]): Action[AnyContent] = Action.async { implicit request =>
     val resultSet: Future[(Set[(Either[ResourceteamRow, ResourcepoolRow],
       Iterable[(ProductfeatureRow, Long, Map[Date, Double])])], Seq[Date])] = resourcePoolRepo.allPoolsTeams.map { set =>
@@ -394,7 +394,7 @@ class ResourcePoolController @Inject()
           ("Content-Disposition", s"attachment; filename=ResourcePoolList.xls"))
     }
   }
-*/
+
 
   def rpBreakdownXLS(result:Set[(Either[ResourceteamRow, ResourcepoolRow], Iterable[(ProductfeatureRow, Long, Map[Date, Double])])],
                      monthLimit:Seq[Date]):java.io.File = {
