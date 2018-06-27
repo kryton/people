@@ -1,0 +1,154 @@
+@*
+ * Copyright (C) 2014  Ian Holsman
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *@
+
+@import offline.Tables.EmprelationsRow
+@import offline.Tables.TeamdescriptionRow
+@import models.people.EmpRelationsRowUtils._
+@import models.people.EmployeeTreeNode
+@import projectdb.Tables.ProductfeatureRow
+@import utl.Page
+@import utl.EmpLayerStats
+
+@( emp:EmprelationsRow,
+   manager:Option[EmprelationsRow],
+   directs: Set[(EmprelationsRow, EmpLayerStats)] ,
+   summary:Iterable[EmpLayerStats],
+   totals:EmpLayerStats
+)(implicit webJarsUtil: org.webjars.play.WebJarsUtil,
+        assets: AssetsFinder, request: Request[_], ldap: utl.LDAP )
+
+@main( s"Heirarchy dump for ${emp.fullName}") {
+    <div class="row">
+        <div class="col-xs-12">
+        @manager.map { mgr =>
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Manager View</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="container">
+                        See <a href="@routes.PersonController.layer(mgr.login)">@mgr.fullName</a> Layers
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if( directs.nonEmpty) {
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Directs View</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="container">
+                        <table class="table table-responsive table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th align="right">Managers</th>
+                                    <th align="right">#</th>
+                                    <th align="right">Perms</th>
+                                    <th align="right">TSA</th>
+                                    <th align="right">EW</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @directs.toList.sortBy(_._1.lastname).map { direct =>
+                                    <tr>
+                                        <td><a href="@routes.PersonController.layer(direct._1.login)">@direct._1.fullName</a></td>
+                                        <td align="right">@direct._2.number</td>
+                                        <td align="right">@direct._2.heads</td>
+                                        <td align="right">@direct._2.perm</td>
+                                        <td align="right">@direct._2.tsa</td>
+                                        <td align="right">@direct._2.ew</td>
+                                    </tr>
+                            }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th align="right">Total</th>
+                                    <td align="right">@totals.number</td>
+                                    <td align="right">@totals.heads</td>
+                                    <td align="right">@totals.perm</td>
+                                    <td align="right">@totals.tsa</td>
+                                    <td align="right">@totals.ew</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        }
+    @if( summary.nonEmpty) {
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Layer Summary</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a> </li>
+                            <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="container">
+                            <table class="table table-responsive table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Level</th>
+                                        <th>Managers</th>
+                                        <th>#</th>
+                                        <th>Perms</th>
+                                        <th>TSA</th>
+                                        <th>EW</th>
+                                        <th>Avg Span</th>
+                                        <th>Max Span</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @summary.toList.sortBy(_.level).map { line =>
+                                    <tr>
+                                        <th>@line.level</th>
+                                        <td>@line.number</td>
+                                        <td>@line.heads</td>
+                                        <td>@line.perm</td>
+                                        <td>@line.tsa</td>
+                                        <td>@line.ew</td>
+                                        <td>@( (1.0*line.heads/line.number).formatted("%4.2f"))</td>
+                                        <td>@line.maxSpan</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+    }
+        </div>
+    </div>
+}

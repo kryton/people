@@ -39,6 +39,8 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
+case class EmployeeTreeNode( emp: Tables.EmprelationsRow,  directs: Set[EmployeeTreeNode])
+
 class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
@@ -129,6 +131,23 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
     }
     managementTreeDownI(Future(Set(login.toLowerCase)), Future(Set.empty),1)
   }
+
+  def managementTreeDownAsTree(login:String):Future[Option[EmployeeTreeNode]] = {
+    findByLogin(login).map {
+      case Some(emp: EmprelationsRow) =>
+        managedBy(emp.login).map { list =>
+          Future.sequence(list.map { child =>
+            managementTreeDownAsTree(child.login)
+          })
+        }.flatMap(identity).map { childSet: Set[Option[EmployeeTreeNode]] =>
+          val children = childSet.flatten
+          Some(EmployeeTreeNode(emp, children))
+        }
+
+      case None => Future.successful(None)
+    }.flatMap(identity)
+  }
+
 
   def agencies():Future[Seq[(String,Int)]] = {
    db.run( Emprelations.filterNot(_.agency === "").groupBy(_.agency).map{ x => (x._1, x._2.length)}.result)
@@ -223,7 +242,7 @@ object EmpRelationsRowUtils {
       case None => s"${emp.firstname} ${emp.lastname}"
     }
     def isContractor: Boolean = {
-      emp.employeegroup.equalsIgnoreCase("External employee")
+      emp.employeegroup.equalsIgnoreCase("External employee") || emp.employeegroup.startsWith("CONTINGENT_WORKER_TYPE_")
     }
     def interOfficePhone( LDAPPerson:Option[SearchResultEntry]=None)(implicit ldap:utl.LDAP):Option[String] = {
       val LDAPPerson2: Option[SearchResultEntry] = LDAPPerson //ldap.getPersonByAccount(URLDecoder.decode(emp.login, "UTF-8")).headOption
@@ -256,6 +275,16 @@ object EmpRelationsRowUtils {
 
     def getLDAPPerson()(implicit ldap:utl.LDAP): Option[SearchResultEntry] = {
       ldap.getPersonByAccount(URLDecoder.decode(emp.login, "UTF-8")).headOption
+    }
+
+    def isPerm: Boolean = {
+      emp.employeegroup.startsWith("EMPLOYEE_TYPE_")
+    }
+    def isTSA: Boolean = {
+      emp.employeegroup.startsWith("CONTINGENT_WORKER_TYPE_TSA_")
+    }
+    def isEW: Boolean = {
+      emp.employeegroup.startsWith("CONTINGENT_WORKER_TYPE_EW_")
     }
 
   }

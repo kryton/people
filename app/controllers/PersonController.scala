@@ -34,11 +34,14 @@ import play.api.libs.Files
 import play.api.libs.json.{JsObject, Json, Writes}
 import play.api.mvc._
 import play.db.NamedDatabase
-import utl.{LDAP, User}
+import utl.{EmpLayerStats, LDAP, User}
 
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.JdbcProfile
 import utl.importFile.{SAPImport, WDImport}
+
+import scala.annotation.tailrec
+import scala.collection.immutable
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -67,6 +70,7 @@ class PersonController @Inject()
     positionTypeRepo: PositionTypeRepo,
     ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
+    config: Configuration,
     cc: ControllerComponents,
     webJarAssets: org.webjars.play.WebJarAssets,
     webJarsUtil: org.webjars.play.WebJarsUtil,
@@ -74,8 +78,10 @@ class PersonController @Inject()
     ldap: LDAP
   ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport {
 
-  // implicit val ldap: LDAP = new LDAP
-  protected val sapImportDir: String = ConfigFactory.load().getString("offline.SAPImportDir")
+  //protected val sapImportDir: String = ConfigFactory.load().getString("offline.SAPImportDir")
+  protected val sapImportDir: String = config.get[String]("offline.SAPImportDir")
+  //protected val ceoLoginOverride: String = ConfigFactory.load().getString("ceo.login")
+  protected val ceoLoginOverride: Option[String] = config.getOptional[String]("ceo.login")
 
   /**
     * Create an Action to render an HTML page.
@@ -119,9 +125,13 @@ class PersonController @Inject()
   }
 
   def ceo: Action[AnyContent] = Action.async { implicit request =>
-    employeeRepo.findCEO().map {
-      case Some(emp) => Redirect(routes.PersonController.id(emp.login))
-      case None => Redirect(routes.HomeController.index())
+    ceoLoginOverride match {
+      case Some(login) => Future.successful(Redirect(routes.PersonController.id(login)))
+      case None =>
+        employeeRepo.findCEO().map {
+          case Some(emp) => Redirect(routes.PersonController.id(emp.login))
+          case None => Redirect(routes.HomeController.index())
+        }
     }
   }
 
@@ -172,6 +182,72 @@ class PersonController @Inject()
       case None => NotFound(views.html.page_404("No matching person number"))
     }
   }
+
+
+  def summarizeTree(employeeTreeNode: EmployeeTreeNode, level: Int = 1): Set[EmpLayerStats] = {
+    if (employeeTreeNode.directs.isEmpty) {
+      Set.empty
+    } else {
+      val tally = employeeTreeNode.directs.foldLeft(0,0,0,0) { (b, node) =>
+        if (node.emp.isPerm) {
+          (b._1 + 1, b._2, b._3, b._4)
+        } else if (node.emp.isTSA) {
+          (b._1,  b._2 + 1, b._3, b._4)
+        } else if (node.emp.isEW) {
+          (b._1, b._2, b._3 + 1 , b._4 )
+        } else {
+          (b._1, b._2, b._3 , b._4 + 1 )
+        }
+      }
+      Set(EmpLayerStats( level, employeeTreeNode.directs.size, tally._1, tally._2, tally._3, tally._4,  1, employeeTreeNode.directs.size)) ++
+        employeeTreeNode.directs.flatMap { direct =>
+        summarizeTree(direct, level + 1)
+      }
+    }
+  }
+  def layer(login: String) = LDAPAuthPermission("OrgSpansLayer") {
+    Action.async { implicit request =>
+      (for {
+        u <- user.isOwnerManagerOrAdmin(login, LDAPAuth.getUser())
+        emp <- employeeRepo.findByLogin(login)
+        manager <- employeeRepo.manager(login)
+        mgdBy <- employeeRepo.managedBy(login)
+        tree <- employeeRepo.managementTreeDownAsTree(login)
+      } yield (u, emp, mgdBy, tree, manager)).map { result =>
+        result._2 match {
+          case Some(emp) =>
+            if (result._1) {
+              val tree = result._4
+              val summarized: immutable.Iterable[EmpLayerStats] = summarizeTree(tree.get).groupBy( _.level).map{ k =>
+                k._2.foldLeft( EmpLayerStats(k._1,0,0,0,0,0,0,0) ) { (b, a) =>
+                  EmpLayerStats(b.level, b.heads + a.heads, b.perm + a.perm, b.tsa + a.tsa, b.ew + a.ew, b.other+a.other, b.number+1, Math.max(b.maxSpan,a.maxSpan))
+                }
+              }
+              val totals: EmpLayerStats = summarized.foldLeft( EmpLayerStats(1,0,0,0,0,0,0,0)) { (b, a) =>
+                EmpLayerStats(b.level, b.heads + a.heads, b.perm + a.perm, b.tsa + a.tsa, b.ew + a.ew, b.other +a.other, b.number+a.number, Math.max(b.maxSpan,a.maxSpan))
+              }
+              val directsSummary: Set[(EmprelationsRow, EmpLayerStats)] = tree match {
+                case Some(d) =>
+                  d.directs.map { direct =>
+                  val directSummary = summarizeTree(direct).foldLeft( EmpLayerStats(1,0,0,0,0,0,0,0)) { (b,a) =>
+                    EmpLayerStats(b.level, b.heads + a.heads, b.perm + a.perm, b.tsa + a.tsa, b.ew + a.ew, b.other+a.other, b.number+a.number, Math.max(b.maxSpan,a.maxSpan))
+                  }
+                  (direct.emp, directSummary)
+                }
+                case None => Set.empty
+              }
+
+
+              Ok(views.html.person.layers(emp,result._5, directsSummary, summarized, totals))
+            } else {
+              NotFound(views.html.page_403( "Not Authorized"))
+            }
+          case None => NotFound(views.html.page_404("Login not found"))
+        }
+      }
+    }
+  }
+
 
   def importFile(): LDAPAuthPermission[AnyContent] = LDAPAuthPermission("ImportSAPFile") {
     Action.async { implicit request =>

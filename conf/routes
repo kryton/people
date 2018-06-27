@@ -17,6 +17,7 @@ POST        /headshot/:login/edit                           controllers.Headshot
 
 GET         /person/                                        controllers.PersonController.search(p: Int ?= 0, search: Option[String] ?= None )
 GET         /person/ceo                                     controllers.PersonController.ceo
+GET         /person/:login/layer                            controllers.PersonController.layer(login)
 
 GET         /person/autocomplete                            controllers.PersonController.personAutoComplete( q:Option[String] ?= None)
 GET         /person/:login                                  controllers.PersonController.id(login:String)
@@ -135,7 +136,7 @@ POST        /rteam/:id/poolUPD                              controllers.Resource
 GET         /rpool/                                         controllers.ResourcePoolController.search( p:Int ?= 0, search: Option[String] ?= None)
 POST        /rpool/new                                      controllers.ResourcePoolController.newRP
 GET         /rpool/breakdown                                controllers.ResourcePoolController.doFullBreakdown(format:Option[String]?=None, teamLevel:Option[String]?=None)
-## GET         /rpool/rpbreakdown                              controllers.ResourcePoolController.rpBreakdown(format:Option[String]?=None)
+GET         /rpool/rpbreakdown                              controllers.ResourcePoolController.rpBreakdown(format:Option[String]?=None)
 GET         /rpool/:id                                      controllers.ResourcePoolController.id( id:Int, p:Int ?= 0)
 GET         /rpool/:id/breakdown                            controllers.ResourcePoolController.doBreakdown(id:Int)
 GET         /rpool/:id/roadmap                              controllers.ResourcePoolController.roadmap(id:Int)
