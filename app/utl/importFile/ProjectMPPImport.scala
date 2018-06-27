@@ -77,10 +77,10 @@ object ProjectMPPImport {
         rt._1.msprojectname.trim.toLowerCase -> rt
       }.toMap
 
-    }.map { (resourceMap: Map[String, (Tables.ResourceteamRow, Option[Tables.ResourcepoolRow])]) =>
-      val tasks = inFile.getAllTasks
-      val resources = inFile.getAllResources
-      val resourceAssignment = inFile.getAllResourceAssignments
+    }.map { resourceMap: Map[String, (Tables.ResourceteamRow, Option[Tables.ResourcepoolRow])] =>
+      val tasks = inFile.getTasks
+      val resources = inFile.getResources
+      val resourceAssignment = inFile.getResourceAssignments
       val size = tasks.size
       val rootTask = tasks.get(0)
       val childFeatures = rootTask.getChildTasks
