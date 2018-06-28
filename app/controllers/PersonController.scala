@@ -224,7 +224,8 @@ class PersonController @Inject()
                 }
               }
               val totals: EmpLayerStats = summarized.foldLeft( EmpLayerStats(1,0,0,0,0,0,0,0)) { (b, a) =>
-                EmpLayerStats(b.level, b.heads + a.heads, b.perm + a.perm, b.tsa + a.tsa, b.ew + a.ew, b.other +a.other, b.number+a.number, Math.max(b.maxSpan,a.maxSpan))
+                EmpLayerStats(b.level, b.heads + a.heads, b.perm + a.perm, b.tsa + a.tsa, b.ew + a.ew, b.other
+                  +a.other, b.number+a.number, Math.max(b.maxSpan,a.maxSpan))
               }
               val directsSummary: Set[(EmprelationsRow, EmpLayerStats)] = tree match {
                 case Some(d) =>
