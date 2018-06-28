@@ -17,20 +17,23 @@
 
 package controllers
 
-import javax.inject._
+import java.nio.file.Path
 
+import javax.inject._
 import models.people.EmpRelationsRowUtils._
 import models.people._
 import models.product.ProductTrackRepo
 import offline.Tables
-import offline.Tables.{EmprelationsRow, MatrixteamRow}
+import offline.Tables.{EmprelationsRow, MatrixteamRow, MatrixteammemberRow}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
+import utl.importFile.{CostCenterImport, ResourceFileImport}
 import utl.{LDAP, Page, User}
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -41,16 +44,14 @@ import scala.concurrent.{ExecutionContext, Future}
 class MatrixTeamController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   //@NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
    teamDescriptionRepo: TeamDescriptionRepo,
    matrixTeamRepo: MatrixTeamRepo,
-   matrixTeamMemberRepo: MatrixTeamMemberRepo,
    user: User
-
   )(implicit
     employeeRepo: EmployeeRepo,
     empHistoryRepo: EmpHistoryRepo,
+    matrixTeamMemberRepo: MatrixTeamMemberRepo,
     ec: ExecutionContext,
     //override val messagesApi: MessagesApi,
     cc: ControllerComponents,
@@ -90,6 +91,56 @@ class MatrixTeamController @Inject()
           Ok(views.html.matrix.id( ID, mt, Page(emps,page, pageSize = 9), teams ))
         }
       case None => Future.successful(NotFound(views.html.page_404("Team ID not found")))
+    }.flatMap(identity)
+  }
+
+
+  def importFile = LDAPAuthAction {
+    Action.async { implicit request =>
+      user.isAdmin(LDAPAuth.getUser()).map {
+        case true =>
+          Ok(views.html.matrix.importFile())
+        case false =>
+          Unauthorized(views.html.page_403("User not authorized"))
+      }
+    }
+  }
+  case class MatrixTeamMemberImportRow( teamName: String, login:String)
+  def doImport = Action.async(parse.multipartFormData) { implicit request =>
+    user.isAdmin(LDAPAuth.getUser()).map {
+      case true =>
+        request.body.file("importFile").map { picture =>
+          val filename = picture.filename
+          val path: Path = picture.ref.path
+          ResourceFileImport.importFile(path).map {
+            case Left(errorMsg) => Future.successful(Ok(errorMsg))
+            case Right(seq) =>
+              val portfolio = seq.groupBy(p => p.portfolioGroup).flatMap( x => x._2.map{ y => MatrixTeamMemberImportRow(x._1,  y.employee)})
+              val serviceTeam = seq.groupBy(p => p.serviceArea).flatMap(x => x._2.map { y => MatrixTeamMemberImportRow(x._1, y.employee) })
+              val teams = seq.groupBy(p => p.teamName).flatMap( x => x._2.map{ y => MatrixTeamMemberImportRow(x._1,  y.employee)})
+              val combinedTeams = (portfolio ++ serviceTeam ++ teams ).groupBy(_.teamName).filterNot(_._1.trim.isEmpty)
+
+
+               matrixTeamRepo.bulkInsertUpdate(combinedTeams.keys).map { records =>
+                 val mapTeams = records.map{ x => x.name.toLowerCase -> x}.toMap
+                 combinedTeams.flatMap{ x =>
+                   x._2.map { mtm =>
+                     MatrixteammemberRow(matrixteammemberid = mapTeams(x._1.toLowerCase).id, login = mtm.login, id = 0L )
+                   }
+                 }
+               }.map{ matrixTeamMemberList=>
+                  matrixTeamMemberRepo.bulkInsertUpdate(matrixTeamMemberList)
+                }.map { _ =>
+                  Ok(views.html.matrix.importFileResult())
+                }
+          }.flatMap(identity)
+        }.getOrElse {
+          Future.successful(Redirect(routes.MatrixTeamController.importFile()).flashing(
+            "error" -> "Missing file"))
+        }
+
+      case false => Future.successful(Unauthorized("You don't have access to import Resource File files"))
+
     }.flatMap(identity)
   }
 }

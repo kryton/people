@@ -41,6 +41,7 @@ class MatrixTeamRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
   import offline.Tables.profile.api._
 
   def find(id:Long):Future[Option[MatrixteamRow]] = db.run(Matrixteam.filter(_.id === id).result.headOption)
+  def find(name:String):Future[Option[MatrixteamRow]] = db.run(Matrixteam.filter(_.name === name).result.headOption)
 
   def search(searchString:String): Future[Seq[MatrixteamRow]] = db.run{
     Matrixteam.filter { m =>
@@ -64,4 +65,14 @@ class MatrixTeamRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
 
   def delete(id: Long) =
     db.run(Matrixteam.filter(_.id === id).delete) map { _ > 0 }
+
+  def bulkInsertUpdate(rows:Iterable[String])(implicit matrixTeamMemberRepo: MatrixTeamMemberRepo): Future[Iterable[MatrixteamRow]] = {
+    Future.sequence(rows.map{ row =>
+      find(row).map{
+        case None => insert(MatrixteamRow(id = 0, name = row, owner = None))
+        case Some(pc) => matrixTeamMemberRepo.deleteByTeam(pc.id).map{ _ => pc }
+      }.flatMap(identity)
+    })
+  }
+
 }

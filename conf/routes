@@ -43,7 +43,8 @@ GET         /orgchart                                       controllers.PersonCo
 
 GET         /matrix/                                        controllers.MatrixTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
 GET         /matrix/:id                                     controllers.MatrixTeamController.id( id:Long, p:Int ?= 0 )
-
+GET         /matrix/admin/import                            controllers.MatrixTeamController.importFile
+POST        /matrix/admin/import                            controllers.MatrixTeamController.doImport
 GET         /agency/                                        controllers.PersonController.agencyList()
 GET         /agency/:agency                                 controllers.PersonController.byAgency(agency, p:Int ?= 0)
 GET         /office/                                        controllers.OfficeController.search( p:Int ?= 0, search: Option[String] ?= None)

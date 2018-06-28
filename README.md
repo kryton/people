@@ -10,6 +10,7 @@ It has since morphed into areas to help me (and others) do resource planning and
 * Corporate monthly awards
 * OKR's
 * Matrix teams, Tagging, Workgroups
+* Basic Spans & Layers (beta)
 
 ## Project
 * Ability to see what work is going on within the department

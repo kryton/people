@@ -164,18 +164,6 @@ class CostCenterController @Inject()
                 }
               }.flatMap(identity)
           }.flatMap(identity)
-          //???
-          /*
-          ProjectXLSImport.importFile(path).map {
-            case Left(errorMsg) => Future.successful(Ok(errorMsg))
-            case Right(list) =>
-
-              productFeatureRepo.repopulate( list ).map { x =>
-                Ok( views.html.product.productFeature.importFileResult(x))
-              }
-
-          }.flatMap(identity)
-              */
         }.getOrElse {
           Future.successful(Redirect(routes.ProductFeatureController.importFile()).flashing(
             "error" -> "Missing file"))

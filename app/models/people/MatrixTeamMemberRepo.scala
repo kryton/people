@@ -50,7 +50,7 @@ class MatrixTeamMemberRepo @Inject()(@NamedDatabase("default")  protected val db
     db.run( qry.result )
   }
 
-  def isPE( login:String):Future[Boolean] =
+  def isPE(login:String):Future[Boolean] =
     db.run( Matrixteam.filter(_.ispe)
                 .join(Matrixteammember).on(_.id === _.matrixteammemberid)
                 .filter(_._2.login.toLowerCase === login.toLowerCase).result
@@ -91,4 +91,16 @@ class MatrixTeamMemberRepo @Inject()(@NamedDatabase("default")  protected val db
 
   def delete(id: Long) =
     db.run(Matrixteammember.filter(_.id === id).delete) map { _ > 0 }
+
+  def deleteByTeam( teamid: Long) =
+    db.run( Matrixteammember.filter(_.matrixteammemberid === teamid).delete) map { _ > 0 }
+
+  def bulkInsertUpdate(rows:Iterable[MatrixteammemberRow]): Future[Iterable[MatrixteammemberRow]] = {
+    Future.sequence(rows.map{ row =>
+      find(row.id).map{
+        case None => insert(row)
+        case Some(pc) => Future.successful(pc)
+      }.flatMap(identity)
+    })
+  }
 }
