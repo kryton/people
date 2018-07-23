@@ -1,5 +1,6 @@
-<!DOCTYPE html>
+<html>
 <meta charset="utf-8">
+<head>
 <style>
 
     .node {
@@ -28,8 +29,10 @@
     }
 
 </style>
+</head>
+<body>
 <svg width="960" height="960"></svg>
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js" nonce="PMAN"></script>
 <script nonce="PMAN">
 
     var svg = d3.select("svg"),
@@ -46,7 +49,7 @@
         .size([diameter - margin, diameter - margin])
         .padding(2);
 
-    d3.json("flare.json", function(error, root) {
+    d3.json("/matrix/heir?", function(error, root) {
         if (error) throw error;
 
         root = d3.hierarchy(root)
@@ -105,3 +108,5 @@
     });
 
 </script>
+</body>
+</html>
