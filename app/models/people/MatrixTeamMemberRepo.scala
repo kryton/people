@@ -103,4 +103,5 @@ class MatrixTeamMemberRepo @Inject()(@NamedDatabase("default")  protected val db
       }.flatMap(identity)
     })
   }
+
 }

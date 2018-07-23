@@ -1,2 +1,6 @@
 ALTER TABLE `MatrixTeam`
 	ADD COLUMN `owner` VARCHAR(254) NULL AFTER `isPE`;
+
+ALTER TABLE `matrixteam`
+	ADD COLUMN `parent` BIGINT NULL DEFAULT NULL AFTER `owner`,
+	ADD CONSTRAINT `PARENT` FOREIGN KEY (`parent`) REFERENCES `matrixteam` (`id`);

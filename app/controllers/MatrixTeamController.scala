@@ -27,6 +27,7 @@ import offline.Tables
 import offline.Tables.{EmprelationsRow, MatrixteamRow, MatrixteammemberRow}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
+import play.api.libs.Files
 import play.api.mvc._
 import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
@@ -84,11 +85,13 @@ class MatrixTeamController @Inject()
         (for {
           emps <- empsF
           teams <- empsF.map{ empS => Future.sequence( empS.map{ emp => teamDescriptionRepo.findTeamForLogin( emp.login).map{ x => emp.login -> x}}) }.flatMap(identity)
-        } yield (emps,teams))
+          parent <- matrixTeamRepo.findParent(ID)
+          children <- matrixTeamRepo.findChildren(ID)
+        } yield (emps,teams, parent, children))
         .map { x =>
           val emps = x._1
           val teams: Map[String, Option[Tables.TeamdescriptionRow]] = x._2.toMap
-          Ok(views.html.matrix.id( ID, mt, Page(emps,page, pageSize = 9), teams ))
+          Ok(views.html.matrix.id( ID, mt, Page(emps,page, pageSize = 9), teams, x._3, x._4 ))
         }
       case None => Future.successful(NotFound(views.html.page_404("Team ID not found")))
     }.flatMap(identity)
@@ -105,8 +108,9 @@ class MatrixTeamController @Inject()
       }
     }
   }
-  case class MatrixTeamMemberImportRow( teamName: String, login:String)
-  def doImport = Action.async(parse.multipartFormData) { implicit request =>
+  case class MatrixTeamMemberImportRow( teamName: String, login:String, parent:Option[String])
+
+  def doImport(): Action[MultipartFormData[Files.TemporaryFile]] = Action.async(parse.multipartFormData) { implicit request =>
     user.isAdmin(LDAPAuth.getUser()).map {
       case true =>
         request.body.file("importFile").map { picture =>
@@ -115,17 +119,43 @@ class MatrixTeamController @Inject()
           ResourceFileImport.importFile(path).map {
             case Left(errorMsg) => Future.successful(Ok(errorMsg))
             case Right(seq) =>
-              val portfolio = seq.groupBy(p => p.portfolioGroup).flatMap( x => x._2.map{ y => MatrixTeamMemberImportRow(x._1,  y.employee)})
-              val serviceTeam = seq.groupBy(p => p.serviceArea).flatMap(x => x._2.map { y => MatrixTeamMemberImportRow(x._1, y.employee) })
-              val teams = seq.groupBy(p => p.teamName).flatMap( x => x._2.map{ y => MatrixTeamMemberImportRow(x._1,  y.employee)})
-              val combinedTeams = (portfolio ++ serviceTeam ++ teams ).groupBy(_.teamName).filterNot(_._1.trim.isEmpty)
+              val portfolio = seq.groupBy(p => p.portfolioGroup).flatMap( x => x._2.map{ y =>
+                MatrixTeamMemberImportRow(x._1,  y.employee, None)})
+              val serviceTeam = seq.groupBy(p => p.serviceArea).flatMap(x => x._2.map { y =>
+                MatrixTeamMemberImportRow(x._1, y.employee, Some(y.portfolioGroup))
+              })
+              val teams = seq.groupBy(p => p.teamName).flatMap( x => x._2.map{ y =>
+                MatrixTeamMemberImportRow(x._1,  y.employee, Some(y.serviceArea))
+              })
 
+              val combinedTeams: Map[(String, Option[String]), immutable.Iterable[MatrixTeamMemberImportRow]] = {
+                (portfolio ++ serviceTeam ++ teams).groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty)
+              }
+              // ordering is important here.. we want the top of the heirarchy updated/created first
+              // so children find their parents.
 
-               matrixTeamRepo.bulkInsertUpdate(combinedTeams.keys).map { records =>
+              val insertedTeams: Future[Iterable[MatrixteamRow]] =  matrixTeamRepo.bulkInsertUpdate(
+                portfolio.groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty).keys
+              ).map { portFolioRecs =>
+                val st = matrixTeamRepo.bulkInsertUpdate(
+                  serviceTeam.groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty).keys
+                ).map { serviceTeamRecs =>
+                  matrixTeamRepo.bulkInsertUpdate(
+                    teams.groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty).keys
+                  ).map { t =>
+                    serviceTeamRecs ++ t
+                  }
+                }
+                st.flatMap(identity).map{ p =>
+                  portFolioRecs ++ p
+                }
+              }.flatMap(identity)
+
+              insertedTeams.map{ records =>
                  val mapTeams = records.map{ x => x.name.toLowerCase -> x}.toMap
                  combinedTeams.flatMap{ x =>
                    x._2.map { mtm =>
-                     MatrixteammemberRow(matrixteammemberid = mapTeams(x._1.toLowerCase).id, login = mtm.login, id = 0L )
+                     MatrixteammemberRow(matrixteammemberid = mapTeams(x._1._1.toLowerCase).id, login = mtm.login, id = 0L )
                    }
                  }
                }.map{ matrixTeamMemberList=>
@@ -142,6 +172,22 @@ class MatrixTeamController @Inject()
       case false => Future.successful(Unauthorized("You don't have access to import Resource File files"))
 
     }.flatMap(identity)
+  }
+
+  def matrixHierarchy(team:Option[Long]): Action[AnyContent] = Action.async { implicit request =>
+    val fTree: Future[Option[MatrixTeamTreeNode]] = team match {
+      case Some(teamid) => matrixTeamRepo.managementTreeDownAsTree(teamid)
+      case None => matrixTeamRepo.managementTreeDownAsTree().map {
+        nodes =>
+         Some(MatrixTeamTreeNode(MatrixteamRow(0,"ALL",ispe = false,None,None),nodes.toSet,0))
+      }
+    }
+
+    fTree.map{
+      case Some(node) => Ok(node.toJson()).as("application/json; charset=utf-8").withHeaders(("Access-Control-Allow-Origin", "*"))
+      case None => NotFound("I Can't find that team")
+
+    }
   }
 }
 

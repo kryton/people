@@ -35,13 +35,13 @@ POST        /person/admin/importWorkday                     controllers.PersonCo
 GET         /person/admin/importDir                         controllers.PersonController.importFileDir
 GET         /person/admin/importFile/:filename              controllers.PersonController.doImportFile(filename:String)
 
-
-
-GET         /orgchart/hier                                  controllers.PersonController.personHierarchy(login:Option[String]?=None)
-GET         /orgchart/list/:manager                          controllers.PersonController.byManagerList(manager:String, formatO:Option[String]?=None)
+GET         /orgchart/hier                                  controllers.PersonController.personHierarchy(login:Option[String] ?= None)
+GET         /orgchart/list/:manager                         controllers.PersonController.byManagerList(manager:String, formatO:Option[String] ?= None)
 GET         /orgchart                                       controllers.PersonController.personOrgChart(login:Option[String]?=None)
 
 GET         /matrix/                                        controllers.MatrixTeamController.search( p:Int ?= 0, search: Option[String] ?= None)
+GET         /matrix/heir                                    controllers.MatrixTeamController.matrixHierarchy(team:Option[Long] ?= None)
+
 GET         /matrix/:id                                     controllers.MatrixTeamController.id( id:Long, p:Int ?= 0 )
 GET         /matrix/admin/import                            controllers.MatrixTeamController.importFile
 POST        /matrix/admin/import                            controllers.MatrixTeamController.doImport
@@ -187,4 +187,4 @@ POST        /release/ppl/new                                controllers.ReleaseC
 
 GET         /assets/*file                                   controllers.Assets.at(file)
 GET         /versionedAssets/*file                          controllers.Assets.versioned(file)
-->          /webjars                webjars.Routes
+->          /webjars                                        webjars.Routes

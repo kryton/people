@@ -588,7 +588,6 @@ class PersonController @Inject()
           Ok(JS_GG_ORGCHART_ROOT(id = emp.personnumber, title = s"${emp.fullName}'s org", root = empJ).toJson).as("application/json; charset=utf-8").withHeaders(("Access-Control-Allow-Origin", "*"))
       }
     }
-
   }
   case class JS_GG_ORGCHART_ROOT(id: Long, title:String, root:JS_GG_ORGCHART) {
     def toJson:String = {

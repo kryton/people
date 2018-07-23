@@ -1059,18 +1059,19 @@ trait Tables {
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param name Database column Name SqlType(VARCHAR), Length(254,true)
    *  @param ispe Database column isPE SqlType(BIT), Default(false)
-   *  @param owner Database column owner SqlType(VARCHAR), Length(254,true), Default(None) */
-  case class MatrixteamRow(id: Long, name: String, ispe: Boolean = false, owner: Option[String] = None)
+   *  @param owner Database column owner SqlType(VARCHAR), Length(254,true), Default(None)
+   *  @param parent Database column parent SqlType(BIGINT), Default(None) */
+  case class MatrixteamRow(id: Long, name: String, ispe: Boolean = false, owner: Option[String] = None, parent: Option[Long] = None)
   /** GetResult implicit for fetching MatrixteamRow objects using plain SQL queries */
-  implicit def GetResultMatrixteamRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Boolean], e3: GR[Option[String]]): GR[MatrixteamRow] = GR{
+  implicit def GetResultMatrixteamRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Boolean], e3: GR[Option[String]], e4: GR[Option[Long]]): GR[MatrixteamRow] = GR{
     prs => import prs._
-    MatrixteamRow.tupled((<<[Long], <<[String], <<[Boolean], <<?[String]))
+    MatrixteamRow.tupled((<<[Long], <<[String], <<[Boolean], <<?[String], <<?[Long]))
   }
   /** Table description of table matrixteam. Objects of this class serve as prototypes for rows in queries. */
   class Matrixteam(_tableTag: Tag) extends profile.api.Table[MatrixteamRow](_tableTag, Some("offline"), "matrixteam") {
-    def * = (id, name, ispe, owner) <> (MatrixteamRow.tupled, MatrixteamRow.unapply)
+    def * = (id, name, ispe, owner, parent) <> (MatrixteamRow.tupled, MatrixteamRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ispe), owner).shaped.<>({r=>import r._; _1.map(_=> MatrixteamRow.tupled((_1.get, _2.get, _3.get, _4)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ispe), owner, parent).shaped.<>({r=>import r._; _1.map(_=> MatrixteamRow.tupled((_1.get, _2.get, _3.get, _4, _5)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -1080,6 +1081,11 @@ trait Tables {
     val ispe: Rep[Boolean] = column[Boolean]("isPE", O.Default(false))
     /** Database column owner SqlType(VARCHAR), Length(254,true), Default(None) */
     val owner: Rep[Option[String]] = column[Option[String]]("owner", O.Length(254,varying=true), O.Default(None))
+    /** Database column parent SqlType(BIGINT), Default(None) */
+    val parent: Rep[Option[Long]] = column[Option[Long]]("parent", O.Default(None))
+
+    /** Foreign key referencing Matrixteam (database name PARENT) */
+    lazy val matrixteamFk = foreignKey("PARENT", parent, Matrixteam)(r => Rep.Some(r.id), onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
 
     /** Uniqueness Index over (name) (database name Name) */
     val index1 = index("Name", name, unique=true)

@@ -89,7 +89,7 @@ object ResourceFileImport {
       Left(s"Missing Header Field(s): ${fieldnames.toSet.diff(headerCells.keySet).mkString(",")}")
     } else {
       val cellHeaders: Map[Int, String] = headerCells.map { x => x._2 -> x._1 }
-      val resourceFileRows: Seq[ResourceFileRow] = (1 until rows).flatMap { r =>
+      val resourceFileRows: Seq[ResourceFileRow] = (3 until rows).flatMap { r =>
         val row: Row = sheet.getRow(r)
         if (row != null) {
           val cellValues: Map[String, String] = (0 until numColumns).map { column =>

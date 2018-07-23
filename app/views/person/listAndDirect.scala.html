@@ -47,8 +47,16 @@
                 <div class="x_content">
                     <div class="container">
                         <table class="table table-striped">
-                            <thead><tr><th>Direct</th><th>Manager</th><th>login</th><th>Name</th>
-                                <th>Contractor?</th><th>Cost Center</th>
+                            <thead>
+                            <tr>
+                                <th>Manager</th>
+                                <th>Manager's Name</th>
+                                <th>Direct</th>
+                                <th>Name</th>
+                                <th>Perm?</th>
+                                <th>TSA?</th>
+                                <th>EW?</th>
+                                <th>Cost Center</th>
                                 <th>Depth</th>
                                 <th>Position Type</th>
                                 <th>Team</th>
@@ -58,11 +66,14 @@
                         <tbody>
 
                     @employees.map { line  =>
-                        <tr><td>@line._1.login.toLowerCase()</td>
+                        <tr>
                             <td>@line._2.managerid.getOrElse("?").toLowerCase</td>
-                            <td>@line._2.login.toLowerCase</td>
+                            <td>@line._1.fullName</td>
+                            <td>@line._2.login.toLowerCase()</td>
                             <td>@line._2.fullName</td>
-                            <td>@line._2.isContractor</td>
+                            <td>@line._2.isPerm</td>
+                            <td>@line._2.isTSA</td>
+                            <td>@line._2.isEW</td>
                             <td>@line._2.costcenter</td>
                             <td>@line._3</td>
                             <td>@line._4.map { pt =>
