@@ -23,7 +23,7 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
-import projectdb.Tables
+import offline.Tables
 import slick.jdbc.JdbcProfile
 import utl.importFile.ProjectImport
 
@@ -35,11 +35,11 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ProjectRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id:Int):Future[Option[ProjectRow]] = db.run(Project.filter(_.id === id).result.headOption)
   def findEx(id:Int): Future[Option[(ProjectRow, Option[StatuscolorRow], Seq[(ResourceteamprojectRow,ResourceteamRow)], Seq[(ProjectdependencyRow, ProjectRow)])]] = {

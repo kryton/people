@@ -26,8 +26,8 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.db.NamedDatabase
-import projectdb.Tables
-import projectdb.Tables.ManagedclientRow
+import offline.Tables
+import offline.Tables.ManagedclientRow
 import slick.jdbc.JdbcProfile
 import utl.{LDAP, Page, User}
 
@@ -41,7 +41,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ManagedClientController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+  /* @NamedDatabase("offline") protected val dbProjectConfigProvider: DatabaseConfigProvider,*/
    productTrackRepo: ProductTrackRepo,
    productFeatureRepo: ProductFeatureRepo,
    managedClientRepo: ManagedClientRepo,
@@ -103,9 +103,9 @@ class ManagedClientController @Inject()
 
       res._2 match {
         case Some(mc) =>
-          val featuresPlusTrack: Future[Seq[((projectdb.Tables.ProductfeatureRow,
-            projectdb.Tables.ManagedclientproductfeatureRow),
-            Seq[(projectdb.Tables.ProducttrackRow, projectdb.Tables.ProducttrackfeatureRow)])
+          val featuresPlusTrack: Future[Seq[((offline.Tables.ProductfeatureRow,
+            offline.Tables.ManagedclientproductfeatureRow),
+            Seq[(offline.Tables.ProducttrackRow, offline.Tables.ProducttrackfeatureRow)])
             ]] = Future.sequence(features.map {pf =>
               productFeatureRepo.findTracksByFeature(pf._2.productfeatureid).map { f => (pf, f) }
             })

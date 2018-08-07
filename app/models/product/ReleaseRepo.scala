@@ -21,8 +21,8 @@ import javax.inject.Inject
 
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
-import projectdb.Tables
-import projectdb.Tables.Projectrelease
+import offline.Tables
+import offline.Tables.Projectrelease
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcBackend, JdbcProfile}
 
@@ -33,11 +33,11 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ReleaseRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ReleaseRepo @Inject()(/*@NamedDatabase("offline") */ protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db: JdbcBackend#DatabaseDef = dbConfig.db
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id:Int):Future[Option[ProjectreleaseRow]] = db.run(Projectrelease.filter(_.id === id).result.headOption)
   def find(name:String):Future[Option[ProjectreleaseRow]] = db.run(Projectrelease.filter(_.name === name ).result.headOption)

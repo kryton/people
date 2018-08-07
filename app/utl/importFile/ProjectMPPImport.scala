@@ -26,7 +26,7 @@ import models.product.ResourceTeamRepo
 import net.sf.mpxj.mpp.MPPReader
 import net.sf.mpxj.{ProjectFile, Relation, ResourceAssignment, Task}
 import play.api.Logger
-import projectdb.Tables
+import offline.Tables
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.{BufferedSource, Codec}

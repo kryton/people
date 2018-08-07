@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@import projectdb.Tables.ProductfeatureRow
+@import offline.Tables.ProductfeatureRow
 @import utl.Page
 @import java.sql.Date
-@import projectdb.Tables.ResourceteamRow
-@import projectdb.Tables.ResourcepoolRow
-@import projectdb.Tables.ProjectRow
+@import offline.Tables.ResourceteamRow
+@import offline.Tables.ResourcepoolRow
+@import offline.Tables.ProjectRow
 @import java.time.format.DateTimeFormatter
 @(      monthRange: Seq[Date],
         summary: Map[(String, Boolean, String), Map[Either[ResourceteamRow, ResourcepoolRow], Map[Date, Double]]],

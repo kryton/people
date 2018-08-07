@@ -29,8 +29,8 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.db.NamedDatabase
-import projectdb.Tables
-import projectdb.Tables._
+import offline.Tables
+import offline.Tables._
 import slick.jdbc.JdbcProfile
 import utl.{LDAP, Page, User}
 
@@ -45,7 +45,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ResourceTeamController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+//   @NamedDatabase("offline") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
    productFeatureRepo: ProductFeatureRepo,
    resourcePoolRepo: ResourcePoolRepo,

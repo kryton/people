@@ -30,11 +30,12 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class FeatureFlagRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class FeatureFlagRepo @Inject()( /*@NamedDatabase("offline") */
+                                 protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id:Int):Future[Option[FeatureflagRow]] = db.run(Featureflag.filter(_.id === id).result.headOption)
   def all = db.run(Featureflag.sortBy( _.name).result)

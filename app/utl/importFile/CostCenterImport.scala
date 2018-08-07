@@ -27,8 +27,8 @@ import models.product.ResourceTeamRepo
 import offline.Tables.CostcenterRow
 import org.apache.poi.ss.usermodel._
 import play.api.Logger
-import projectdb.Tables
-import projectdb.Tables.ResourcepoolRow
+import offline.Tables
+import offline.Tables.ResourcepoolRow
 import utl.Conversions
 
 import scala.annotation.tailrec

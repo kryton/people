@@ -48,7 +48,7 @@ import slick.jdbc.JdbcProfile
 class HomeController @Inject()
   (
     protected val dbConfigProvider: DatabaseConfigProvider,
-    @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+    /*@NamedDatabase("offline") protected val dbProjectConfigProvider: DatabaseConfigProvider,*/
     productTrackRepo: ProductTrackRepo,
     officeRepo: OfficeRepo,
     employeeRepo: EmployeeRepo,

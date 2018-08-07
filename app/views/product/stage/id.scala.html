@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@import projectdb.Tables.ProducttrackRow
-@import projectdb.Tables.ProducttrackfeatureRow
-@import projectdb.Tables.ProductfeatureRow
+@import offline.Tables.ProducttrackRow
+@import offline.Tables.ProducttrackfeatureRow
+@import offline.Tables.ProductfeatureRow
 @import utl.Page
-@import projectdb.Tables.StageRow
+@import offline.Tables.StageRow
 @(      id:Int,
         stage:StageRow,
         features:Page[(ProductfeatureRow, Seq[(ProducttrackRow,ProducttrackfeatureRow)])])(implicit webJarsUtil: org.webjars.play.WebJarsUtil,

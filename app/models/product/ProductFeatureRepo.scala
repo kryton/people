@@ -24,7 +24,7 @@ import offline.Tables.Emprelations
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
-import projectdb.Tables
+import offline.Tables
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcBackend, JdbcProfile}
 import utl.importFile.FeatureImport
@@ -36,11 +36,11 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ProductFeatureRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ProductFeatureRepo @Inject()(/* @NamedDatabase("offline") */ protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db: JdbcBackend#DatabaseDef = dbConfig.db
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id:Int):Future[Option[ProductfeatureRow]] =
     db.run(Productfeature.filter(_.id === id).result.headOption)

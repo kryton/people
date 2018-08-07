@@ -39,7 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TagController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+//   @NamedDatabase("offline") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    employeeRepo: EmployeeRepo,
    teamDescriptionRepo: TeamDescriptionRepo,
    empTagRepo: EmpTagRepo,

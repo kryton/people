@@ -27,8 +27,8 @@ import models.product.ResourceTeamRepo
 import org.apache.poi.ss.usermodel.CellType._
 import org.apache.poi.ss.usermodel._
 import play.api.Logger
-import projectdb.Tables
-import projectdb.Tables.ResourcepoolRow
+import offline.Tables
+import offline.Tables.ResourcepoolRow
 import utl.Conversions
 
 import scala.annotation.tailrec

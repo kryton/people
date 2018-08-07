@@ -31,11 +31,11 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ReleaseTypeRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ReleaseTypeRepo @Inject()( /* @NamedDatabase("offline") */  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db: JdbcBackend#DatabaseDef = dbConfig.db
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id:Int):Future[Option[ReleasetypeRow]] = db.run(Releasetype.filter(_.id === id).result.headOption)
   def find(name:String):Future[Option[ReleasetypeRow]] = db.run(Releasetype.filter(_.name === name ).result.headOption)

@@ -31,11 +31,12 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ProductTrackRepo @Inject()( @NamedDatabase("projectdb")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ProductTrackRepo @Inject()( /*@NamedDatabase("offline") */
+                                  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db: JdbcBackend#DatabaseDef = dbConfig.db
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id:Int):Future[Option[ProducttrackRow]] = db.run(Producttrack.filter(_.id === id).result.headOption)
   def findByMSProject(msProjectTrack:String):Future[Option[ProducttrackRow]] =

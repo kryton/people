@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Authpermission.schema, Authpreference.schema, Authrole.schema, Authrolepermission.schema, Authuser.schema, Authuserpreference.schema, Awardnominationto.schema, Businessunit.schema, Corplevel.schema, Costcenter.schema, Empbio.schema, Emphistory.schema, Employeemilestone.schema, Employeeroster.schema, Emppayroll.schema, Emprelations.schema, Emptag.schema, Functionalarea.schema, Gitcommit.schema, Gitissue.schema, Individualarchetype.schema, Individualbusinessunit.schema, Jiraissue.schema, Jiraparentissue.schema, Kudosto.schema, Managerarchetype.schema, Matrixteam.schema, Matrixteammember.schema, Milestone.schema, Office.schema, Okrkeyresult.schema, Okrobjective.schema, PlayEvolutions.schema, Positiontype.schema, Profitcenter.schema, Ratecard.schema, Ratecardrate.schema, Ratecardrole.schema, Resourcepool.schema, Resourcepoolteam.schema, Scenario.schema, Scenariodetail.schema, Scenariolevel.schema, Surveyanswer.schema, Surveycategory.schema, Surveyquestion.schema, Surveyset.schema, Surveysetinstance.schema, Surveysetperson.schema, Teamdescription.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Authpermission.schema, Authpreference.schema, Authrole.schema, Authrolepermission.schema, Authuser.schema, Authuserpreference.schema, Awardnominationto.schema, Businessunit.schema, Corplevel.schema, Costcenter.schema, Empbio.schema, Empefficiency.schema, Emphistory.schema, Employeemilestone.schema, Employeeroster.schema, Emppayroll.schema, Emprelations.schema, Emptag.schema, Featureflag.schema, Functionalarea.schema, Gitcommit.schema, Gitissue.schema, Individualarchetype.schema, Individualbusinessunit.schema, Jiraissue.schema, Jiraparentissue.schema, Kudosto.schema, Managedclient.schema, Managedclientproductfeature.schema, Managerarchetype.schema, Matrixteam.schema, Matrixteammember.schema, Milestone.schema, Office.schema, Okrkeyresult.schema, Okrobjective.schema, PlayEvolutions.schema, Positiontype.schema, Productfeature.schema, Productfeatureflag.schema, Producttrack.schema, Producttrackfeature.schema, Profitcenter.schema, Project.schema, Projectarea.schema, Projectdependency.schema, Projectfeature.schema, Projecthighlight.schema, Projectperson.schema, Projectpersontype.schema, Projectrelease.schema, Projectrole.schema, Ratecard.schema, Ratecardrate.schema, Ratecardrole.schema, Releaseauthorization.schema, Releaseauthorizationtype.schema, Releasetype.schema, Releasetypeauthorizationpeople.schema, Resourcepool.schema, Resourceteam.schema, Resourceteamproductfeature.schema, Resourceteamproject.schema, Roadmapslack.schema, Scenario.schema, Scenariodetail.schema, Scenariolevel.schema, Stage.schema, Statuscolor.schema, Statusupdate.schema, Surveyanswer.schema, Surveycategory.schema, Surveyquestion.schema, Surveyset.schema, Surveysetinstance.schema, Surveysetperson.schema, Systemrole.schema, Teamdescription.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -28,8 +28,8 @@ trait Tables {
     prs => import prs._
     AuthpermissionRow.tupled((<<[Long], <<[String], <<?[String]))
   }
-  /** Table description of table authpermission. Objects of this class serve as prototypes for rows in queries. */
-  class Authpermission(_tableTag: Tag) extends profile.api.Table[AuthpermissionRow](_tableTag, Some("offline"), "authpermission") {
+  /** Table description of table AuthPermission. Objects of this class serve as prototypes for rows in queries. */
+  class Authpermission(_tableTag: Tag) extends profile.api.Table[AuthpermissionRow](_tableTag, Some("offline"), "AuthPermission") {
     def * = (id, permission, description) <> (AuthpermissionRow.tupled, AuthpermissionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(permission), description).shaped.<>({r=>import r._; _1.map(_=> AuthpermissionRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -57,8 +57,8 @@ trait Tables {
     prs => import prs._
     AuthpreferenceRow.tupled((<<[Long], <<[String], <<[String]))
   }
-  /** Table description of table authpreference. Objects of this class serve as prototypes for rows in queries. */
-  class Authpreference(_tableTag: Tag) extends profile.api.Table[AuthpreferenceRow](_tableTag, Some("offline"), "authpreference") {
+  /** Table description of table AuthPreference. Objects of this class serve as prototypes for rows in queries. */
+  class Authpreference(_tableTag: Tag) extends profile.api.Table[AuthpreferenceRow](_tableTag, Some("offline"), "AuthPreference") {
     def * = (id, name, code) <> (AuthpreferenceRow.tupled, AuthpreferenceRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(code)).shaped.<>({r=>import r._; _1.map(_=> AuthpreferenceRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -89,8 +89,8 @@ trait Tables {
     prs => import prs._
     AuthroleRow.tupled((<<[Long], <<[String], <<?[String], <<[Boolean]))
   }
-  /** Table description of table authrole. Objects of this class serve as prototypes for rows in queries. */
-  class Authrole(_tableTag: Tag) extends profile.api.Table[AuthroleRow](_tableTag, Some("offline"), "authrole") {
+  /** Table description of table AuthRole. Objects of this class serve as prototypes for rows in queries. */
+  class Authrole(_tableTag: Tag) extends profile.api.Table[AuthroleRow](_tableTag, Some("offline"), "AuthRole") {
     def * = (id, role, description, isadmin) <> (AuthroleRow.tupled, AuthroleRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(role), description, Rep.Some(isadmin)).shaped.<>({r=>import r._; _1.map(_=> AuthroleRow.tupled((_1.get, _2.get, _3, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -120,8 +120,8 @@ trait Tables {
     prs => import prs._
     AuthrolepermissionRow.tupled((<<[Long], <<[Long], <<[Long]))
   }
-  /** Table description of table authrolepermission. Objects of this class serve as prototypes for rows in queries. */
-  class Authrolepermission(_tableTag: Tag) extends profile.api.Table[AuthrolepermissionRow](_tableTag, Some("offline"), "authrolepermission") {
+  /** Table description of table AuthRolePermission. Objects of this class serve as prototypes for rows in queries. */
+  class Authrolepermission(_tableTag: Tag) extends profile.api.Table[AuthrolepermissionRow](_tableTag, Some("offline"), "AuthRolePermission") {
     def * = (id, permissionid, roleid) <> (AuthrolepermissionRow.tupled, AuthrolepermissionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(permissionid), Rep.Some(roleid)).shaped.<>({r=>import r._; _1.map(_=> AuthrolepermissionRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -151,8 +151,8 @@ trait Tables {
     prs => import prs._
     AuthuserRow.tupled((<<[Long], <<[String], <<[Long]))
   }
-  /** Table description of table authuser. Objects of this class serve as prototypes for rows in queries. */
-  class Authuser(_tableTag: Tag) extends profile.api.Table[AuthuserRow](_tableTag, Some("offline"), "authuser") {
+  /** Table description of table AuthUser. Objects of this class serve as prototypes for rows in queries. */
+  class Authuser(_tableTag: Tag) extends profile.api.Table[AuthuserRow](_tableTag, Some("offline"), "AuthUser") {
     def * = (id, username, roleid) <> (AuthuserRow.tupled, AuthuserRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(username), Rep.Some(roleid)).shaped.<>({r=>import r._; _1.map(_=> AuthuserRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -181,8 +181,8 @@ trait Tables {
     prs => import prs._
     AuthuserpreferenceRow.tupled((<<[Long], <<[String]))
   }
-  /** Table description of table authuserpreference. Objects of this class serve as prototypes for rows in queries. */
-  class Authuserpreference(_tableTag: Tag) extends profile.api.Table[AuthuserpreferenceRow](_tableTag, Some("offline"), "authuserpreference") {
+  /** Table description of table AuthUserPreference. Objects of this class serve as prototypes for rows in queries. */
+  class Authuserpreference(_tableTag: Tag) extends profile.api.Table[AuthuserpreferenceRow](_tableTag, Some("offline"), "AuthUserPreference") {
     def * = (authpreferenceid, login) <> (AuthuserpreferenceRow.tupled, AuthuserpreferenceRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(authpreferenceid), Rep.Some(login)).shaped.<>({r=>import r._; _1.map(_=> AuthuserpreferenceRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -192,8 +192,8 @@ trait Tables {
     /** Database column login SqlType(VARCHAR), Length(20,true) */
     val login: Rep[String] = column[String]("login", O.Length(20,varying=true))
 
-    /** Primary key of Authuserpreference (database name authuserpreference_PK) */
-    val pk = primaryKey("authuserpreference_PK", (authpreferenceid, login))
+    /** Primary key of Authuserpreference (database name AuthUserPreference_PK) */
+    val pk = primaryKey("AuthUserPreference_PK", (authpreferenceid, login))
 
     /** Foreign key referencing Authpreference (database name AuthUserPreference_ibfk_1) */
     lazy val authpreferenceFk = foreignKey("AuthUserPreference_ibfk_1", authpreferenceid, Authpreference)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
@@ -280,8 +280,8 @@ trait Tables {
     prs => import prs._
     BusinessunitRow.tupled((<<[Long], <<[String]))
   }
-  /** Table description of table businessunit. Objects of this class serve as prototypes for rows in queries. */
-  class Businessunit(_tableTag: Tag) extends profile.api.Table[BusinessunitRow](_tableTag, Some("offline"), "businessunit") {
+  /** Table description of table BusinessUnit. Objects of this class serve as prototypes for rows in queries. */
+  class Businessunit(_tableTag: Tag) extends profile.api.Table[BusinessunitRow](_tableTag, Some("offline"), "BusinessUnit") {
     def * = (id, name) <> (BusinessunitRow.tupled, BusinessunitRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(name)).shaped.<>({r=>import r._; _1.map(_=> BusinessunitRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -313,8 +313,8 @@ trait Tables {
     prs => import prs._
     CorplevelRow.tupled((<<[Long], <<[Long], <<[String], <<[Boolean], <<[Boolean], <<[Boolean], <<?[Long], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String]))
   }
-  /** Table description of table corplevel. Objects of this class serve as prototypes for rows in queries. */
-  class Corplevel(_tableTag: Tag) extends profile.api.Table[CorplevelRow](_tableTag, Some("offline"), "corplevel") {
+  /** Table description of table CorpLevel. Objects of this class serve as prototypes for rows in queries. */
+  class Corplevel(_tableTag: Tag) extends profile.api.Table[CorplevelRow](_tableTag, Some("offline"), "CorpLevel") {
     def * = (id, level, name, admin, ic, nonexempt, archetypeid, scope, complexity, supervision, knowledge, yearsofexperience) <> (CorplevelRow.tupled, CorplevelRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(level), Rep.Some(name), Rep.Some(admin), Rep.Some(ic), Rep.Some(nonexempt), archetypeid, scope, complexity, supervision, knowledge, yearsofexperience).shaped.<>({r=>import r._; _1.map(_=> CorplevelRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7, _8, _9, _10, _11, _12)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -365,8 +365,8 @@ trait Tables {
     prs => import prs._
     CostcenterRow.tupled((<<[Long], <<?[String], <<?[String], <<?[String], <<?[Long], <<?[Long], <<?[Long], <<?[String]))
   }
-  /** Table description of table costcenter. Objects of this class serve as prototypes for rows in queries. */
-  class Costcenter(_tableTag: Tag) extends profile.api.Table[CostcenterRow](_tableTag, Some("offline"), "costcenter") {
+  /** Table description of table CostCenter. Objects of this class serve as prototypes for rows in queries. */
+  class Costcenter(_tableTag: Tag) extends profile.api.Table[CostcenterRow](_tableTag, Some("offline"), "CostCenter") {
     def * = (costcenter, costcentertext, account, functionalarea, businessunit, functionalareaid, profitcenterid, company) <> (CostcenterRow.tupled, CostcenterRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(costcenter), costcentertext, account, functionalarea, businessunit, functionalareaid, profitcenterid, company).shaped.<>({r=>import r._; _1.map(_=> CostcenterRow.tupled((_1.get, _2, _3, _4, _5, _6, _7, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -406,8 +406,8 @@ trait Tables {
     prs => import prs._
     EmpbioRow.tupled((<<[String], <<?[String], <<?[java.sql.Date]))
   }
-  /** Table description of table empbio. Objects of this class serve as prototypes for rows in queries. */
-  class Empbio(_tableTag: Tag) extends profile.api.Table[EmpbioRow](_tableTag, Some("offline"), "empbio") {
+  /** Table description of table EmpBio. Objects of this class serve as prototypes for rows in queries. */
+  class Empbio(_tableTag: Tag) extends profile.api.Table[EmpbioRow](_tableTag, Some("offline"), "EmpBio") {
     def * = (login, bio, lastupdated) <> (EmpbioRow.tupled, EmpbioRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(login), bio, lastupdated).shaped.<>({r=>import r._; _1.map(_=> EmpbioRow.tupled((_1.get, _2, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -422,9 +422,38 @@ trait Tables {
   /** Collection-like TableQuery object for table Empbio */
   lazy val Empbio = new TableQuery(tag => new Empbio(tag))
 
+  /** Entity class storing rows of table Empefficiency
+   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param month Database column month SqlType(INT)
+   *  @param efficiency Database column efficiency SqlType(DECIMAL), Default(None) */
+  case class EmpefficiencyRow(id: Long, month: Int, efficiency: Option[scala.math.BigDecimal] = None)
+  /** GetResult implicit for fetching EmpefficiencyRow objects using plain SQL queries */
+  implicit def GetResultEmpefficiencyRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Option[scala.math.BigDecimal]]): GR[EmpefficiencyRow] = GR{
+    prs => import prs._
+    EmpefficiencyRow.tupled((<<[Long], <<[Int], <<?[scala.math.BigDecimal]))
+  }
+  /** Table description of table EmpEfficiency. Objects of this class serve as prototypes for rows in queries. */
+  class Empefficiency(_tableTag: Tag) extends profile.api.Table[EmpefficiencyRow](_tableTag, Some("offline"), "EmpEfficiency") {
+    def * = (id, month, efficiency) <> (EmpefficiencyRow.tupled, EmpefficiencyRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(month), efficiency).shaped.<>({r=>import r._; _1.map(_=> EmpefficiencyRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column month SqlType(INT) */
+    val month: Rep[Int] = column[Int]("month")
+    /** Database column efficiency SqlType(DECIMAL), Default(None) */
+    val efficiency: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("efficiency", O.Default(None))
+
+    /** Uniqueness Index over (month) (database name month) */
+    val index1 = index("month", month, unique=true)
+  }
+  /** Collection-like TableQuery object for table Empefficiency */
+  lazy val Empefficiency = new TableQuery(tag => new Empefficiency(tag))
+
   /** Entity class storing rows of table Emphistory
    *  @param personnumber Database column PersonNumber SqlType(BIGINT)
-   *  @param login Database column Login SqlType(VARCHAR), PrimaryKey, Length(254,true)
+   *  @param login Database column Login SqlType(VARCHAR), Length(254,true), Default(None)
    *  @param firstname Database column Firstname SqlType(VARCHAR), Length(254,true)
    *  @param nickname Database column NickName SqlType(VARCHAR), Length(254,true), Default(None)
    *  @param lastname Database column LastName SqlType(VARCHAR), Length(254,true)
@@ -434,22 +463,22 @@ trait Tables {
    *  @param employeetype Database column EmployeeType SqlType(VARCHAR), Length(254,true), Default(None)
    *  @param hirerehiredate Database column HireRehireDate SqlType(DATE), Default(None)
    *  @param lastseen Database column LastSeen SqlType(DATE), Default(None) */
-  case class EmphistoryRow(personnumber: Long, login: String, firstname: String, nickname: Option[String] = None, lastname: String, managerid: Option[String] = None, costcenter: Long, officeid: Long, employeetype: Option[String] = None, hirerehiredate: Option[java.sql.Date] = None, lastseen: Option[java.sql.Date] = None)
+  case class EmphistoryRow(personnumber: Long, login: Option[String] = None, firstname: String, nickname: Option[String] = None, lastname: String, managerid: Option[String] = None, costcenter: Long, officeid: Long, employeetype: Option[String] = None, hirerehiredate: Option[java.sql.Date] = None, lastseen: Option[java.sql.Date] = None)
   /** GetResult implicit for fetching EmphistoryRow objects using plain SQL queries */
-  implicit def GetResultEmphistoryRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[Option[java.sql.Date]]): GR[EmphistoryRow] = GR{
+  implicit def GetResultEmphistoryRow(implicit e0: GR[Long], e1: GR[Option[String]], e2: GR[String], e3: GR[Option[java.sql.Date]]): GR[EmphistoryRow] = GR{
     prs => import prs._
-    EmphistoryRow.tupled((<<[Long], <<[String], <<[String], <<?[String], <<[String], <<?[String], <<[Long], <<[Long], <<?[String], <<?[java.sql.Date], <<?[java.sql.Date]))
+    EmphistoryRow.tupled((<<[Long], <<?[String], <<[String], <<?[String], <<[String], <<?[String], <<[Long], <<[Long], <<?[String], <<?[java.sql.Date], <<?[java.sql.Date]))
   }
-  /** Table description of table emphistory. Objects of this class serve as prototypes for rows in queries. */
-  class Emphistory(_tableTag: Tag) extends profile.api.Table[EmphistoryRow](_tableTag, Some("offline"), "emphistory") {
+  /** Table description of table EmpHistory. Objects of this class serve as prototypes for rows in queries. */
+  class Emphistory(_tableTag: Tag) extends profile.api.Table[EmphistoryRow](_tableTag, Some("offline"), "EmpHistory") {
     def * = (personnumber, login, firstname, nickname, lastname, managerid, costcenter, officeid, employeetype, hirerehiredate, lastseen) <> (EmphistoryRow.tupled, EmphistoryRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(personnumber), Rep.Some(login), Rep.Some(firstname), nickname, Rep.Some(lastname), managerid, Rep.Some(costcenter), Rep.Some(officeid), employeetype, hirerehiredate, lastseen).shaped.<>({r=>import r._; _1.map(_=> EmphistoryRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6, _7.get, _8.get, _9, _10, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(personnumber), login, Rep.Some(firstname), nickname, Rep.Some(lastname), managerid, Rep.Some(costcenter), Rep.Some(officeid), employeetype, hirerehiredate, lastseen).shaped.<>({r=>import r._; _1.map(_=> EmphistoryRow.tupled((_1.get, _2, _3.get, _4, _5.get, _6, _7.get, _8.get, _9, _10, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column PersonNumber SqlType(BIGINT) */
     val personnumber: Rep[Long] = column[Long]("PersonNumber")
-    /** Database column Login SqlType(VARCHAR), PrimaryKey, Length(254,true) */
-    val login: Rep[String] = column[String]("Login", O.PrimaryKey, O.Length(254,varying=true))
+    /** Database column Login SqlType(VARCHAR), Length(254,true), Default(None) */
+    val login: Rep[Option[String]] = column[Option[String]]("Login", O.Length(254,varying=true), O.Default(None))
     /** Database column Firstname SqlType(VARCHAR), Length(254,true) */
     val firstname: Rep[String] = column[String]("Firstname", O.Length(254,varying=true))
     /** Database column NickName SqlType(VARCHAR), Length(254,true), Default(None) */
@@ -471,6 +500,9 @@ trait Tables {
 
     /** Foreign key referencing Office (database name EmpHistory_Office_FK) */
     lazy val officeFk = foreignKey("EmpHistory_Office_FK", officeid, Office)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+
+    /** Uniqueness Index over (login) (database name EmpHistory_login) */
+    val index1 = index("EmpHistory_login", login, unique=true)
   }
   /** Collection-like TableQuery object for table Emphistory */
   lazy val Emphistory = new TableQuery(tag => new Emphistory(tag))
@@ -489,8 +521,8 @@ trait Tables {
     prs => import prs._
     EmployeemilestoneRow.tupled((<<[Long], <<[Long], <<[String], <<[java.sql.Date], <<[java.sql.Date], <<[String], <<?[Int]))
   }
-  /** Table description of table employeemilestone. Objects of this class serve as prototypes for rows in queries. */
-  class Employeemilestone(_tableTag: Tag) extends profile.api.Table[EmployeemilestoneRow](_tableTag, Some("offline"), "employeemilestone") {
+  /** Table description of table EmployeeMilestone. Objects of this class serve as prototypes for rows in queries. */
+  class Employeemilestone(_tableTag: Tag) extends profile.api.Table[EmployeemilestoneRow](_tableTag, Some("offline"), "EmployeeMilestone") {
     def * = (id, milestoneid, login, completedon, enteredon, comments, duration) <> (EmployeemilestoneRow.tupled, EmployeemilestoneRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(milestoneid), Rep.Some(login), Rep.Some(completedon), Rep.Some(enteredon), Rep.Some(comments), duration).shaped.<>({r=>import r._; _1.map(_=> EmployeemilestoneRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -525,8 +557,8 @@ trait Tables {
     prs => import prs._
     EmployeerosterRow.tupled((<<[String], <<[Long]))
   }
-  /** Table description of table employeeroster. Objects of this class serve as prototypes for rows in queries. */
-  class Employeeroster(_tableTag: Tag) extends profile.api.Table[EmployeerosterRow](_tableTag, Some("offline"), "employeeroster") {
+  /** Table description of table EmployeeRoster. Objects of this class serve as prototypes for rows in queries. */
+  class Employeeroster(_tableTag: Tag) extends profile.api.Table[EmployeerosterRow](_tableTag, Some("offline"), "EmployeeRoster") {
     def * = (login, corplevelid) <> (EmployeerosterRow.tupled, EmployeerosterRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(login), Rep.Some(corplevelid)).shaped.<>({r=>import r._; _1.map(_=> EmployeerosterRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -551,8 +583,8 @@ trait Tables {
     prs => import prs._
     EmppayrollRow.tupled((<<[String], <<[String]))
   }
-  /** Table description of table emppayroll. Objects of this class serve as prototypes for rows in queries. */
-  class Emppayroll(_tableTag: Tag) extends profile.api.Table[EmppayrollRow](_tableTag, Some("offline"), "emppayroll") {
+  /** Table description of table EmpPayroll. Objects of this class serve as prototypes for rows in queries. */
+  class Emppayroll(_tableTag: Tag) extends profile.api.Table[EmppayrollRow](_tableTag, Some("offline"), "EmpPayroll") {
     def * = (login, crypted) <> (EmppayrollRow.tupled, EmppayrollRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(login), Rep.Some(crypted)).shaped.<>({r=>import r._; _1.map(_=> EmppayrollRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -594,8 +626,8 @@ trait Tables {
     prs => import prs._
     EmprelationsRow.tupled((<<[Long], <<[String], <<[String], <<?[String], <<[String], <<?[String], <<[Long], <<[Long], <<[Long], <<[Int], <<[String], <<[Long], <<[String], <<[String], <<[String], <<[String], <<[String], <<?[String], <<?[String], <<?[String], <<?[Long], <<?[String]))
   }
-  /** Table description of table emprelations. Objects of this class serve as prototypes for rows in queries. */
-  class Emprelations(_tableTag: Tag) extends profile.api.Table[EmprelationsRow](_tableTag, Some("offline"), "emprelations") {
+  /** Table description of table EmpRelations. Objects of this class serve as prototypes for rows in queries. */
+  class Emprelations(_tableTag: Tag) extends profile.api.Table[EmprelationsRow](_tableTag, Some("offline"), "EmpRelations") {
     def * = (personnumber, login, firstname, nickname, lastname, managerid, directs, reports, reportscontractor, companycode, companycodename, costcenter, personalarea, personalsubarea, employeegroup, position, agency, executivename, officelocation, officelocation2, officeid, employeetype) <> (EmprelationsRow.tupled, EmprelationsRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(personnumber), Rep.Some(login), Rep.Some(firstname), nickname, Rep.Some(lastname), managerid, Rep.Some(directs), Rep.Some(reports), Rep.Some(reportscontractor), Rep.Some(companycode), Rep.Some(companycodename), Rep.Some(costcenter), Rep.Some(personalarea), Rep.Some(personalsubarea), Rep.Some(employeegroup), Rep.Some(position), Rep.Some(agency), executivename, officelocation, officelocation2, officeid, employeetype).shaped.<>({r=>import r._; _1.map(_=> EmprelationsRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6, _7.get, _8.get, _9.get, _10.get, _11.get, _12.get, _13.get, _14.get, _15.get, _16.get, _17.get, _18, _19, _20, _21, _22)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -664,8 +696,8 @@ trait Tables {
     prs => import prs._
     EmptagRow.tupled((<<[Long], <<[String], <<[java.sql.Date], <<[String]))
   }
-  /** Table description of table emptag. Objects of this class serve as prototypes for rows in queries. */
-  class Emptag(_tableTag: Tag) extends profile.api.Table[EmptagRow](_tableTag, Some("offline"), "emptag") {
+  /** Table description of table EmpTag. Objects of this class serve as prototypes for rows in queries. */
+  class Emptag(_tableTag: Tag) extends profile.api.Table[EmptagRow](_tableTag, Some("offline"), "EmpTag") {
     def * = (id, login, dateadded, tagtext) <> (EmptagRow.tupled, EmptagRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(login), Rep.Some(dateadded), Rep.Some(tagtext)).shaped.<>({r=>import r._; _1.map(_=> EmptagRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -687,6 +719,35 @@ trait Tables {
   /** Collection-like TableQuery object for table Emptag */
   lazy val Emptag = new TableQuery(tag => new Emptag(tag))
 
+  /** Entity class storing rows of table Featureflag
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(45,true)
+   *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0) */
+  case class FeatureflagRow(id: Int, name: String, ordering: Long = 0L)
+  /** GetResult implicit for fetching FeatureflagRow objects using plain SQL queries */
+  implicit def GetResultFeatureflagRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[FeatureflagRow] = GR{
+    prs => import prs._
+    FeatureflagRow.tupled((<<[Int], <<[String], <<[Long]))
+  }
+  /** Table description of table featureflag. Objects of this class serve as prototypes for rows in queries. */
+  class Featureflag(_tableTag: Tag) extends profile.api.Table[FeatureflagRow](_tableTag, Some("offline"), "featureflag") {
+    def * = (id, name, ordering) <> (FeatureflagRow.tupled, FeatureflagRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ordering)).shaped.<>({r=>import r._; _1.map(_=> FeatureflagRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("name", O.Length(45,varying=true))
+    /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
+
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Featureflag */
+  lazy val Featureflag = new TableQuery(tag => new Featureflag(tag))
+
   /** Entity class storing rows of table Functionalarea
    *  @param functionalarea Database column functionalArea SqlType(BIGINT), PrimaryKey
    *  @param department Database column department SqlType(VARCHAR), Length(100,true), Default(None)
@@ -699,8 +760,8 @@ trait Tables {
     prs => import prs._
     FunctionalareaRow.tupled((<<[Long], <<?[String], <<?[String], <<?[String], <<?[String]))
   }
-  /** Table description of table functionalarea. Objects of this class serve as prototypes for rows in queries. */
-  class Functionalarea(_tableTag: Tag) extends profile.api.Table[FunctionalareaRow](_tableTag, Some("offline"), "functionalarea") {
+  /** Table description of table FunctionalArea. Objects of this class serve as prototypes for rows in queries. */
+  class Functionalarea(_tableTag: Tag) extends profile.api.Table[FunctionalareaRow](_tableTag, Some("offline"), "FunctionalArea") {
     def * = (functionalarea, department, shortname, pandlcategory, company) <> (FunctionalareaRow.tupled, FunctionalareaRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(functionalarea), department, shortname, pandlcategory, company).shaped.<>({r=>import r._; _1.map(_=> FunctionalareaRow.tupled((_1.get, _2, _3, _4, _5)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -732,8 +793,8 @@ trait Tables {
     prs => import prs._
     GitcommitRow.tupled((<<[String], <<[String], <<?[String], <<?[String], <<?[java.sql.Date], <<?[java.sql.Date]))
   }
-  /** Table description of table gitcommit. Objects of this class serve as prototypes for rows in queries. */
-  class Gitcommit(_tableTag: Tag) extends profile.api.Table[GitcommitRow](_tableTag, Some("offline"), "gitcommit") {
+  /** Table description of table GitCommit. Objects of this class serve as prototypes for rows in queries. */
+  class Gitcommit(_tableTag: Tag) extends profile.api.Table[GitcommitRow](_tableTag, Some("offline"), "GitCommit") {
     def * = (sha, message, committer, author, commitdate, authordate) <> (GitcommitRow.tupled, GitcommitRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(sha), Rep.Some(message), committer, author, commitdate, authordate).shaped.<>({r=>import r._; _1.map(_=> GitcommitRow.tupled((_1.get, _2.get, _3, _4, _5, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -774,8 +835,8 @@ trait Tables {
     prs => import prs._
     GitissueRow.tupled((<<[Long], <<[Long], <<[String], <<[String], <<[String], <<?[String], <<?[java.sql.Date], <<?[java.sql.Date], <<?[java.sql.Date], <<?[String]))
   }
-  /** Table description of table gitissue. Objects of this class serve as prototypes for rows in queries. */
-  class Gitissue(_tableTag: Tag) extends profile.api.Table[GitissueRow](_tableTag, Some("offline"), "gitissue") {
+  /** Table description of table GitIssue. Objects of this class serve as prototypes for rows in queries. */
+  class Gitissue(_tableTag: Tag) extends profile.api.Table[GitissueRow](_tableTag, Some("offline"), "GitIssue") {
     def * = (id, issuenumber, user, title, state, assignee, createdat, updatedat, closedat, pullurl) <> (GitissueRow.tupled, GitissueRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(issuenumber), Rep.Some(user), Rep.Some(title), Rep.Some(state), assignee, createdat, updatedat, closedat, pullurl).shaped.<>({r=>import r._; _1.map(_=> GitissueRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6, _7, _8, _9, _10)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -817,8 +878,8 @@ trait Tables {
     prs => import prs._
     IndividualarchetypeRow.tupled((<<[Long], <<[String], <<[Long]))
   }
-  /** Table description of table individualarchetype. Objects of this class serve as prototypes for rows in queries. */
-  class Individualarchetype(_tableTag: Tag) extends profile.api.Table[IndividualarchetypeRow](_tableTag, Some("offline"), "individualarchetype") {
+  /** Table description of table IndividualArchetype. Objects of this class serve as prototypes for rows in queries. */
+  class Individualarchetype(_tableTag: Tag) extends profile.api.Table[IndividualarchetypeRow](_tableTag, Some("offline"), "IndividualArchetype") {
     def * = (id, login, archetypeid) <> (IndividualarchetypeRow.tupled, IndividualarchetypeRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(login), Rep.Some(archetypeid)).shaped.<>({r=>import r._; _1.map(_=> IndividualarchetypeRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -846,8 +907,8 @@ trait Tables {
     prs => import prs._
     IndividualbusinessunitRow.tupled((<<[Long], <<[String], <<[Long]))
   }
-  /** Table description of table individualbusinessunit. Objects of this class serve as prototypes for rows in queries. */
-  class Individualbusinessunit(_tableTag: Tag) extends profile.api.Table[IndividualbusinessunitRow](_tableTag, Some("offline"), "individualbusinessunit") {
+  /** Table description of table IndividualBusinessUnit. Objects of this class serve as prototypes for rows in queries. */
+  class Individualbusinessunit(_tableTag: Tag) extends profile.api.Table[IndividualbusinessunitRow](_tableTag, Some("offline"), "IndividualBusinessUnit") {
     def * = (id, login, businessunitid) <> (IndividualbusinessunitRow.tupled, IndividualbusinessunitRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(login), Rep.Some(businessunitid)).shaped.<>({r=>import r._; _1.map(_=> IndividualbusinessunitRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -889,8 +950,8 @@ trait Tables {
     prs => import prs._
     JiraissueRow.tupled((<<[String], <<[String], <<[String], <<[String], <<[String], <<?[String], <<?[Int], <<?[Int], <<?[Int], <<?[Int], <<?[Int], <<?[String], <<?[String], <<?[String], <<[java.sql.Date], <<?[java.sql.Date], <<?[java.sql.Date]))
   }
-  /** Table description of table jiraissue. Objects of this class serve as prototypes for rows in queries. */
-  class Jiraissue(_tableTag: Tag) extends profile.api.Table[JiraissueRow](_tableTag, Some("offline"), "jiraissue") {
+  /** Table description of table JiraIssue. Objects of this class serve as prototypes for rows in queries. */
+  class Jiraissue(_tableTag: Tag) extends profile.api.Table[JiraissueRow](_tableTag, Some("offline"), "JiraIssue") {
     def * = (id, self, jirakey, issuetype, summary, parent, timespent, timeestimate, progress, progresstotal, progresspercent, assignee, status, projectname, createdat, updatedat, resolvedat) <> (JiraissueRow.tupled, JiraissueRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(self), Rep.Some(jirakey), Rep.Some(issuetype), Rep.Some(summary), parent, timespent, timeestimate, progress, progresstotal, progresspercent, assignee, status, projectname, Rep.Some(createdat), updatedat, resolvedat).shaped.<>({r=>import r._; _1.map(_=> JiraissueRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15.get, _16, _17)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -949,8 +1010,8 @@ trait Tables {
     prs => import prs._
     JiraparentissueRow.tupled((<<[String], <<[String], <<[String], <<[String]))
   }
-  /** Table description of table jiraparentissue. Objects of this class serve as prototypes for rows in queries. */
-  class Jiraparentissue(_tableTag: Tag) extends profile.api.Table[JiraparentissueRow](_tableTag, Some("offline"), "jiraparentissue") {
+  /** Table description of table JiraParentIssue. Objects of this class serve as prototypes for rows in queries. */
+  class Jiraparentissue(_tableTag: Tag) extends profile.api.Table[JiraparentissueRow](_tableTag, Some("offline"), "JiraParentIssue") {
     def * = (id, jirakey, self, summary) <> (JiraparentissueRow.tupled, JiraparentissueRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(jirakey), Rep.Some(self), Rep.Some(summary)).shaped.<>({r=>import r._; _1.map(_=> JiraparentissueRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -986,8 +1047,8 @@ trait Tables {
     prs => import prs._
     KudostoRow.tupled((<<[Long], <<[String], <<[String], <<[java.sql.Date], <<[String], <<[Boolean], <<?[String], <<?[java.sql.Date], <<?[String]))
   }
-  /** Table description of table kudosto. Objects of this class serve as prototypes for rows in queries. */
-  class Kudosto(_tableTag: Tag) extends profile.api.Table[KudostoRow](_tableTag, Some("offline"), "kudosto") {
+  /** Table description of table KudosTo. Objects of this class serve as prototypes for rows in queries. */
+  class Kudosto(_tableTag: Tag) extends profile.api.Table[KudostoRow](_tableTag, Some("offline"), "KudosTo") {
     def * = (id, fromperson, toperson, dateadded, feedback, rejected, rejectedby, rejectedon, rejectedreason) <> (KudostoRow.tupled, KudostoRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(fromperson), Rep.Some(toperson), Rep.Some(dateadded), Rep.Some(feedback), Rep.Some(rejected), rejectedby, rejectedon, rejectedreason).shaped.<>({r=>import r._; _1.map(_=> KudostoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1014,6 +1075,72 @@ trait Tables {
   /** Collection-like TableQuery object for table Kudosto */
   lazy val Kudosto = new TableQuery(tag => new Kudosto(tag))
 
+  /** Entity class storing rows of table Managedclient
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
+   *  @param ismanaged Database column isManaged SqlType(BIT), Default(Some(true))
+   *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(30,true), Default(None) */
+  case class ManagedclientRow(id: Int, name: String, ismanaged: Option[Boolean] = Some(true), msprojectname: Option[String] = None)
+  /** GetResult implicit for fetching ManagedclientRow objects using plain SQL queries */
+  implicit def GetResultManagedclientRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[Boolean]], e3: GR[Option[String]]): GR[ManagedclientRow] = GR{
+    prs => import prs._
+    ManagedclientRow.tupled((<<[Int], <<[String], <<?[Boolean], <<?[String]))
+  }
+  /** Table description of table managedclient. Objects of this class serve as prototypes for rows in queries. */
+  class Managedclient(_tableTag: Tag) extends profile.api.Table[ManagedclientRow](_tableTag, Some("offline"), "managedclient") {
+    def * = (id, name, ismanaged, msprojectname) <> (ManagedclientRow.tupled, ManagedclientRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), ismanaged, msprojectname).shaped.<>({r=>import r._; _1.map(_=> ManagedclientRow.tupled((_1.get, _2.get, _3, _4)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column Name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
+    /** Database column isManaged SqlType(BIT), Default(Some(true)) */
+    val ismanaged: Rep[Option[Boolean]] = column[Option[Boolean]]("isManaged", O.Default(Some(true)))
+    /** Database column msprojectname SqlType(VARCHAR), Length(30,true), Default(None) */
+    val msprojectname: Rep[Option[String]] = column[Option[String]]("msprojectname", O.Length(30,varying=true), O.Default(None))
+
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Managedclient */
+  lazy val Managedclient = new TableQuery(tag => new Managedclient(tag))
+
+  /** Entity class storing rows of table Managedclientproductfeature
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param productfeatureid Database column productFeatureId SqlType(INT)
+   *  @param managedclientid Database column managedClientId SqlType(INT)
+   *  @param allocation Database column allocation SqlType(DECIMAL UNSIGNED), Default(1.00) */
+  case class ManagedclientproductfeatureRow(id: Int, productfeatureid: Int, managedclientid: Int, allocation: scala.math.BigDecimal = scala.math.BigDecimal("1.00"))
+  /** GetResult implicit for fetching ManagedclientproductfeatureRow objects using plain SQL queries */
+  implicit def GetResultManagedclientproductfeatureRow(implicit e0: GR[Int], e1: GR[scala.math.BigDecimal]): GR[ManagedclientproductfeatureRow] = GR{
+    prs => import prs._
+    ManagedclientproductfeatureRow.tupled((<<[Int], <<[Int], <<[Int], <<[scala.math.BigDecimal]))
+  }
+  /** Table description of table managedclientproductfeature. Objects of this class serve as prototypes for rows in queries. */
+  class Managedclientproductfeature(_tableTag: Tag) extends profile.api.Table[ManagedclientproductfeatureRow](_tableTag, Some("offline"), "managedclientproductfeature") {
+    def * = (id, productfeatureid, managedclientid, allocation) <> (ManagedclientproductfeatureRow.tupled, ManagedclientproductfeatureRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(productfeatureid), Rep.Some(managedclientid), Rep.Some(allocation)).shaped.<>({r=>import r._; _1.map(_=> ManagedclientproductfeatureRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column productFeatureId SqlType(INT) */
+    val productfeatureid: Rep[Int] = column[Int]("productFeatureId")
+    /** Database column managedClientId SqlType(INT) */
+    val managedclientid: Rep[Int] = column[Int]("managedClientId")
+    /** Database column allocation SqlType(DECIMAL UNSIGNED), Default(1.00) */
+    val allocation: Rep[scala.math.BigDecimal] = column[scala.math.BigDecimal]("allocation", O.Default(scala.math.BigDecimal("1.00")))
+
+    /** Foreign key referencing Managedclient (database name ManagedClientProductFeature_ibfk_2) */
+    lazy val managedclientFk = foreignKey("ManagedClientProductFeature_ibfk_2", managedclientid, Managedclient)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Productfeature (database name ManagedClientProductFeature_ibfk_1) */
+    lazy val productfeatureFk = foreignKey("ManagedClientProductFeature_ibfk_1", productfeatureid, Productfeature)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Managedclientproductfeature */
+  lazy val Managedclientproductfeature = new TableQuery(tag => new Managedclientproductfeature(tag))
+
   /** Entity class storing rows of table Managerarchetype
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param name Database column name SqlType(VARCHAR), Length(254,true)
@@ -1029,8 +1156,8 @@ trait Tables {
     prs => import prs._
     ManagerarchetypeRow.tupled((<<[Long], <<[String], <<[Long], <<?[Long], <<?[String], <<?[String], <<?[String], <<?[String]))
   }
-  /** Table description of table managerarchetype. Objects of this class serve as prototypes for rows in queries. */
-  class Managerarchetype(_tableTag: Tag) extends profile.api.Table[ManagerarchetypeRow](_tableTag, Some("offline"), "managerarchetype") {
+  /** Table description of table ManagerArchetype. Objects of this class serve as prototypes for rows in queries. */
+  class Managerarchetype(_tableTag: Tag) extends profile.api.Table[ManagerarchetypeRow](_tableTag, Some("offline"), "ManagerArchetype") {
     def * = (id, name, minspan, maxspan, maturity, timespent, taskrepeatability, subordinatesskills) <> (ManagerarchetypeRow.tupled, ManagerarchetypeRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(minspan), maxspan, maturity, timespent, taskrepeatability, subordinatesskills).shaped.<>({r=>import r._; _1.map(_=> ManagerarchetypeRow.tupled((_1.get, _2.get, _3.get, _4, _5, _6, _7, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1067,8 +1194,8 @@ trait Tables {
     prs => import prs._
     MatrixteamRow.tupled((<<[Long], <<[String], <<[Boolean], <<?[String], <<?[Long]))
   }
-  /** Table description of table matrixteam. Objects of this class serve as prototypes for rows in queries. */
-  class Matrixteam(_tableTag: Tag) extends profile.api.Table[MatrixteamRow](_tableTag, Some("offline"), "matrixteam") {
+  /** Table description of table MatrixTeam. Objects of this class serve as prototypes for rows in queries. */
+  class Matrixteam(_tableTag: Tag) extends profile.api.Table[MatrixteamRow](_tableTag, Some("offline"), "MatrixTeam") {
     def * = (id, name, ispe, owner, parent) <> (MatrixteamRow.tupled, MatrixteamRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ispe), owner, parent).shaped.<>({r=>import r._; _1.map(_=> MatrixteamRow.tupled((_1.get, _2.get, _3.get, _4, _5)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1103,8 +1230,8 @@ trait Tables {
     prs => import prs._
     MatrixteammemberRow.tupled((<<[Long], <<[Long], <<[String]))
   }
-  /** Table description of table matrixteammember. Objects of this class serve as prototypes for rows in queries. */
-  class Matrixteammember(_tableTag: Tag) extends profile.api.Table[MatrixteammemberRow](_tableTag, Some("offline"), "matrixteammember") {
+  /** Table description of table MatrixTeamMember. Objects of this class serve as prototypes for rows in queries. */
+  class Matrixteammember(_tableTag: Tag) extends profile.api.Table[MatrixteammemberRow](_tableTag, Some("offline"), "MatrixTeamMember") {
     def * = (id, matrixteammemberid, login) <> (MatrixteammemberRow.tupled, MatrixteammemberRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(matrixteammemberid), Rep.Some(login)).shaped.<>({r=>import r._; _1.map(_=> MatrixteammemberRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1135,8 +1262,8 @@ trait Tables {
     prs => import prs._
     MilestoneRow.tupled((<<[Long], <<[Int], <<[String], <<[String], <<[Boolean], <<[Int]))
   }
-  /** Table description of table milestone. Objects of this class serve as prototypes for rows in queries. */
-  class Milestone(_tableTag: Tag) extends profile.api.Table[MilestoneRow](_tableTag, Some("offline"), "milestone") {
+  /** Table description of table Milestone. Objects of this class serve as prototypes for rows in queries. */
+  class Milestone(_tableTag: Tag) extends profile.api.Table[MilestoneRow](_tableTag, Some("offline"), "Milestone") {
     def * = (id, order, shorttext, longtext, isautomated, starlevel) <> (MilestoneRow.tupled, MilestoneRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(order), Rep.Some(shorttext), Rep.Some(longtext), Rep.Some(isautomated), Rep.Some(starlevel)).shaped.<>({r=>import r._; _1.map(_=> MilestoneRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1174,8 +1301,8 @@ trait Tables {
     prs => import prs._
     OfficeRow.tupled((<<[Long], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String]))
   }
-  /** Table description of table office. Objects of this class serve as prototypes for rows in queries. */
-  class Office(_tableTag: Tag) extends profile.api.Table[OfficeRow](_tableTag, Some("offline"), "office") {
+  /** Table description of table Office. Objects of this class serve as prototypes for rows in queries. */
+  class Office(_tableTag: Tag) extends profile.api.Table[OfficeRow](_tableTag, Some("offline"), "Office") {
     def * = (id, city, street, pobox, region, zipcode, country) <> (OfficeRow.tupled, OfficeRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), city, street, pobox, region, zipcode, country).shaped.<>({r=>import r._; _1.map(_=> OfficeRow.tupled((_1.get, _2, _3, _4, _5, _6, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1212,8 +1339,8 @@ trait Tables {
     prs => import prs._
     OkrkeyresultRow.tupled((<<[Long], <<[Long], <<[java.sql.Date], <<[String], <<?[String], <<?[Int], <<[Boolean]))
   }
-  /** Table description of table okrkeyresult. Objects of this class serve as prototypes for rows in queries. */
-  class Okrkeyresult(_tableTag: Tag) extends profile.api.Table[OkrkeyresultRow](_tableTag, Some("offline"), "okrkeyresult") {
+  /** Table description of table OKRKeyResult. Objects of this class serve as prototypes for rows in queries. */
+  class Okrkeyresult(_tableTag: Tag) extends profile.api.Table[OkrkeyresultRow](_tableTag, Some("offline"), "OKRKeyResult") {
     def * = (id, objectiveid, dateadded, objective, description, score, completed) <> (OkrkeyresultRow.tupled, OkrkeyresultRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(objectiveid), Rep.Some(dateadded), Rep.Some(objective), description, score, Rep.Some(completed)).shaped.<>({r=>import r._; _1.map(_=> OkrkeyresultRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1251,8 +1378,8 @@ trait Tables {
     prs => import prs._
     OkrobjectiveRow.tupled((<<[Long], <<[String], <<[java.sql.Date], <<[String], <<?[java.sql.Date], <<?[Int], <<[Boolean], <<[Boolean]))
   }
-  /** Table description of table okrobjective. Objects of this class serve as prototypes for rows in queries. */
-  class Okrobjective(_tableTag: Tag) extends profile.api.Table[OkrobjectiveRow](_tableTag, Some("offline"), "okrobjective") {
+  /** Table description of table OKRObjective. Objects of this class serve as prototypes for rows in queries. */
+  class Okrobjective(_tableTag: Tag) extends profile.api.Table[OkrobjectiveRow](_tableTag, Some("offline"), "OKRObjective") {
     def * = (id, login, dateadded, objective, quarterdate, score, completed, retired) <> (OkrobjectiveRow.tupled, OkrobjectiveRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(login), Rep.Some(dateadded), Rep.Some(objective), quarterdate, score, Rep.Some(completed), Rep.Some(retired)).shaped.<>({r=>import r._; _1.map(_=> OkrobjectiveRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7.get, _8.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1281,10 +1408,10 @@ trait Tables {
    *  @param id Database column id SqlType(INT), PrimaryKey
    *  @param hash Database column hash SqlType(VARCHAR), Length(255,true)
    *  @param appliedAt Database column applied_at SqlType(TIMESTAMP)
-   *  @param applyScript Database column apply_script SqlType(MEDIUMTEXT), Length(16777215,true), Default(None)
-   *  @param revertScript Database column revert_script SqlType(MEDIUMTEXT), Length(16777215,true), Default(None)
+   *  @param applyScript Database column apply_script SqlType(TEXT), Default(None)
+   *  @param revertScript Database column revert_script SqlType(TEXT), Default(None)
    *  @param state Database column state SqlType(VARCHAR), Length(255,true), Default(None)
-   *  @param lastProblem Database column last_problem SqlType(MEDIUMTEXT), Length(16777215,true), Default(None) */
+   *  @param lastProblem Database column last_problem SqlType(TEXT), Default(None) */
   case class PlayEvolutionsRow(id: Int, hash: String, appliedAt: java.sql.Timestamp, applyScript: Option[String] = None, revertScript: Option[String] = None, state: Option[String] = None, lastProblem: Option[String] = None)
   /** GetResult implicit for fetching PlayEvolutionsRow objects using plain SQL queries */
   implicit def GetResultPlayEvolutionsRow(implicit e0: GR[Int], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[String]]): GR[PlayEvolutionsRow] = GR{
@@ -1303,14 +1430,14 @@ trait Tables {
     val hash: Rep[String] = column[String]("hash", O.Length(255,varying=true))
     /** Database column applied_at SqlType(TIMESTAMP) */
     val appliedAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("applied_at")
-    /** Database column apply_script SqlType(MEDIUMTEXT), Length(16777215,true), Default(None) */
-    val applyScript: Rep[Option[String]] = column[Option[String]]("apply_script", O.Length(16777215,varying=true), O.Default(None))
-    /** Database column revert_script SqlType(MEDIUMTEXT), Length(16777215,true), Default(None) */
-    val revertScript: Rep[Option[String]] = column[Option[String]]("revert_script", O.Length(16777215,varying=true), O.Default(None))
+    /** Database column apply_script SqlType(TEXT), Default(None) */
+    val applyScript: Rep[Option[String]] = column[Option[String]]("apply_script", O.Default(None))
+    /** Database column revert_script SqlType(TEXT), Default(None) */
+    val revertScript: Rep[Option[String]] = column[Option[String]]("revert_script", O.Default(None))
     /** Database column state SqlType(VARCHAR), Length(255,true), Default(None) */
     val state: Rep[Option[String]] = column[Option[String]]("state", O.Length(255,varying=true), O.Default(None))
-    /** Database column last_problem SqlType(MEDIUMTEXT), Length(16777215,true), Default(None) */
-    val lastProblem: Rep[Option[String]] = column[Option[String]]("last_problem", O.Length(16777215,varying=true), O.Default(None))
+    /** Database column last_problem SqlType(TEXT), Default(None) */
+    val lastProblem: Rep[Option[String]] = column[Option[String]]("last_problem", O.Default(None))
   }
   /** Collection-like TableQuery object for table PlayEvolutions */
   lazy val PlayEvolutions = new TableQuery(tag => new PlayEvolutions(tag))
@@ -1325,8 +1452,8 @@ trait Tables {
     prs => import prs._
     PositiontypeRow.tupled((<<[Long], <<[String], <<[String]))
   }
-  /** Table description of table positiontype. Objects of this class serve as prototypes for rows in queries. */
-  class Positiontype(_tableTag: Tag) extends profile.api.Table[PositiontypeRow](_tableTag, Some("offline"), "positiontype") {
+  /** Table description of table PositionType. Objects of this class serve as prototypes for rows in queries. */
+  class Positiontype(_tableTag: Tag) extends profile.api.Table[PositiontypeRow](_tableTag, Some("offline"), "PositionType") {
     def * = (id, position, positiontype) <> (PositiontypeRow.tupled, PositiontypeRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(position), Rep.Some(positiontype)).shaped.<>({r=>import r._; _1.map(_=> PositiontypeRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1344,6 +1471,162 @@ trait Tables {
   /** Collection-like TableQuery object for table Positiontype */
   lazy val Positiontype = new TableQuery(tag => new Positiontype(tag))
 
+  /** Entity class storing rows of table Productfeature
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(200,true)
+   *  @param execsummary Database column execSummary SqlType(TEXT)
+   *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0)
+   *  @param stageid Database column stageId SqlType(INT), Default(1)
+   *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None)
+   *  @param isactive Database column isActive SqlType(BIT), Default(Some(true))
+   *  @param iscid Database column isCID SqlType(BIT), Default(Some(false))
+   *  @param isanchor Database column isAnchor SqlType(BIT), Default(Some(false))
+   *  @param mspriority Database column msPriority SqlType(INT), Default(Some(0))
+   *  @param start Database column start SqlType(DATE), Default(None)
+   *  @param finish Database column finish SqlType(DATE), Default(None) */
+  case class ProductfeatureRow(id: Int, name: String, execsummary: String, ordering: Long = 0L, stageid: Int = 1, msprojectname: Option[String] = None, isactive: Option[Boolean] = Some(true), iscid: Option[Boolean] = Some(false), isanchor: Option[Boolean] = Some(false), mspriority: Option[Int] = Some(0), start: Option[java.sql.Date] = None, finish: Option[java.sql.Date] = None)
+  /** GetResult implicit for fetching ProductfeatureRow objects using plain SQL queries */
+  implicit def GetResultProductfeatureRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long], e3: GR[Option[String]], e4: GR[Option[Boolean]], e5: GR[Option[Int]], e6: GR[Option[java.sql.Date]]): GR[ProductfeatureRow] = GR{
+    prs => import prs._
+    ProductfeatureRow.tupled((<<[Int], <<[String], <<[String], <<[Long], <<[Int], <<?[String], <<?[Boolean], <<?[Boolean], <<?[Boolean], <<?[Int], <<?[java.sql.Date], <<?[java.sql.Date]))
+  }
+  /** Table description of table productfeature. Objects of this class serve as prototypes for rows in queries. */
+  class Productfeature(_tableTag: Tag) extends profile.api.Table[ProductfeatureRow](_tableTag, Some("offline"), "productfeature") {
+    def * = (id, name, execsummary, ordering, stageid, msprojectname, isactive, iscid, isanchor, mspriority, start, finish) <> (ProductfeatureRow.tupled, ProductfeatureRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(execsummary), Rep.Some(ordering), Rep.Some(stageid), msprojectname, isactive, iscid, isanchor, mspriority, start, finish).shaped.<>({r=>import r._; _1.map(_=> ProductfeatureRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6, _7, _8, _9, _10, _11, _12)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(200,true) */
+    val name: Rep[String] = column[String]("name", O.Length(200,varying=true))
+    /** Database column execSummary SqlType(TEXT) */
+    val execsummary: Rep[String] = column[String]("execSummary")
+    /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
+    /** Database column stageId SqlType(INT), Default(1) */
+    val stageid: Rep[Int] = column[Int]("stageId", O.Default(1))
+    /** Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None) */
+    val msprojectname: Rep[Option[String]] = column[Option[String]]("msprojectname", O.Length(200,varying=true), O.Default(None))
+    /** Database column isActive SqlType(BIT), Default(Some(true)) */
+    val isactive: Rep[Option[Boolean]] = column[Option[Boolean]]("isActive", O.Default(Some(true)))
+    /** Database column isCID SqlType(BIT), Default(Some(false)) */
+    val iscid: Rep[Option[Boolean]] = column[Option[Boolean]]("isCID", O.Default(Some(false)))
+    /** Database column isAnchor SqlType(BIT), Default(Some(false)) */
+    val isanchor: Rep[Option[Boolean]] = column[Option[Boolean]]("isAnchor", O.Default(Some(false)))
+    /** Database column msPriority SqlType(INT), Default(Some(0)) */
+    val mspriority: Rep[Option[Int]] = column[Option[Int]]("msPriority", O.Default(Some(0)))
+    /** Database column start SqlType(DATE), Default(None) */
+    val start: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("start", O.Default(None))
+    /** Database column finish SqlType(DATE), Default(None) */
+    val finish: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("finish", O.Default(None))
+
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Productfeature */
+  lazy val Productfeature = new TableQuery(tag => new Productfeature(tag))
+
+  /** Entity class storing rows of table Productfeatureflag
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param productfeatureid Database column productFeatureId SqlType(INT)
+   *  @param featureflagid Database column featureFlagId SqlType(INT) */
+  case class ProductfeatureflagRow(id: Int, productfeatureid: Int, featureflagid: Int)
+  /** GetResult implicit for fetching ProductfeatureflagRow objects using plain SQL queries */
+  implicit def GetResultProductfeatureflagRow(implicit e0: GR[Int]): GR[ProductfeatureflagRow] = GR{
+    prs => import prs._
+    ProductfeatureflagRow.tupled((<<[Int], <<[Int], <<[Int]))
+  }
+  /** Table description of table productfeatureflag. Objects of this class serve as prototypes for rows in queries. */
+  class Productfeatureflag(_tableTag: Tag) extends profile.api.Table[ProductfeatureflagRow](_tableTag, Some("offline"), "productfeatureflag") {
+    def * = (id, productfeatureid, featureflagid) <> (ProductfeatureflagRow.tupled, ProductfeatureflagRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(productfeatureid), Rep.Some(featureflagid)).shaped.<>({r=>import r._; _1.map(_=> ProductfeatureflagRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column productFeatureId SqlType(INT) */
+    val productfeatureid: Rep[Int] = column[Int]("productFeatureId")
+    /** Database column featureFlagId SqlType(INT) */
+    val featureflagid: Rep[Int] = column[Int]("featureFlagId")
+
+    /** Foreign key referencing Featureflag (database name productfeatureflag_ibfk_2) */
+    lazy val featureflagFk = foreignKey("productfeatureflag_ibfk_2", featureflagid, Featureflag)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Productfeature (database name productfeatureflag_ibfk_1) */
+    lazy val productfeatureFk = foreignKey("productfeatureflag_ibfk_1", productfeatureid, Productfeature)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Productfeatureflag */
+  lazy val Productfeatureflag = new TableQuery(tag => new Productfeatureflag(tag))
+
+  /** Entity class storing rows of table Producttrack
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
+   *  @param ordering Database column Ordering SqlType(INT UNSIGNED), Default(0)
+   *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(30,true), Default(None) */
+  case class ProducttrackRow(id: Int, name: String, ordering: Long = 0L, msprojectname: Option[String] = None)
+  /** GetResult implicit for fetching ProducttrackRow objects using plain SQL queries */
+  implicit def GetResultProducttrackRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long], e3: GR[Option[String]]): GR[ProducttrackRow] = GR{
+    prs => import prs._
+    ProducttrackRow.tupled((<<[Int], <<[String], <<[Long], <<?[String]))
+  }
+  /** Table description of table producttrack. Objects of this class serve as prototypes for rows in queries. */
+  class Producttrack(_tableTag: Tag) extends profile.api.Table[ProducttrackRow](_tableTag, Some("offline"), "producttrack") {
+    def * = (id, name, ordering, msprojectname) <> (ProducttrackRow.tupled, ProducttrackRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ordering), msprojectname).shaped.<>({r=>import r._; _1.map(_=> ProducttrackRow.tupled((_1.get, _2.get, _3.get, _4)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column Name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
+    /** Database column Ordering SqlType(INT UNSIGNED), Default(0) */
+    val ordering: Rep[Long] = column[Long]("Ordering", O.Default(0L))
+    /** Database column msprojectname SqlType(VARCHAR), Length(30,true), Default(None) */
+    val msprojectname: Rep[Option[String]] = column[Option[String]]("msprojectname", O.Length(30,varying=true), O.Default(None))
+
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Producttrack */
+  lazy val Producttrack = new TableQuery(tag => new Producttrack(tag))
+
+  /** Entity class storing rows of table Producttrackfeature
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param productfeatureid Database column productFeatureId SqlType(INT)
+   *  @param producttrackid Database column productTrackId SqlType(INT)
+   *  @param allocation Database column allocation SqlType(DECIMAL UNSIGNED)
+   *  @param priority Database column priority SqlType(INT) */
+  case class ProducttrackfeatureRow(id: Int, productfeatureid: Int, producttrackid: Int, allocation: scala.math.BigDecimal, priority: Int)
+  /** GetResult implicit for fetching ProducttrackfeatureRow objects using plain SQL queries */
+  implicit def GetResultProducttrackfeatureRow(implicit e0: GR[Int], e1: GR[scala.math.BigDecimal]): GR[ProducttrackfeatureRow] = GR{
+    prs => import prs._
+    ProducttrackfeatureRow.tupled((<<[Int], <<[Int], <<[Int], <<[scala.math.BigDecimal], <<[Int]))
+  }
+  /** Table description of table producttrackfeature. Objects of this class serve as prototypes for rows in queries. */
+  class Producttrackfeature(_tableTag: Tag) extends profile.api.Table[ProducttrackfeatureRow](_tableTag, Some("offline"), "producttrackfeature") {
+    def * = (id, productfeatureid, producttrackid, allocation, priority) <> (ProducttrackfeatureRow.tupled, ProducttrackfeatureRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(productfeatureid), Rep.Some(producttrackid), Rep.Some(allocation), Rep.Some(priority)).shaped.<>({r=>import r._; _1.map(_=> ProducttrackfeatureRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column productFeatureId SqlType(INT) */
+    val productfeatureid: Rep[Int] = column[Int]("productFeatureId")
+    /** Database column productTrackId SqlType(INT) */
+    val producttrackid: Rep[Int] = column[Int]("productTrackId")
+    /** Database column allocation SqlType(DECIMAL UNSIGNED) */
+    val allocation: Rep[scala.math.BigDecimal] = column[scala.math.BigDecimal]("allocation")
+    /** Database column priority SqlType(INT) */
+    val priority: Rep[Int] = column[Int]("priority")
+
+    /** Foreign key referencing Productfeature (database name producttrackfeature_ibfk_1) */
+    lazy val productfeatureFk = foreignKey("producttrackfeature_ibfk_1", productfeatureid, Productfeature)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Producttrack (database name producttrackfeature_ibfk_2) */
+    lazy val producttrackFk = foreignKey("producttrackfeature_ibfk_2", producttrackid, Producttrack)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Producttrackfeature */
+  lazy val Producttrackfeature = new TableQuery(tag => new Producttrackfeature(tag))
+
   /** Entity class storing rows of table Profitcenter
    *  @param profitcenter Database column profitCenter SqlType(BIGINT), PrimaryKey
    *  @param shortname Database column shortname SqlType(VARCHAR), Length(50,true), Default(None) */
@@ -1353,8 +1636,8 @@ trait Tables {
     prs => import prs._
     ProfitcenterRow.tupled((<<[Long], <<?[String]))
   }
-  /** Table description of table profitcenter. Objects of this class serve as prototypes for rows in queries. */
-  class Profitcenter(_tableTag: Tag) extends profile.api.Table[ProfitcenterRow](_tableTag, Some("offline"), "profitcenter") {
+  /** Table description of table ProfitCenter. Objects of this class serve as prototypes for rows in queries. */
+  class Profitcenter(_tableTag: Tag) extends profile.api.Table[ProfitcenterRow](_tableTag, Some("offline"), "ProfitCenter") {
     def * = (profitcenter, shortname) <> (ProfitcenterRow.tupled, ProfitcenterRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(profitcenter), shortname).shaped.<>({r=>import r._; _1.map(_=> ProfitcenterRow.tupled((_1.get, _2)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1367,6 +1650,364 @@ trait Tables {
   /** Collection-like TableQuery object for table Profitcenter */
   lazy val Profitcenter = new TableQuery(tag => new Profitcenter(tag))
 
+  /** Entity class storing rows of table Project
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column Name SqlType(VARCHAR), Length(200,true)
+   *  @param execsummary Database column ExecSummary SqlType(MEDIUMTEXT), Length(16777215,true)
+   *  @param currentstatusid Database column currentStatusId SqlType(INT)
+   *  @param started Database column started SqlType(DATE), Default(None)
+   *  @param finished Database column finished SqlType(DATE), Default(None)
+   *  @param isactive Database column isActive SqlType(BIT), Default(true)
+   *  @param productfeatureid Database column productFeatureId SqlType(INT), Default(1)
+   *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None)
+   *  @param constrainttype Database column constraintType SqlType(CHAR), Length(4,false), Default(ASAP)
+   *  @param constraintdate Database column constraintDate SqlType(DATE), Default(None) */
+  case class ProjectRow(id: Int, name: String, execsummary: String, currentstatusid: Int, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None, isactive: Boolean = true, productfeatureid: Int = 1, msprojectname: Option[String] = None, constrainttype: String = "ASAP", constraintdate: Option[java.sql.Date] = None)
+  /** GetResult implicit for fetching ProjectRow objects using plain SQL queries */
+  implicit def GetResultProjectRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Date]], e3: GR[Boolean], e4: GR[Option[String]]): GR[ProjectRow] = GR{
+    prs => import prs._
+    ProjectRow.tupled((<<[Int], <<[String], <<[String], <<[Int], <<?[java.sql.Date], <<?[java.sql.Date], <<[Boolean], <<[Int], <<?[String], <<[String], <<?[java.sql.Date]))
+  }
+  /** Table description of table project. Objects of this class serve as prototypes for rows in queries. */
+  class Project(_tableTag: Tag) extends profile.api.Table[ProjectRow](_tableTag, Some("offline"), "project") {
+    def * = (id, name, execsummary, currentstatusid, started, finished, isactive, productfeatureid, msprojectname, constrainttype, constraintdate) <> (ProjectRow.tupled, ProjectRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(execsummary), Rep.Some(currentstatusid), started, finished, Rep.Some(isactive), Rep.Some(productfeatureid), msprojectname, Rep.Some(constrainttype), constraintdate).shaped.<>({r=>import r._; _1.map(_=> ProjectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7.get, _8.get, _9, _10.get, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column Name SqlType(VARCHAR), Length(200,true) */
+    val name: Rep[String] = column[String]("Name", O.Length(200,varying=true))
+    /** Database column ExecSummary SqlType(MEDIUMTEXT), Length(16777215,true) */
+    val execsummary: Rep[String] = column[String]("ExecSummary", O.Length(16777215,varying=true))
+    /** Database column currentStatusId SqlType(INT) */
+    val currentstatusid: Rep[Int] = column[Int]("currentStatusId")
+    /** Database column started SqlType(DATE), Default(None) */
+    val started: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("started", O.Default(None))
+    /** Database column finished SqlType(DATE), Default(None) */
+    val finished: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("finished", O.Default(None))
+    /** Database column isActive SqlType(BIT), Default(true) */
+    val isactive: Rep[Boolean] = column[Boolean]("isActive", O.Default(true))
+    /** Database column productFeatureId SqlType(INT), Default(1) */
+    val productfeatureid: Rep[Int] = column[Int]("productFeatureId", O.Default(1))
+    /** Database column msprojectname SqlType(VARCHAR), Length(200,true), Default(None) */
+    val msprojectname: Rep[Option[String]] = column[Option[String]]("msprojectname", O.Length(200,varying=true), O.Default(None))
+    /** Database column constraintType SqlType(CHAR), Length(4,false), Default(ASAP) */
+    val constrainttype: Rep[String] = column[String]("constraintType", O.Length(4,varying=false), O.Default("ASAP"))
+    /** Database column constraintDate SqlType(DATE), Default(None) */
+    val constraintdate: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("constraintDate", O.Default(None))
+
+    /** Foreign key referencing Statuscolor (database name Project_ibfk_1) */
+    lazy val statuscolorFk = foreignKey("Project_ibfk_1", currentstatusid, Statuscolor)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+
+    /** Index over (name) (database name Name) */
+    val index1 = index("Name", name)
+  }
+  /** Collection-like TableQuery object for table Project */
+  lazy val Project = new TableQuery(tag => new Project(tag))
+
+  /** Entity class storing rows of table Projectarea
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param projectid Database column projectId SqlType(INT)
+   *  @param areaid Database column areaId SqlType(INT) */
+  case class ProjectareaRow(id: Int, projectid: Int, areaid: Int)
+  /** GetResult implicit for fetching ProjectareaRow objects using plain SQL queries */
+  implicit def GetResultProjectareaRow(implicit e0: GR[Int]): GR[ProjectareaRow] = GR{
+    prs => import prs._
+    ProjectareaRow.tupled((<<[Int], <<[Int], <<[Int]))
+  }
+  /** Table description of table projectarea. Objects of this class serve as prototypes for rows in queries. */
+  class Projectarea(_tableTag: Tag) extends profile.api.Table[ProjectareaRow](_tableTag, Some("offline"), "projectarea") {
+    def * = (id, projectid, areaid) <> (ProjectareaRow.tupled, ProjectareaRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(projectid), Rep.Some(areaid)).shaped.<>({r=>import r._; _1.map(_=> ProjectareaRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column projectId SqlType(INT) */
+    val projectid: Rep[Int] = column[Int]("projectId")
+    /** Database column areaId SqlType(INT) */
+    val areaid: Rep[Int] = column[Int]("areaId")
+
+    /** Foreign key referencing Project (database name ProjectArea_ibfk_1) */
+    lazy val projectFk = foreignKey("ProjectArea_ibfk_1", projectid, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+
+    /** Index over (areaid) (database name areaId) */
+    val index1 = index("areaId", areaid)
+  }
+  /** Collection-like TableQuery object for table Projectarea */
+  lazy val Projectarea = new TableQuery(tag => new Projectarea(tag))
+
+  /** Entity class storing rows of table Projectdependency
+   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param fromproject Database column fromProject SqlType(INT)
+   *  @param toproject Database column toProject SqlType(INT)
+   *  @param dependencytype Database column dependencytype SqlType(CHAR), Length(2,false), Default(FS) */
+  case class ProjectdependencyRow(id: Long, fromproject: Int, toproject: Int, dependencytype: String = "FS")
+  /** GetResult implicit for fetching ProjectdependencyRow objects using plain SQL queries */
+  implicit def GetResultProjectdependencyRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[String]): GR[ProjectdependencyRow] = GR{
+    prs => import prs._
+    ProjectdependencyRow.tupled((<<[Long], <<[Int], <<[Int], <<[String]))
+  }
+  /** Table description of table ProjectDependency. Objects of this class serve as prototypes for rows in queries. */
+  class Projectdependency(_tableTag: Tag) extends profile.api.Table[ProjectdependencyRow](_tableTag, Some("offline"), "ProjectDependency") {
+    def * = (id, fromproject, toproject, dependencytype) <> (ProjectdependencyRow.tupled, ProjectdependencyRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(fromproject), Rep.Some(toproject), Rep.Some(dependencytype)).shaped.<>({r=>import r._; _1.map(_=> ProjectdependencyRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column fromProject SqlType(INT) */
+    val fromproject: Rep[Int] = column[Int]("fromProject")
+    /** Database column toProject SqlType(INT) */
+    val toproject: Rep[Int] = column[Int]("toProject")
+    /** Database column dependencytype SqlType(CHAR), Length(2,false), Default(FS) */
+    val dependencytype: Rep[String] = column[String]("dependencytype", O.Length(2,varying=false), O.Default("FS"))
+
+    /** Foreign key referencing Project (database name ProjectDependency_ibfk_1) */
+    lazy val projectFk1 = foreignKey("ProjectDependency_ibfk_1", fromproject, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Project (database name ProjectDependency_ibfk_2) */
+    lazy val projectFk2 = foreignKey("ProjectDependency_ibfk_2", toproject, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Projectdependency */
+  lazy val Projectdependency = new TableQuery(tag => new Projectdependency(tag))
+
+  /** Entity class storing rows of table Projectfeature
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param projectid Database column projectId SqlType(INT)
+   *  @param releaseid Database column releaseId SqlType(INT)
+   *  @param parentfeatureid Database column parentFeatureId SqlType(INT), Default(None)
+   *  @param feature Database column feature SqlType(VARCHAR), Length(45,true)
+   *  @param status Database column status SqlType(INT), Default(None)
+   *  @param timeline Database column timeLine SqlType(DATE), Default(None)
+   *  @param timelinestring Database column timeLineString SqlType(VARCHAR), Length(45,true), Default(None)
+   *  @param hidden Database column hidden SqlType(BIT), Default(Some(false)) */
+  case class ProjectfeatureRow(id: Int, projectid: Int, releaseid: Int, parentfeatureid: Option[Int] = None, feature: String, status: Option[Int] = None, timeline: Option[java.sql.Date] = None, timelinestring: Option[String] = None, hidden: Option[Boolean] = Some(false))
+  /** GetResult implicit for fetching ProjectfeatureRow objects using plain SQL queries */
+  implicit def GetResultProjectfeatureRow(implicit e0: GR[Int], e1: GR[Option[Int]], e2: GR[String], e3: GR[Option[java.sql.Date]], e4: GR[Option[String]], e5: GR[Option[Boolean]]): GR[ProjectfeatureRow] = GR{
+    prs => import prs._
+    ProjectfeatureRow.tupled((<<[Int], <<[Int], <<[Int], <<?[Int], <<[String], <<?[Int], <<?[java.sql.Date], <<?[String], <<?[Boolean]))
+  }
+  /** Table description of table projectfeature. Objects of this class serve as prototypes for rows in queries. */
+  class Projectfeature(_tableTag: Tag) extends profile.api.Table[ProjectfeatureRow](_tableTag, Some("offline"), "projectfeature") {
+    def * = (id, projectid, releaseid, parentfeatureid, feature, status, timeline, timelinestring, hidden) <> (ProjectfeatureRow.tupled, ProjectfeatureRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(projectid), Rep.Some(releaseid), parentfeatureid, Rep.Some(feature), status, timeline, timelinestring, hidden).shaped.<>({r=>import r._; _1.map(_=> ProjectfeatureRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6, _7, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column projectId SqlType(INT) */
+    val projectid: Rep[Int] = column[Int]("projectId")
+    /** Database column releaseId SqlType(INT) */
+    val releaseid: Rep[Int] = column[Int]("releaseId")
+    /** Database column parentFeatureId SqlType(INT), Default(None) */
+    val parentfeatureid: Rep[Option[Int]] = column[Option[Int]]("parentFeatureId", O.Default(None))
+    /** Database column feature SqlType(VARCHAR), Length(45,true) */
+    val feature: Rep[String] = column[String]("feature", O.Length(45,varying=true))
+    /** Database column status SqlType(INT), Default(None) */
+    val status: Rep[Option[Int]] = column[Option[Int]]("status", O.Default(None))
+    /** Database column timeLine SqlType(DATE), Default(None) */
+    val timeline: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("timeLine", O.Default(None))
+    /** Database column timeLineString SqlType(VARCHAR), Length(45,true), Default(None) */
+    val timelinestring: Rep[Option[String]] = column[Option[String]]("timeLineString", O.Length(45,varying=true), O.Default(None))
+    /** Database column hidden SqlType(BIT), Default(Some(false)) */
+    val hidden: Rep[Option[Boolean]] = column[Option[Boolean]]("hidden", O.Default(Some(false)))
+
+    /** Foreign key referencing Project (database name ProjectFeature_ibfk_1) */
+    lazy val projectFk = foreignKey("ProjectFeature_ibfk_1", projectid, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Projectfeature (database name ProjectFeature_ibfk_3) */
+    lazy val projectfeatureFk = foreignKey("ProjectFeature_ibfk_3", parentfeatureid, Projectfeature)(r => Rep.Some(r.id), onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Projectrelease (database name ProjectFeature_ibfk_2) */
+    lazy val projectreleaseFk = foreignKey("ProjectFeature_ibfk_2", releaseid, Projectrelease)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Projectfeature */
+  lazy val Projectfeature = new TableQuery(tag => new Projectfeature(tag))
+
+  /** Entity class storing rows of table Projecthighlight
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param projectid Database column projectId SqlType(INT)
+   *  @param updated Database column updated SqlType(DATE)
+   *  @param memo Database column memo SqlType(TEXT) */
+  case class ProjecthighlightRow(id: Int, projectid: Int, updated: java.sql.Date, memo: String)
+  /** GetResult implicit for fetching ProjecthighlightRow objects using plain SQL queries */
+  implicit def GetResultProjecthighlightRow(implicit e0: GR[Int], e1: GR[java.sql.Date], e2: GR[String]): GR[ProjecthighlightRow] = GR{
+    prs => import prs._
+    ProjecthighlightRow.tupled((<<[Int], <<[Int], <<[java.sql.Date], <<[String]))
+  }
+  /** Table description of table projecthighlight. Objects of this class serve as prototypes for rows in queries. */
+  class Projecthighlight(_tableTag: Tag) extends profile.api.Table[ProjecthighlightRow](_tableTag, Some("offline"), "projecthighlight") {
+    def * = (id, projectid, updated, memo) <> (ProjecthighlightRow.tupled, ProjecthighlightRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(projectid), Rep.Some(updated), Rep.Some(memo)).shaped.<>({r=>import r._; _1.map(_=> ProjecthighlightRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column projectId SqlType(INT) */
+    val projectid: Rep[Int] = column[Int]("projectId")
+    /** Database column updated SqlType(DATE) */
+    val updated: Rep[java.sql.Date] = column[java.sql.Date]("updated")
+    /** Database column memo SqlType(TEXT) */
+    val memo: Rep[String] = column[String]("memo")
+
+    /** Foreign key referencing Project (database name ProjectHighlight_ibfk_1) */
+    lazy val projectFk = foreignKey("ProjectHighlight_ibfk_1", projectid, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Projecthighlight */
+  lazy val Projecthighlight = new TableQuery(tag => new Projecthighlight(tag))
+
+  /** Entity class storing rows of table Projectperson
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param projectid Database column projectId SqlType(INT)
+   *  @param projectpersontypeid Database column projectPersonTypeId SqlType(INT)
+   *  @param alias Database column alias SqlType(VARCHAR), Length(20,true)
+   *  @param started Database column started SqlType(DATE), Default(None)
+   *  @param finished Database column finished SqlType(DATE), Default(None) */
+  case class ProjectpersonRow(id: Int, projectid: Int, projectpersontypeid: Int, alias: String, started: Option[java.sql.Date] = None, finished: Option[java.sql.Date] = None)
+  /** GetResult implicit for fetching ProjectpersonRow objects using plain SQL queries */
+  implicit def GetResultProjectpersonRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Date]]): GR[ProjectpersonRow] = GR{
+    prs => import prs._
+    ProjectpersonRow.tupled((<<[Int], <<[Int], <<[Int], <<[String], <<?[java.sql.Date], <<?[java.sql.Date]))
+  }
+  /** Table description of table projectperson. Objects of this class serve as prototypes for rows in queries. */
+  class Projectperson(_tableTag: Tag) extends profile.api.Table[ProjectpersonRow](_tableTag, Some("offline"), "projectperson") {
+    def * = (id, projectid, projectpersontypeid, alias, started, finished) <> (ProjectpersonRow.tupled, ProjectpersonRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(projectid), Rep.Some(projectpersontypeid), Rep.Some(alias), started, finished).shaped.<>({r=>import r._; _1.map(_=> ProjectpersonRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column projectId SqlType(INT) */
+    val projectid: Rep[Int] = column[Int]("projectId")
+    /** Database column projectPersonTypeId SqlType(INT) */
+    val projectpersontypeid: Rep[Int] = column[Int]("projectPersonTypeId")
+    /** Database column alias SqlType(VARCHAR), Length(20,true) */
+    val alias: Rep[String] = column[String]("alias", O.Length(20,varying=true))
+    /** Database column started SqlType(DATE), Default(None) */
+    val started: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("started", O.Default(None))
+    /** Database column finished SqlType(DATE), Default(None) */
+    val finished: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("finished", O.Default(None))
+
+    /** Foreign key referencing Project (database name ProjectPerson_ibfk_1) */
+    lazy val projectFk = foreignKey("ProjectPerson_ibfk_1", projectid, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Projectpersontype (database name ProjectPerson_ibfk_2) */
+    lazy val projectpersontypeFk = foreignKey("ProjectPerson_ibfk_2", projectpersontypeid, Projectpersontype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Projectperson */
+  lazy val Projectperson = new TableQuery(tag => new Projectperson(tag))
+
+  /** Entity class storing rows of table Projectpersontype
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
+   *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0) */
+  case class ProjectpersontypeRow(id: Int, name: String, ordering: Long = 0L)
+  /** GetResult implicit for fetching ProjectpersontypeRow objects using plain SQL queries */
+  implicit def GetResultProjectpersontypeRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[ProjectpersontypeRow] = GR{
+    prs => import prs._
+    ProjectpersontypeRow.tupled((<<[Int], <<[String], <<[Long]))
+  }
+  /** Table description of table projectpersontype. Objects of this class serve as prototypes for rows in queries. */
+  class Projectpersontype(_tableTag: Tag) extends profile.api.Table[ProjectpersontypeRow](_tableTag, Some("offline"), "projectpersontype") {
+    def * = (id, name, ordering) <> (ProjectpersontypeRow.tupled, ProjectpersontypeRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ordering)).shaped.<>({r=>import r._; _1.map(_=> ProjectpersontypeRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column Name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
+    /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
+
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Projectpersontype */
+  lazy val Projectpersontype = new TableQuery(tag => new Projectpersontype(tag))
+
+  /** Entity class storing rows of table Projectrelease
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
+   *  @param deployed Database column Deployed SqlType(DATETIME), Default(None)
+   *  @param planned Database column Planned SqlType(DATETIME), Default(None)
+   *  @param releasetypeid Database column ReleaseTypeId SqlType(INT)
+   *  @param changeticket Database column changeticket SqlType(VARCHAR), Length(50,true), Default(None)
+   *  @param releasefileurl Database column releasefileURL SqlType(VARCHAR), Length(255,true), Default(None)
+   *  @param releasenotes Database column releasenotes SqlType(TEXT), Default(None)
+   *  @param rolledback Database column RolledBack SqlType(DATETIME), Default(None) */
+  case class ProjectreleaseRow(id: Int, name: String, deployed: Option[java.sql.Timestamp] = None, planned: Option[java.sql.Timestamp] = None, releasetypeid: Int, changeticket: Option[String] = None, releasefileurl: Option[String] = None, releasenotes: Option[String] = None, rolledback: Option[java.sql.Timestamp] = None)
+  /** GetResult implicit for fetching ProjectreleaseRow objects using plain SQL queries */
+  implicit def GetResultProjectreleaseRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Timestamp]], e3: GR[Option[String]]): GR[ProjectreleaseRow] = GR{
+    prs => import prs._
+    ProjectreleaseRow.tupled((<<[Int], <<[String], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp], <<[Int], <<?[String], <<?[String], <<?[String], <<?[java.sql.Timestamp]))
+  }
+  /** Table description of table projectrelease. Objects of this class serve as prototypes for rows in queries. */
+  class Projectrelease(_tableTag: Tag) extends profile.api.Table[ProjectreleaseRow](_tableTag, Some("offline"), "projectrelease") {
+    def * = (id, name, deployed, planned, releasetypeid, changeticket, releasefileurl, releasenotes, rolledback) <> (ProjectreleaseRow.tupled, ProjectreleaseRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), deployed, planned, Rep.Some(releasetypeid), changeticket, releasefileurl, releasenotes, rolledback).shaped.<>({r=>import r._; _1.map(_=> ProjectreleaseRow.tupled((_1.get, _2.get, _3, _4, _5.get, _6, _7, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column Name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
+    /** Database column Deployed SqlType(DATETIME), Default(None) */
+    val deployed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("Deployed", O.Default(None))
+    /** Database column Planned SqlType(DATETIME), Default(None) */
+    val planned: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("Planned", O.Default(None))
+    /** Database column ReleaseTypeId SqlType(INT) */
+    val releasetypeid: Rep[Int] = column[Int]("ReleaseTypeId")
+    /** Database column changeticket SqlType(VARCHAR), Length(50,true), Default(None) */
+    val changeticket: Rep[Option[String]] = column[Option[String]]("changeticket", O.Length(50,varying=true), O.Default(None))
+    /** Database column releasefileURL SqlType(VARCHAR), Length(255,true), Default(None) */
+    val releasefileurl: Rep[Option[String]] = column[Option[String]]("releasefileURL", O.Length(255,varying=true), O.Default(None))
+    /** Database column releasenotes SqlType(TEXT), Default(None) */
+    val releasenotes: Rep[Option[String]] = column[Option[String]]("releasenotes", O.Default(None))
+    /** Database column RolledBack SqlType(DATETIME), Default(None) */
+    val rolledback: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("RolledBack", O.Default(None))
+
+    /** Foreign key referencing Releasetype (database name projectrelease_ibfk_1) */
+    lazy val releasetypeFk = foreignKey("projectrelease_ibfk_1", releasetypeid, Releasetype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Projectrelease */
+  lazy val Projectrelease = new TableQuery(tag => new Projectrelease(tag))
+
+  /** Entity class storing rows of table Projectrole
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param projectid Database column projectId SqlType(INT)
+   *  @param roleid Database column roleId SqlType(INT)
+   *  @param updated Database column updated SqlType(DATE)
+   *  @param headcount Database column headCount SqlType(DECIMAL), Default(None) */
+  case class ProjectroleRow(id: Int, projectid: Int, roleid: Int, updated: java.sql.Date, headcount: Option[scala.math.BigDecimal] = None)
+  /** GetResult implicit for fetching ProjectroleRow objects using plain SQL queries */
+  implicit def GetResultProjectroleRow(implicit e0: GR[Int], e1: GR[java.sql.Date], e2: GR[Option[scala.math.BigDecimal]]): GR[ProjectroleRow] = GR{
+    prs => import prs._
+    ProjectroleRow.tupled((<<[Int], <<[Int], <<[Int], <<[java.sql.Date], <<?[scala.math.BigDecimal]))
+  }
+  /** Table description of table projectrole. Objects of this class serve as prototypes for rows in queries. */
+  class Projectrole(_tableTag: Tag) extends profile.api.Table[ProjectroleRow](_tableTag, Some("offline"), "projectrole") {
+    def * = (id, projectid, roleid, updated, headcount) <> (ProjectroleRow.tupled, ProjectroleRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(projectid), Rep.Some(roleid), Rep.Some(updated), headcount).shaped.<>({r=>import r._; _1.map(_=> ProjectroleRow.tupled((_1.get, _2.get, _3.get, _4.get, _5)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column projectId SqlType(INT) */
+    val projectid: Rep[Int] = column[Int]("projectId")
+    /** Database column roleId SqlType(INT) */
+    val roleid: Rep[Int] = column[Int]("roleId")
+    /** Database column updated SqlType(DATE) */
+    val updated: Rep[java.sql.Date] = column[java.sql.Date]("updated")
+    /** Database column headCount SqlType(DECIMAL), Default(None) */
+    val headcount: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("headCount", O.Default(None))
+
+    /** Foreign key referencing Project (database name ProjectRole_ibfk_1) */
+    lazy val projectFk = foreignKey("ProjectRole_ibfk_1", projectid, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Systemrole (database name ProjectRole_ibfk_2) */
+    lazy val systemroleFk = foreignKey("ProjectRole_ibfk_2", roleid, Systemrole)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Projectrole */
+  lazy val Projectrole = new TableQuery(tag => new Projectrole(tag))
+
   /** Entity class storing rows of table Ratecard
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param companyname Database column CompanyName SqlType(VARCHAR), Length(254,true) */
@@ -1376,8 +2017,8 @@ trait Tables {
     prs => import prs._
     RatecardRow.tupled((<<[Long], <<[String]))
   }
-  /** Table description of table ratecard. Objects of this class serve as prototypes for rows in queries. */
-  class Ratecard(_tableTag: Tag) extends profile.api.Table[RatecardRow](_tableTag, Some("offline"), "ratecard") {
+  /** Table description of table RateCard. Objects of this class serve as prototypes for rows in queries. */
+  class Ratecard(_tableTag: Tag) extends profile.api.Table[RatecardRow](_tableTag, Some("offline"), "RateCard") {
     def * = (id, companyname) <> (RatecardRow.tupled, RatecardRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(companyname)).shaped.<>({r=>import r._; _1.map(_=> RatecardRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1402,8 +2043,8 @@ trait Tables {
     prs => import prs._
     RatecardrateRow.tupled((<<[Long], <<[Long], <<[String], <<[Double], <<[Double]))
   }
-  /** Table description of table ratecardrate. Objects of this class serve as prototypes for rows in queries. */
-  class Ratecardrate(_tableTag: Tag) extends profile.api.Table[RatecardrateRow](_tableTag, Some("offline"), "ratecardrate") {
+  /** Table description of table RateCardRate. Objects of this class serve as prototypes for rows in queries. */
+  class Ratecardrate(_tableTag: Tag) extends profile.api.Table[RatecardrateRow](_tableTag, Some("offline"), "RateCardRate") {
     def * = (id, roleid, country, monthlyrate, hourlyrate) <> (RatecardrateRow.tupled, RatecardrateRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(roleid), Rep.Some(country), Rep.Some(monthlyrate), Rep.Some(hourlyrate)).shaped.<>({r=>import r._; _1.map(_=> RatecardrateRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1438,8 +2079,8 @@ trait Tables {
     prs => import prs._
     RatecardroleRow.tupled((<<[Long], <<[Long], <<[String], <<?[Long], <<[Long], <<[Long]))
   }
-  /** Table description of table ratecardrole. Objects of this class serve as prototypes for rows in queries. */
-  class Ratecardrole(_tableTag: Tag) extends profile.api.Table[RatecardroleRow](_tableTag, Some("offline"), "ratecardrole") {
+  /** Table description of table RateCardRole. Objects of this class serve as prototypes for rows in queries. */
+  class Ratecardrole(_tableTag: Tag) extends profile.api.Table[RatecardroleRow](_tableTag, Some("offline"), "RateCardRole") {
     def * = (id, ratecardid, level, corplevelid, yearsmin, yearsmax) <> (RatecardroleRow.tupled, RatecardroleRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(ratecardid), Rep.Some(level), corplevelid, Rep.Some(yearsmin), Rep.Some(yearsmax)).shaped.<>({r=>import r._; _1.map(_=> RatecardroleRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1465,63 +2106,337 @@ trait Tables {
   /** Collection-like TableQuery object for table Ratecardrole */
   lazy val Ratecardrole = new TableQuery(tag => new Ratecardrole(tag))
 
-  /** Entity class storing rows of table Resourcepool
-   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
-   *  @param poolname Database column poolName SqlType(VARCHAR), Length(254,true) */
-  case class ResourcepoolRow(id: Long, poolname: String)
-  /** GetResult implicit for fetching ResourcepoolRow objects using plain SQL queries */
-  implicit def GetResultResourcepoolRow(implicit e0: GR[Long], e1: GR[String]): GR[ResourcepoolRow] = GR{
+  /** Entity class storing rows of table Releaseauthorization
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param releaseid Database column ReleaseId SqlType(INT)
+   *  @param releaseauthorityid Database column ReleaseAuthorityId SqlType(INT)
+   *  @param login Database column login SqlType(VARCHAR), Length(20,true)
+   *  @param approveddate Database column approvedDate SqlType(DATETIME), Default(None)
+   *  @param rejecteddate Database column rejectedDate SqlType(DATETIME), Default(None)
+   *  @param isapproved Database column isApproved SqlType(BIT), Default(None)
+   *  @param notes Database column notes SqlType(TEXT), Default(None) */
+  case class ReleaseauthorizationRow(id: Int, releaseid: Int, releaseauthorityid: Int, login: String, approveddate: Option[java.sql.Timestamp] = None, rejecteddate: Option[java.sql.Timestamp] = None, isapproved: Option[Boolean] = None, notes: Option[String] = None)
+  /** GetResult implicit for fetching ReleaseauthorizationRow objects using plain SQL queries */
+  implicit def GetResultReleaseauthorizationRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[java.sql.Timestamp]], e3: GR[Option[Boolean]], e4: GR[Option[String]]): GR[ReleaseauthorizationRow] = GR{
     prs => import prs._
-    ResourcepoolRow.tupled((<<[Long], <<[String]))
+    ReleaseauthorizationRow.tupled((<<[Int], <<[Int], <<[Int], <<[String], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[Boolean], <<?[String]))
+  }
+  /** Table description of table ReleaseAuthorization. Objects of this class serve as prototypes for rows in queries. */
+  class Releaseauthorization(_tableTag: Tag) extends profile.api.Table[ReleaseauthorizationRow](_tableTag, Some("offline"), "ReleaseAuthorization") {
+    def * = (id, releaseid, releaseauthorityid, login, approveddate, rejecteddate, isapproved, notes) <> (ReleaseauthorizationRow.tupled, ReleaseauthorizationRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(releaseid), Rep.Some(releaseauthorityid), Rep.Some(login), approveddate, rejecteddate, isapproved, notes).shaped.<>({r=>import r._; _1.map(_=> ReleaseauthorizationRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column ReleaseId SqlType(INT) */
+    val releaseid: Rep[Int] = column[Int]("ReleaseId")
+    /** Database column ReleaseAuthorityId SqlType(INT) */
+    val releaseauthorityid: Rep[Int] = column[Int]("ReleaseAuthorityId")
+    /** Database column login SqlType(VARCHAR), Length(20,true) */
+    val login: Rep[String] = column[String]("login", O.Length(20,varying=true))
+    /** Database column approvedDate SqlType(DATETIME), Default(None) */
+    val approveddate: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("approvedDate", O.Default(None))
+    /** Database column rejectedDate SqlType(DATETIME), Default(None) */
+    val rejecteddate: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("rejectedDate", O.Default(None))
+    /** Database column isApproved SqlType(BIT), Default(None) */
+    val isapproved: Rep[Option[Boolean]] = column[Option[Boolean]]("isApproved", O.Default(None))
+    /** Database column notes SqlType(TEXT), Default(None) */
+    val notes: Rep[Option[String]] = column[Option[String]]("notes", O.Default(None))
+
+    /** Foreign key referencing Releaseauthorizationtype (database name ReleaseAuth_type) */
+    lazy val releaseauthorizationtypeFk = foreignKey("ReleaseAuth_type", releaseauthorityid, Releaseauthorizationtype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Projectrelease (database name ReleaseAuth_rel) */
+    lazy val projectreleaseFk = foreignKey("ReleaseAuth_rel", releaseid, Projectrelease)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Releaseauthorization */
+  lazy val Releaseauthorization = new TableQuery(tag => new Releaseauthorization(tag))
+
+  /** Entity class storing rows of table Releaseauthorizationtype
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(255,true)
+   *  @param description Database column description SqlType(TEXT), Default(None) */
+  case class ReleaseauthorizationtypeRow(id: Int, name: String, description: Option[String] = None)
+  /** GetResult implicit for fetching ReleaseauthorizationtypeRow objects using plain SQL queries */
+  implicit def GetResultReleaseauthorizationtypeRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[String]]): GR[ReleaseauthorizationtypeRow] = GR{
+    prs => import prs._
+    ReleaseauthorizationtypeRow.tupled((<<[Int], <<[String], <<?[String]))
+  }
+  /** Table description of table ReleaseAuthorizationType. Objects of this class serve as prototypes for rows in queries. */
+  class Releaseauthorizationtype(_tableTag: Tag) extends profile.api.Table[ReleaseauthorizationtypeRow](_tableTag, Some("offline"), "ReleaseAuthorizationType") {
+    def * = (id, name, description) <> (ReleaseauthorizationtypeRow.tupled, ReleaseauthorizationtypeRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), description).shaped.<>({r=>import r._; _1.map(_=> ReleaseauthorizationtypeRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(255,true) */
+    val name: Rep[String] = column[String]("name", O.Length(255,varying=true))
+    /** Database column description SqlType(TEXT), Default(None) */
+    val description: Rep[Option[String]] = column[Option[String]]("description", O.Default(None))
+
+    /** Uniqueness Index over (name) (database name name) */
+    val index1 = index("name", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Releaseauthorizationtype */
+  lazy val Releaseauthorizationtype = new TableQuery(tag => new Releaseauthorizationtype(tag))
+
+  /** Entity class storing rows of table Releasetype
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(255,true)
+   *  @param emailalias Database column emailAlias SqlType(VARCHAR), Length(255,true) */
+  case class ReleasetypeRow(id: Int, name: String, emailalias: String)
+  /** GetResult implicit for fetching ReleasetypeRow objects using plain SQL queries */
+  implicit def GetResultReleasetypeRow(implicit e0: GR[Int], e1: GR[String]): GR[ReleasetypeRow] = GR{
+    prs => import prs._
+    ReleasetypeRow.tupled((<<[Int], <<[String], <<[String]))
+  }
+  /** Table description of table ReleaseType. Objects of this class serve as prototypes for rows in queries. */
+  class Releasetype(_tableTag: Tag) extends profile.api.Table[ReleasetypeRow](_tableTag, Some("offline"), "ReleaseType") {
+    def * = (id, name, emailalias) <> (ReleasetypeRow.tupled, ReleasetypeRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(emailalias)).shaped.<>({r=>import r._; _1.map(_=> ReleasetypeRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(255,true) */
+    val name: Rep[String] = column[String]("name", O.Length(255,varying=true))
+    /** Database column emailAlias SqlType(VARCHAR), Length(255,true) */
+    val emailalias: Rep[String] = column[String]("emailAlias", O.Length(255,varying=true))
+
+    /** Uniqueness Index over (name) (database name name) */
+    val index1 = index("name", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Releasetype */
+  lazy val Releasetype = new TableQuery(tag => new Releasetype(tag))
+
+  /** Entity class storing rows of table Releasetypeauthorizationpeople
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param releasetypeid Database column ReleaseTypeId SqlType(INT)
+   *  @param releaseauthorityid Database column ReleaseAuthorityId SqlType(INT)
+   *  @param login Database column login SqlType(VARCHAR), Length(20,true)
+   *  @param isprimary Database column isPrimary SqlType(BIT) */
+  case class ReleasetypeauthorizationpeopleRow(id: Int, releasetypeid: Int, releaseauthorityid: Int, login: String, isprimary: Boolean)
+  /** GetResult implicit for fetching ReleasetypeauthorizationpeopleRow objects using plain SQL queries */
+  implicit def GetResultReleasetypeauthorizationpeopleRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Boolean]): GR[ReleasetypeauthorizationpeopleRow] = GR{
+    prs => import prs._
+    ReleasetypeauthorizationpeopleRow.tupled((<<[Int], <<[Int], <<[Int], <<[String], <<[Boolean]))
+  }
+  /** Table description of table ReleaseTypeAuthorizationPeople. Objects of this class serve as prototypes for rows in queries. */
+  class Releasetypeauthorizationpeople(_tableTag: Tag) extends profile.api.Table[ReleasetypeauthorizationpeopleRow](_tableTag, Some("offline"), "ReleaseTypeAuthorizationPeople") {
+    def * = (id, releasetypeid, releaseauthorityid, login, isprimary) <> (ReleasetypeauthorizationpeopleRow.tupled, ReleasetypeauthorizationpeopleRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(releasetypeid), Rep.Some(releaseauthorityid), Rep.Some(login), Rep.Some(isprimary)).shaped.<>({r=>import r._; _1.map(_=> ReleasetypeauthorizationpeopleRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column ReleaseTypeId SqlType(INT) */
+    val releasetypeid: Rep[Int] = column[Int]("ReleaseTypeId")
+    /** Database column ReleaseAuthorityId SqlType(INT) */
+    val releaseauthorityid: Rep[Int] = column[Int]("ReleaseAuthorityId")
+    /** Database column login SqlType(VARCHAR), Length(20,true) */
+    val login: Rep[String] = column[String]("login", O.Length(20,varying=true))
+    /** Database column isPrimary SqlType(BIT) */
+    val isprimary: Rep[Boolean] = column[Boolean]("isPrimary")
+
+    /** Foreign key referencing Releaseauthorizationtype (database name ReleaseAuthorizationType_fk1) */
+    lazy val releaseauthorizationtypeFk = foreignKey("ReleaseAuthorizationType_fk1", releaseauthorityid, Releaseauthorizationtype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Releasetype (database name ReleaseAuthorizationPPL_fk1) */
+    lazy val releasetypeFk = foreignKey("ReleaseAuthorizationPPL_fk1", releasetypeid, Releasetype)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Releasetypeauthorizationpeople */
+  lazy val Releasetypeauthorizationpeople = new TableQuery(tag => new Releasetypeauthorizationpeople(tag))
+
+  /** Entity class storing rows of table Resourcepool
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(45,true)
+   *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0)
+   *  @param poolsize Database column poolsize SqlType(INT UNSIGNED), Default(0) */
+  case class ResourcepoolRow(id: Int, name: String, ordering: Long = 0L, poolsize: Long = 0L)
+  /** GetResult implicit for fetching ResourcepoolRow objects using plain SQL queries */
+  implicit def GetResultResourcepoolRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[ResourcepoolRow] = GR{
+    prs => import prs._
+    ResourcepoolRow.tupled((<<[Int], <<[String], <<[Long], <<[Long]))
   }
   /** Table description of table resourcepool. Objects of this class serve as prototypes for rows in queries. */
   class Resourcepool(_tableTag: Tag) extends profile.api.Table[ResourcepoolRow](_tableTag, Some("offline"), "resourcepool") {
-    def * = (id, poolname) <> (ResourcepoolRow.tupled, ResourcepoolRow.unapply)
+    def * = (id, name, ordering, poolsize) <> (ResourcepoolRow.tupled, ResourcepoolRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(poolname)).shaped.<>({r=>import r._; _1.map(_=> ResourcepoolRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ordering), Rep.Some(poolsize)).shaped.<>({r=>import r._; _1.map(_=> ResourcepoolRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
-    /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
-    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
-    /** Database column poolName SqlType(VARCHAR), Length(254,true) */
-    val poolname: Rep[String] = column[String]("poolName", O.Length(254,varying=true))
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("name", O.Length(45,varying=true))
+    /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
+    /** Database column poolsize SqlType(INT UNSIGNED), Default(0) */
+    val poolsize: Rep[Long] = column[Long]("poolsize", O.Default(0L))
 
-    /** Uniqueness Index over (poolname) (database name poolName) */
-    val index1 = index("poolName", poolname, unique=true)
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
   }
   /** Collection-like TableQuery object for table Resourcepool */
   lazy val Resourcepool = new TableQuery(tag => new Resourcepool(tag))
 
-  /** Entity class storing rows of table Resourcepoolteam
-   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
-   *  @param poolid Database column poolId SqlType(BIGINT)
-   *  @param teamdescription Database column teamDescription SqlType(VARCHAR), Length(254,true) */
-  case class ResourcepoolteamRow(id: Long, poolid: Long, teamdescription: String)
-  /** GetResult implicit for fetching ResourcepoolteamRow objects using plain SQL queries */
-  implicit def GetResultResourcepoolteamRow(implicit e0: GR[Long], e1: GR[String]): GR[ResourcepoolteamRow] = GR{
+  /** Entity class storing rows of table Resourceteam
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(45,true)
+   *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0)
+   *  @param teamsize Database column teamsize SqlType(INT UNSIGNED), Default(0)
+   *  @param resourcepoolid Database column resourcepoolId SqlType(INT), Default(None)
+   *  @param minimum Database column minimum SqlType(INT UNSIGNED), Default(0)
+   *  @param maximum Database column maximum SqlType(INT UNSIGNED), Default(None)
+   *  @param msprojectname Database column msprojectname SqlType(VARCHAR), Length(30,true), Default()
+   *  @param pplteamname Database column pplteamname SqlType(VARCHAR), Length(100,true), Default(None) */
+  case class ResourceteamRow(id: Int, name: String, ordering: Long = 0L, teamsize: Long = 0L, resourcepoolid: Option[Int] = None, minimum: Long = 0L, maximum: Option[Long] = None, msprojectname: String = "", pplteamname: Option[String] = None)
+  /** GetResult implicit for fetching ResourceteamRow objects using plain SQL queries */
+  implicit def GetResultResourceteamRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long], e3: GR[Option[Int]], e4: GR[Option[Long]], e5: GR[Option[String]]): GR[ResourceteamRow] = GR{
     prs => import prs._
-    ResourcepoolteamRow.tupled((<<[Long], <<[Long], <<[String]))
+    ResourceteamRow.tupled((<<[Int], <<[String], <<[Long], <<[Long], <<?[Int], <<[Long], <<?[Long], <<[String], <<?[String]))
   }
-  /** Table description of table resourcepoolteam. Objects of this class serve as prototypes for rows in queries. */
-  class Resourcepoolteam(_tableTag: Tag) extends profile.api.Table[ResourcepoolteamRow](_tableTag, Some("offline"), "resourcepoolteam") {
-    def * = (id, poolid, teamdescription) <> (ResourcepoolteamRow.tupled, ResourcepoolteamRow.unapply)
+  /** Table description of table resourceteam. Objects of this class serve as prototypes for rows in queries. */
+  class Resourceteam(_tableTag: Tag) extends profile.api.Table[ResourceteamRow](_tableTag, Some("offline"), "resourceteam") {
+    def * = (id, name, ordering, teamsize, resourcepoolid, minimum, maximum, msprojectname, pplteamname) <> (ResourceteamRow.tupled, ResourceteamRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(poolid), Rep.Some(teamdescription)).shaped.<>({r=>import r._; _1.map(_=> ResourcepoolteamRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ordering), Rep.Some(teamsize), resourcepoolid, Rep.Some(minimum), maximum, Rep.Some(msprojectname), pplteamname).shaped.<>({r=>import r._; _1.map(_=> ResourceteamRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6.get, _7, _8.get, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("name", O.Length(45,varying=true))
+    /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
+    /** Database column teamsize SqlType(INT UNSIGNED), Default(0) */
+    val teamsize: Rep[Long] = column[Long]("teamsize", O.Default(0L))
+    /** Database column resourcepoolId SqlType(INT), Default(None) */
+    val resourcepoolid: Rep[Option[Int]] = column[Option[Int]]("resourcepoolId", O.Default(None))
+    /** Database column minimum SqlType(INT UNSIGNED), Default(0) */
+    val minimum: Rep[Long] = column[Long]("minimum", O.Default(0L))
+    /** Database column maximum SqlType(INT UNSIGNED), Default(None) */
+    val maximum: Rep[Option[Long]] = column[Option[Long]]("maximum", O.Default(None))
+    /** Database column msprojectname SqlType(VARCHAR), Length(30,true), Default() */
+    val msprojectname: Rep[String] = column[String]("msprojectname", O.Length(30,varying=true), O.Default(""))
+    /** Database column pplteamname SqlType(VARCHAR), Length(100,true), Default(None) */
+    val pplteamname: Rep[Option[String]] = column[Option[String]]("pplteamname", O.Length(100,varying=true), O.Default(None))
+
+    /** Foreign key referencing Resourcepool (database name resourceteam_ibfk_1) */
+    lazy val resourcepoolFk = foreignKey("resourceteam_ibfk_1", resourcepoolid, Resourcepool)(r => Rep.Some(r.id), onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Resourceteam */
+  lazy val Resourceteam = new TableQuery(tag => new Resourceteam(tag))
+
+  /** Entity class storing rows of table Resourceteamproductfeature
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param featuresize Database column featureSize SqlType(INT UNSIGNED), Default(0)
+   *  @param maxdevs Database column maxDevs SqlType(INT UNSIGNED), Default(0)
+   *  @param resourceteamid Database column resourceTeamId SqlType(INT)
+   *  @param productfeatureid Database column productFeatureId SqlType(INT)
+   *  @param featuresizeremaining Database column featureSizeRemaining SqlType(DECIMAL), Default(Some(0.00)) */
+  case class ResourceteamproductfeatureRow(id: Int, featuresize: Long = 0L, maxdevs: Long = 0L, resourceteamid: Int, productfeatureid: Int, featuresizeremaining: Option[scala.math.BigDecimal] = Some(scala.math.BigDecimal("0.00")))
+  /** GetResult implicit for fetching ResourceteamproductfeatureRow objects using plain SQL queries */
+  implicit def GetResultResourceteamproductfeatureRow(implicit e0: GR[Int], e1: GR[Long], e2: GR[Option[scala.math.BigDecimal]]): GR[ResourceteamproductfeatureRow] = GR{
+    prs => import prs._
+    ResourceteamproductfeatureRow.tupled((<<[Int], <<[Long], <<[Long], <<[Int], <<[Int], <<?[scala.math.BigDecimal]))
+  }
+  /** Table description of table resourceteamproductfeature. Objects of this class serve as prototypes for rows in queries. */
+  class Resourceteamproductfeature(_tableTag: Tag) extends profile.api.Table[ResourceteamproductfeatureRow](_tableTag, Some("offline"), "resourceteamproductfeature") {
+    def * = (id, featuresize, maxdevs, resourceteamid, productfeatureid, featuresizeremaining) <> (ResourceteamproductfeatureRow.tupled, ResourceteamproductfeatureRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(featuresize), Rep.Some(maxdevs), Rep.Some(resourceteamid), Rep.Some(productfeatureid), featuresizeremaining).shaped.<>({r=>import r._; _1.map(_=> ResourceteamproductfeatureRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column featureSize SqlType(INT UNSIGNED), Default(0) */
+    val featuresize: Rep[Long] = column[Long]("featureSize", O.Default(0L))
+    /** Database column maxDevs SqlType(INT UNSIGNED), Default(0) */
+    val maxdevs: Rep[Long] = column[Long]("maxDevs", O.Default(0L))
+    /** Database column resourceTeamId SqlType(INT) */
+    val resourceteamid: Rep[Int] = column[Int]("resourceTeamId")
+    /** Database column productFeatureId SqlType(INT) */
+    val productfeatureid: Rep[Int] = column[Int]("productFeatureId")
+    /** Database column featureSizeRemaining SqlType(DECIMAL), Default(Some(0.00)) */
+    val featuresizeremaining: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("featureSizeRemaining", O.Default(Some(scala.math.BigDecimal("0.00"))))
+
+    /** Foreign key referencing Productfeature (database name resourceteamproductfeature_ibfk_2) */
+    lazy val productfeatureFk = foreignKey("resourceteamproductfeature_ibfk_2", productfeatureid, Productfeature)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Resourceteam (database name resourceteamproductfeature_ibfk_1) */
+    lazy val resourceteamFk = foreignKey("resourceteamproductfeature_ibfk_1", resourceteamid, Resourceteam)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Resourceteamproductfeature */
+  lazy val Resourceteamproductfeature = new TableQuery(tag => new Resourceteamproductfeature(tag))
+
+  /** Entity class storing rows of table Resourceteamproject
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param featuresize Database column featureSize SqlType(INT UNSIGNED), Default(0)
+   *  @param maxdevs Database column maxDevs SqlType(INT UNSIGNED), Default(0)
+   *  @param resourceteamid Database column resourceTeamId SqlType(INT)
+   *  @param projectid Database column projectId SqlType(INT)
+   *  @param featuresizeremaining Database column featureSizeRemaining SqlType(DECIMAL), Default(Some(0.00)) */
+  case class ResourceteamprojectRow(id: Int, featuresize: Long = 0L, maxdevs: Long = 0L, resourceteamid: Int, projectid: Int, featuresizeremaining: Option[scala.math.BigDecimal] = Some(scala.math.BigDecimal("0.00")))
+  /** GetResult implicit for fetching ResourceteamprojectRow objects using plain SQL queries */
+  implicit def GetResultResourceteamprojectRow(implicit e0: GR[Int], e1: GR[Long], e2: GR[Option[scala.math.BigDecimal]]): GR[ResourceteamprojectRow] = GR{
+    prs => import prs._
+    ResourceteamprojectRow.tupled((<<[Int], <<[Long], <<[Long], <<[Int], <<[Int], <<?[scala.math.BigDecimal]))
+  }
+  /** Table description of table ResourceTeamProject. Objects of this class serve as prototypes for rows in queries. */
+  class Resourceteamproject(_tableTag: Tag) extends profile.api.Table[ResourceteamprojectRow](_tableTag, Some("offline"), "ResourceTeamProject") {
+    def * = (id, featuresize, maxdevs, resourceteamid, projectid, featuresizeremaining) <> (ResourceteamprojectRow.tupled, ResourceteamprojectRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(featuresize), Rep.Some(maxdevs), Rep.Some(resourceteamid), Rep.Some(projectid), featuresizeremaining).shaped.<>({r=>import r._; _1.map(_=> ResourceteamprojectRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column featureSize SqlType(INT UNSIGNED), Default(0) */
+    val featuresize: Rep[Long] = column[Long]("featureSize", O.Default(0L))
+    /** Database column maxDevs SqlType(INT UNSIGNED), Default(0) */
+    val maxdevs: Rep[Long] = column[Long]("maxDevs", O.Default(0L))
+    /** Database column resourceTeamId SqlType(INT) */
+    val resourceteamid: Rep[Int] = column[Int]("resourceTeamId")
+    /** Database column projectId SqlType(INT) */
+    val projectid: Rep[Int] = column[Int]("projectId")
+    /** Database column featureSizeRemaining SqlType(DECIMAL), Default(Some(0.00)) */
+    val featuresizeremaining: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("featureSizeRemaining", O.Default(Some(scala.math.BigDecimal("0.00"))))
+
+    /** Foreign key referencing Project (database name resourceteamprojectfeature_ibfk_2) */
+    lazy val projectFk = foreignKey("resourceteamprojectfeature_ibfk_2", projectid, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Resourceteam (database name resourceteamprojectfeature_ibfk_1) */
+    lazy val resourceteamFk = foreignKey("resourceteamprojectfeature_ibfk_1", resourceteamid, Resourceteam)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Resourceteamproject */
+  lazy val Resourceteamproject = new TableQuery(tag => new Resourceteamproject(tag))
+
+  /** Entity class storing rows of table Roadmapslack
+   *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param ordering Database column ordering SqlType(INT)
+   *  @param efficiency Database column efficiency SqlType(DECIMAL), Default(None) */
+  case class RoadmapslackRow(id: Long, ordering: Int, efficiency: Option[scala.math.BigDecimal] = None)
+  /** GetResult implicit for fetching RoadmapslackRow objects using plain SQL queries */
+  implicit def GetResultRoadmapslackRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Option[scala.math.BigDecimal]]): GR[RoadmapslackRow] = GR{
+    prs => import prs._
+    RoadmapslackRow.tupled((<<[Long], <<[Int], <<?[scala.math.BigDecimal]))
+  }
+  /** Table description of table RoadmapSlack. Objects of this class serve as prototypes for rows in queries. */
+  class Roadmapslack(_tableTag: Tag) extends profile.api.Table[RoadmapslackRow](_tableTag, Some("offline"), "RoadmapSlack") {
+    def * = (id, ordering, efficiency) <> (RoadmapslackRow.tupled, RoadmapslackRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(ordering), efficiency).shaped.<>({r=>import r._; _1.map(_=> RoadmapslackRow.tupled((_1.get, _2.get, _3)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
-    /** Database column poolId SqlType(BIGINT) */
-    val poolid: Rep[Long] = column[Long]("poolId")
-    /** Database column teamDescription SqlType(VARCHAR), Length(254,true) */
-    val teamdescription: Rep[String] = column[String]("teamDescription", O.Length(254,varying=true))
+    /** Database column ordering SqlType(INT) */
+    val ordering: Rep[Int] = column[Int]("ordering")
+    /** Database column efficiency SqlType(DECIMAL), Default(None) */
+    val efficiency: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("efficiency", O.Default(None))
 
-    /** Foreign key referencing Resourcepool (database name ResourcePoolTeam_ibfk_1) */
-    lazy val resourcepoolFk = foreignKey("ResourcePoolTeam_ibfk_1", poolid, Resourcepool)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.Cascade)
-
-    /** Uniqueness Index over (teamdescription) (database name teamDescription) */
-    val index1 = index("teamDescription", teamdescription, unique=true)
+    /** Uniqueness Index over (ordering) (database name ordering) */
+    val index1 = index("ordering", ordering, unique=true)
   }
-  /** Collection-like TableQuery object for table Resourcepoolteam */
-  lazy val Resourcepoolteam = new TableQuery(tag => new Resourcepoolteam(tag))
+  /** Collection-like TableQuery object for table Roadmapslack */
+  lazy val Roadmapslack = new TableQuery(tag => new Roadmapslack(tag))
 
   /** Entity class storing rows of table Scenario
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
@@ -1542,8 +2457,8 @@ trait Tables {
     prs => import prs._
     ScenarioRow.tupled((<<[Long], <<[String], <<?[Long], <<[String], <<?[String], <<[Double], <<[Double], <<[Long], <<[Long], <<[Long], <<[Long], <<[Boolean]))
   }
-  /** Table description of table scenario. Objects of this class serve as prototypes for rows in queries. */
-  class Scenario(_tableTag: Tag) extends profile.api.Table[ScenarioRow](_tableTag, Some("offline"), "scenario") {
+  /** Table description of table Scenario. Objects of this class serve as prototypes for rows in queries. */
+  class Scenario(_tableTag: Tag) extends profile.api.Table[ScenarioRow](_tableTag, Some("offline"), "Scenario") {
     def * = (id, login, parent, name, desc, managerratio, spanavg, employeecount, offshorecount, contractorcount, maxlayers, ispublic) <> (ScenarioRow.tupled, ScenarioRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(login), parent, Rep.Some(name), desc, Rep.Some(managerratio), Rep.Some(spanavg), Rep.Some(employeecount), Rep.Some(offshorecount), Rep.Some(contractorcount), Rep.Some(maxlayers), Rep.Some(ispublic)).shaped.<>({r=>import r._; _1.map(_=> ScenarioRow.tupled((_1.get, _2.get, _3, _4.get, _5, _6.get, _7.get, _8.get, _9.get, _10.get, _11.get, _12.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1594,8 +2509,8 @@ trait Tables {
     prs => import prs._
     ScenariodetailRow.tupled((<<[Long], <<[Long], <<[String], <<?[String], <<[Boolean], <<[Boolean], <<[Boolean], <<[Long], <<?[Long], <<?[Long], <<?[Long]))
   }
-  /** Table description of table scenariodetail. Objects of this class serve as prototypes for rows in queries. */
-  class Scenariodetail(_tableTag: Tag) extends profile.api.Table[ScenariodetailRow](_tableTag, Some("offline"), "scenariodetail") {
+  /** Table description of table ScenarioDetail. Objects of this class serve as prototypes for rows in queries. */
+  class Scenariodetail(_tableTag: Tag) extends profile.api.Table[ScenariodetailRow](_tableTag, Some("offline"), "ScenarioDetail") {
     def * = (id, scenario, login, managerid, iscurrent, iscontractor, isoffshore, staffnumber, corplevel, businessunit, archetypeid) <> (ScenariodetailRow.tupled, ScenariodetailRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(scenario), Rep.Some(login), managerid, Rep.Some(iscurrent), Rep.Some(iscontractor), Rep.Some(isoffshore), Rep.Some(staffnumber), corplevel, businessunit, archetypeid).shaped.<>({r=>import r._; _1.map(_=> ScenariodetailRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6.get, _7.get, _8.get, _9, _10, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1643,8 +2558,8 @@ trait Tables {
     prs => import prs._
     ScenariolevelRow.tupled((<<[Long], <<[Long], <<[Long], <<[Long], <<[Long], <<[Long], <<[Long], <<[Double], <<[Double], <<[Double]))
   }
-  /** Table description of table scenariolevel. Objects of this class serve as prototypes for rows in queries. */
-  class Scenariolevel(_tableTag: Tag) extends profile.api.Table[ScenariolevelRow](_tableTag, Some("offline"), "scenariolevel") {
+  /** Table description of table ScenarioLevel. Objects of this class serve as prototypes for rows in queries. */
+  class Scenariolevel(_tableTag: Tag) extends profile.api.Table[ScenariolevelRow](_tableTag, Some("offline"), "ScenarioLevel") {
     def * = (id, scenario, layer, managercount, employeecount, offshorecount, contractorcount, spanperlayeravg, spanperlayermin, spanperlayermax) <> (ScenariolevelRow.tupled, ScenariolevelRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(scenario), Rep.Some(layer), Rep.Some(managercount), Rep.Some(employeecount), Rep.Some(offshorecount), Rep.Some(contractorcount), Rep.Some(spanperlayeravg), Rep.Some(spanperlayermin), Rep.Some(spanperlayermax)).shaped.<>({r=>import r._; _1.map(_=> ScenariolevelRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1673,6 +2588,128 @@ trait Tables {
   /** Collection-like TableQuery object for table Scenariolevel */
   lazy val Scenariolevel = new TableQuery(tag => new Scenariolevel(tag))
 
+  /** Entity class storing rows of table Stage
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(45,true)
+   *  @param ordering Database column ordering SqlType(INT UNSIGNED), Default(0) */
+  case class StageRow(id: Int, name: String, ordering: Long = 0L)
+  /** GetResult implicit for fetching StageRow objects using plain SQL queries */
+  implicit def GetResultStageRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[StageRow] = GR{
+    prs => import prs._
+    StageRow.tupled((<<[Int], <<[String], <<[Long]))
+  }
+  /** Table description of table stage. Objects of this class serve as prototypes for rows in queries. */
+  class Stage(_tableTag: Tag) extends profile.api.Table[StageRow](_tableTag, Some("offline"), "stage") {
+    def * = (id, name, ordering) <> (StageRow.tupled, StageRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ordering)).shaped.<>({r=>import r._; _1.map(_=> StageRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("name", O.Length(45,varying=true))
+    /** Database column ordering SqlType(INT UNSIGNED), Default(0) */
+    val ordering: Rep[Long] = column[Long]("ordering", O.Default(0L))
+
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Stage */
+  lazy val Stage = new TableQuery(tag => new Stage(tag))
+
+  /** Entity class storing rows of table Statuscolor
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
+   *  @param cssclassname Database column cssClassName SqlType(VARCHAR), Length(20,true)
+   *  @param isontrack Database column IsOnTrack SqlType(BIT), Default(Some(false))
+   *  @param iscomplete Database column IsComplete SqlType(BIT), Default(Some(false))
+   *  @param hasissues Database column HasIssues SqlType(BIT), Default(Some(false))
+   *  @param isatrisk Database column IsAtRisk SqlType(BIT), Default(Some(false))
+   *  @param isonhold Database column IsOnHold SqlType(BIT), Default(Some(false))
+   *  @param hasnotstarted Database column HasNotStarted SqlType(BIT), Default(Some(false)) */
+  case class StatuscolorRow(id: Int, name: String, cssclassname: String, isontrack: Option[Boolean] = Some(false), iscomplete: Option[Boolean] = Some(false), hasissues: Option[Boolean] = Some(false), isatrisk: Option[Boolean] = Some(false), isonhold: Option[Boolean] = Some(false), hasnotstarted: Option[Boolean] = Some(false))
+  /** GetResult implicit for fetching StatuscolorRow objects using plain SQL queries */
+  implicit def GetResultStatuscolorRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Option[Boolean]]): GR[StatuscolorRow] = GR{
+    prs => import prs._
+    StatuscolorRow.tupled((<<[Int], <<[String], <<[String], <<?[Boolean], <<?[Boolean], <<?[Boolean], <<?[Boolean], <<?[Boolean], <<?[Boolean]))
+  }
+  /** Table description of table statuscolor. Objects of this class serve as prototypes for rows in queries. */
+  class Statuscolor(_tableTag: Tag) extends profile.api.Table[StatuscolorRow](_tableTag, Some("offline"), "statuscolor") {
+    def * = (id, name, cssclassname, isontrack, iscomplete, hasissues, isatrisk, isonhold, hasnotstarted) <> (StatuscolorRow.tupled, StatuscolorRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(cssclassname), isontrack, iscomplete, hasissues, isatrisk, isonhold, hasnotstarted).shaped.<>({r=>import r._; _1.map(_=> StatuscolorRow.tupled((_1.get, _2.get, _3.get, _4, _5, _6, _7, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column Name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
+    /** Database column cssClassName SqlType(VARCHAR), Length(20,true) */
+    val cssclassname: Rep[String] = column[String]("cssClassName", O.Length(20,varying=true))
+    /** Database column IsOnTrack SqlType(BIT), Default(Some(false)) */
+    val isontrack: Rep[Option[Boolean]] = column[Option[Boolean]]("IsOnTrack", O.Default(Some(false)))
+    /** Database column IsComplete SqlType(BIT), Default(Some(false)) */
+    val iscomplete: Rep[Option[Boolean]] = column[Option[Boolean]]("IsComplete", O.Default(Some(false)))
+    /** Database column HasIssues SqlType(BIT), Default(Some(false)) */
+    val hasissues: Rep[Option[Boolean]] = column[Option[Boolean]]("HasIssues", O.Default(Some(false)))
+    /** Database column IsAtRisk SqlType(BIT), Default(Some(false)) */
+    val isatrisk: Rep[Option[Boolean]] = column[Option[Boolean]]("IsAtRisk", O.Default(Some(false)))
+    /** Database column IsOnHold SqlType(BIT), Default(Some(false)) */
+    val isonhold: Rep[Option[Boolean]] = column[Option[Boolean]]("IsOnHold", O.Default(Some(false)))
+    /** Database column HasNotStarted SqlType(BIT), Default(Some(false)) */
+    val hasnotstarted: Rep[Option[Boolean]] = column[Option[Boolean]]("HasNotStarted", O.Default(Some(false)))
+
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Statuscolor */
+  lazy val Statuscolor = new TableQuery(tag => new Statuscolor(tag))
+
+  /** Entity class storing rows of table Statusupdate
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param projectid Database column projectId SqlType(INT)
+   *  @param statusid Database column statusId SqlType(INT)
+   *  @param updated Database column updated SqlType(DATE)
+   *  @param comments Database column comments SqlType(TEXT), Default(None)
+   *  @param issues Database column issues SqlType(TEXT), Default(None)
+   *  @param risks Database column risks SqlType(TEXT), Default(None)
+   *  @param dependencies Database column dependencies SqlType(TEXT), Default(None) */
+  case class StatusupdateRow(id: Int, projectid: Int, statusid: Int, updated: java.sql.Date, comments: Option[String] = None, issues: Option[String] = None, risks: Option[String] = None, dependencies: Option[String] = None)
+  /** GetResult implicit for fetching StatusupdateRow objects using plain SQL queries */
+  implicit def GetResultStatusupdateRow(implicit e0: GR[Int], e1: GR[java.sql.Date], e2: GR[Option[String]]): GR[StatusupdateRow] = GR{
+    prs => import prs._
+    StatusupdateRow.tupled((<<[Int], <<[Int], <<[Int], <<[java.sql.Date], <<?[String], <<?[String], <<?[String], <<?[String]))
+  }
+  /** Table description of table statusupdate. Objects of this class serve as prototypes for rows in queries. */
+  class Statusupdate(_tableTag: Tag) extends profile.api.Table[StatusupdateRow](_tableTag, Some("offline"), "statusupdate") {
+    def * = (id, projectid, statusid, updated, comments, issues, risks, dependencies) <> (StatusupdateRow.tupled, StatusupdateRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(projectid), Rep.Some(statusid), Rep.Some(updated), comments, issues, risks, dependencies).shaped.<>({r=>import r._; _1.map(_=> StatusupdateRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column projectId SqlType(INT) */
+    val projectid: Rep[Int] = column[Int]("projectId")
+    /** Database column statusId SqlType(INT) */
+    val statusid: Rep[Int] = column[Int]("statusId")
+    /** Database column updated SqlType(DATE) */
+    val updated: Rep[java.sql.Date] = column[java.sql.Date]("updated")
+    /** Database column comments SqlType(TEXT), Default(None) */
+    val comments: Rep[Option[String]] = column[Option[String]]("comments", O.Default(None))
+    /** Database column issues SqlType(TEXT), Default(None) */
+    val issues: Rep[Option[String]] = column[Option[String]]("issues", O.Default(None))
+    /** Database column risks SqlType(TEXT), Default(None) */
+    val risks: Rep[Option[String]] = column[Option[String]]("risks", O.Default(None))
+    /** Database column dependencies SqlType(TEXT), Default(None) */
+    val dependencies: Rep[Option[String]] = column[Option[String]]("dependencies", O.Default(None))
+
+    /** Foreign key referencing Project (database name StatusUpdate_ibfk_1) */
+    lazy val projectFk = foreignKey("StatusUpdate_ibfk_1", projectid, Project)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Statuscolor (database name StatusUpdate_ibfk_2) */
+    lazy val statuscolorFk = foreignKey("StatusUpdate_ibfk_2", statusid, Statuscolor)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table Statusupdate */
+  lazy val Statusupdate = new TableQuery(tag => new Statusupdate(tag))
+
   /** Entity class storing rows of table Surveyanswer
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param set Database column set SqlType(BIGINT)
@@ -1685,8 +2722,8 @@ trait Tables {
     prs => import prs._
     SurveyanswerRow.tupled((<<[Long], <<[Long], <<[Long], <<[Long], <<[Int]))
   }
-  /** Table description of table surveyanswer. Objects of this class serve as prototypes for rows in queries. */
-  class Surveyanswer(_tableTag: Tag) extends profile.api.Table[SurveyanswerRow](_tableTag, Some("offline"), "surveyanswer") {
+  /** Table description of table SurveyAnswer. Objects of this class serve as prototypes for rows in queries. */
+  class Surveyanswer(_tableTag: Tag) extends profile.api.Table[SurveyanswerRow](_tableTag, Some("offline"), "SurveyAnswer") {
     def * = (id, set, setinstanceperson, question, value) <> (SurveyanswerRow.tupled, SurveyanswerRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(set), Rep.Some(setinstanceperson), Rep.Some(question), Rep.Some(value)).shaped.<>({r=>import r._; _1.map(_=> SurveyanswerRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1724,8 +2761,8 @@ trait Tables {
     prs => import prs._
     SurveycategoryRow.tupled((<<[Long], <<[Long], <<[String], <<[String], <<[Boolean]))
   }
-  /** Table description of table surveycategory. Objects of this class serve as prototypes for rows in queries. */
-  class Surveycategory(_tableTag: Tag) extends profile.api.Table[SurveycategoryRow](_tableTag, Some("offline"), "surveycategory") {
+  /** Table description of table SurveyCategory. Objects of this class serve as prototypes for rows in queries. */
+  class Surveycategory(_tableTag: Tag) extends profile.api.Table[SurveycategoryRow](_tableTag, Some("offline"), "SurveyCategory") {
     def * = (id, set, name, description, disabled) <> (SurveycategoryRow.tupled, SurveycategoryRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(set), Rep.Some(name), Rep.Some(description), Rep.Some(disabled)).shaped.<>({r=>import r._; _1.map(_=> SurveycategoryRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1758,8 +2795,8 @@ trait Tables {
     prs => import prs._
     SurveyquestionRow.tupled((<<[Long], <<[Long], <<[String], <<[Boolean]))
   }
-  /** Table description of table surveyquestion. Objects of this class serve as prototypes for rows in queries. */
-  class Surveyquestion(_tableTag: Tag) extends profile.api.Table[SurveyquestionRow](_tableTag, Some("offline"), "surveyquestion") {
+  /** Table description of table SurveyQuestion. Objects of this class serve as prototypes for rows in queries. */
+  class Surveyquestion(_tableTag: Tag) extends profile.api.Table[SurveyquestionRow](_tableTag, Some("offline"), "SurveyQuestion") {
     def * = (id, category, name, disabled) <> (SurveyquestionRow.tupled, SurveyquestionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(category), Rep.Some(name), Rep.Some(disabled)).shaped.<>({r=>import r._; _1.map(_=> SurveyquestionRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1790,8 +2827,8 @@ trait Tables {
     prs => import prs._
     SurveysetRow.tupled((<<[Long], <<[String], <<[String], <<[Boolean]))
   }
-  /** Table description of table surveyset. Objects of this class serve as prototypes for rows in queries. */
-  class Surveyset(_tableTag: Tag) extends profile.api.Table[SurveysetRow](_tableTag, Some("offline"), "surveyset") {
+  /** Table description of table SurveySet. Objects of this class serve as prototypes for rows in queries. */
+  class Surveyset(_tableTag: Tag) extends profile.api.Table[SurveysetRow](_tableTag, Some("offline"), "SurveySet") {
     def * = (id, name, description, disabled) <> (SurveysetRow.tupled, SurveysetRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(description), Rep.Some(disabled)).shaped.<>({r=>import r._; _1.map(_=> SurveysetRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1820,8 +2857,8 @@ trait Tables {
     prs => import prs._
     SurveysetinstanceRow.tupled((<<[Long], <<[Long], <<[String], <<[java.sql.Date], <<[Boolean]))
   }
-  /** Table description of table surveysetinstance. Objects of this class serve as prototypes for rows in queries. */
-  class Surveysetinstance(_tableTag: Tag) extends profile.api.Table[SurveysetinstanceRow](_tableTag, Some("offline"), "surveysetinstance") {
+  /** Table description of table SurveySetInstance. Objects of this class serve as prototypes for rows in queries. */
+  class Surveysetinstance(_tableTag: Tag) extends profile.api.Table[SurveysetinstanceRow](_tableTag, Some("offline"), "SurveySetInstance") {
     def * = (id, set, forperson, askedon, closed) <> (SurveysetinstanceRow.tupled, SurveysetinstanceRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(set), Rep.Some(forperson), Rep.Some(askedon), Rep.Some(closed)).shaped.<>({r=>import r._; _1.map(_=> SurveysetinstanceRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1855,8 +2892,8 @@ trait Tables {
     prs => import prs._
     SurveysetpersonRow.tupled((<<[Long], <<[Long], <<[Long], <<[java.sql.Date], <<[String]))
   }
-  /** Table description of table surveysetperson. Objects of this class serve as prototypes for rows in queries. */
-  class Surveysetperson(_tableTag: Tag) extends profile.api.Table[SurveysetpersonRow](_tableTag, Some("offline"), "surveysetperson") {
+  /** Table description of table SurveySetPerson. Objects of this class serve as prototypes for rows in queries. */
+  class Surveysetperson(_tableTag: Tag) extends profile.api.Table[SurveysetpersonRow](_tableTag, Some("offline"), "SurveySetPerson") {
     def * = (id, personrole, setinstance, answeredon, frompersonanon) <> (SurveysetpersonRow.tupled, SurveysetpersonRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(personrole), Rep.Some(setinstance), Rep.Some(answeredon), Rep.Some(frompersonanon)).shaped.<>({r=>import r._; _1.map(_=> SurveysetpersonRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -1878,6 +2915,35 @@ trait Tables {
   /** Collection-like TableQuery object for table Surveysetperson */
   lazy val Surveysetperson = new TableQuery(tag => new Surveysetperson(tag))
 
+  /** Entity class storing rows of table Systemrole
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column Name SqlType(VARCHAR), Length(45,true)
+   *  @param ordering Database column Ordering SqlType(INT UNSIGNED), Default(0) */
+  case class SystemroleRow(id: Int, name: String, ordering: Long = 0L)
+  /** GetResult implicit for fetching SystemroleRow objects using plain SQL queries */
+  implicit def GetResultSystemroleRow(implicit e0: GR[Int], e1: GR[String], e2: GR[Long]): GR[SystemroleRow] = GR{
+    prs => import prs._
+    SystemroleRow.tupled((<<[Int], <<[String], <<[Long]))
+  }
+  /** Table description of table systemrole. Objects of this class serve as prototypes for rows in queries. */
+  class Systemrole(_tableTag: Tag) extends profile.api.Table[SystemroleRow](_tableTag, Some("offline"), "systemrole") {
+    def * = (id, name, ordering) <> (SystemroleRow.tupled, SystemroleRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(ordering)).shaped.<>({r=>import r._; _1.map(_=> SystemroleRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column Name SqlType(VARCHAR), Length(45,true) */
+    val name: Rep[String] = column[String]("Name", O.Length(45,varying=true))
+    /** Database column Ordering SqlType(INT UNSIGNED), Default(0) */
+    val ordering: Rep[Long] = column[Long]("Ordering", O.Default(0L))
+
+    /** Uniqueness Index over (name) (database name Name_UNIQUE) */
+    val index1 = index("Name_UNIQUE", name, unique=true)
+  }
+  /** Collection-like TableQuery object for table Systemrole */
+  lazy val Systemrole = new TableQuery(tag => new Systemrole(tag))
+
   /** Entity class storing rows of table Teamdescription
    *  @param id Database column id SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param login Database column Login SqlType(VARCHAR), Length(254,true)
@@ -1889,8 +2955,8 @@ trait Tables {
     prs => import prs._
     TeamdescriptionRow.tupled((<<[Long], <<[String], <<[java.sql.Date], <<[String]))
   }
-  /** Table description of table teamdescription. Objects of this class serve as prototypes for rows in queries. */
-  class Teamdescription(_tableTag: Tag) extends profile.api.Table[TeamdescriptionRow](_tableTag, Some("offline"), "teamdescription") {
+  /** Table description of table TeamDescription. Objects of this class serve as prototypes for rows in queries. */
+  class Teamdescription(_tableTag: Tag) extends profile.api.Table[TeamdescriptionRow](_tableTag, Some("offline"), "TeamDescription") {
     def * = (id, login, dateadded, tagtext) <> (TeamdescriptionRow.tupled, TeamdescriptionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(login), Rep.Some(dateadded), Rep.Some(tagtext)).shaped.<>({r=>import r._; _1.map(_=> TeamdescriptionRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))

@@ -31,11 +31,11 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ReleaseTypeAuthorizationPeopleRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ReleaseTypeAuthorizationPeopleRepo @Inject()( /* @NamedDatabase("offline") */  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db: JdbcBackend#DatabaseDef = dbConfig.db
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id:Int):Future[Option[ReleasetypeauthorizationpeopleRow]] = db.run(Releasetypeauthorizationpeople.filter(_.id === id).result.headOption)
   def findByLogin(login:String):Future[Seq[ReleasetypeauthorizationpeopleRow]] = db.run(Releasetypeauthorizationpeople.filter(_.login === login ).result)

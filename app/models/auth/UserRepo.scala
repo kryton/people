@@ -36,7 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class UserRepo @Inject()(@NamedDatabase("default")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db: JdbcBackend#DatabaseDef = dbConfig.db
-  import projectdb.Tables.profile.api._
+  import offline.Tables.profile.api._
 
   def find(id:Long):Future[Option[AuthuserRow]] = db.run(Authuser.filter(_.id === id).result.headOption)
 

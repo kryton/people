@@ -29,7 +29,7 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.db.NamedDatabase
-import projectdb.Tables._
+import offline.Tables._
 import slick.jdbc.JdbcProfile
 import utl.{LDAP, Page, User}
 
@@ -45,7 +45,7 @@ import org.apache.poi.ss.usermodel.{Row, Sheet, Workbook}
 class ResourcePoolController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+//   @NamedDatabase("offline") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    resourcePoolRepo: ResourcePoolRepo,
    user: User
   )(implicit

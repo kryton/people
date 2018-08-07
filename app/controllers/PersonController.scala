@@ -51,7 +51,7 @@ import scala.collection.immutable
 class PersonController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+/*   @NamedDatabase("offline") protected val dbProjectConfigProvider: DatabaseConfigProvider,*/
    productTrackRepo: ProductTrackRepo,
    //officeRepo: OfficeRepo,
 

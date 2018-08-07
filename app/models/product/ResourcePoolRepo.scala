@@ -23,7 +23,7 @@ import javax.inject.Inject
 import models.people.{MatrixTeamMemberRepo, OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
-import projectdb.Tables
+import offline.Tables
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,12 +33,12 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ResourcePoolRepo @Inject()( /* @NamedDatabase("offline") */ protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
 
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id: Int): Future[Option[ResourcepoolRow]] = db.run(Resourcepool.filter(_.id === id).result.headOption)
 
@@ -59,7 +59,7 @@ class ResourcePoolRepo @Inject()(@NamedDatabase("projectdb")  protected val dbCo
 
   def findTeams(id: Int): Future[Seq[Tables.ResourceteamRow]] = db.run(Resourceteam.filter(_.resourcepoolid === id).result)
 
-  def insert(pt: ResourcepoolRow): Future[_root_.projectdb.Tables.ResourcepoolRow] = db
+  def insert(pt: ResourcepoolRow): Future[_root_.offline.Tables.ResourcepoolRow] = db
     .run(Resourcepool returning Resourcepool.map(_.id) += pt)
     .map(id => pt.copy(id = id))
 

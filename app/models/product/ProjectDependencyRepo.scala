@@ -32,11 +32,11 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ProjectDependencyRepo @Inject()(@NamedDatabase("projectdb")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ProjectDependencyRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id:Long ):Future[Option[ProjectdependencyRow]] = db.run(Projectdependency.filter(_.id === id).result.headOption)
   def findFrom(projectId:Int):Future[Seq[ProjectdependencyRow]] =

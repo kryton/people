@@ -18,7 +18,7 @@
 package utl.importFile
 
 
-import projectdb.Tables._
+import offline.Tables._
 /**
   * Created by iholsman on 4/15/2017.
   * All Rights reserved

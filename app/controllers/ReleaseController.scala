@@ -25,8 +25,8 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.db.NamedDatabase
-import projectdb.Tables
-import projectdb.Tables.{ReleaseauthorizationtypeRow, ReleasetypeRow, ReleasetypeauthorizationpeopleRow}
+import offline.Tables
+import offline.Tables.{ReleaseauthorizationtypeRow, ReleasetypeRow, ReleasetypeauthorizationpeopleRow}
 import slick.jdbc.JdbcProfile
 import utl.{Conversions, LDAP, Page, User}
 
@@ -40,7 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ReleaseController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+//   @NamedDatabase("offline") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    releaseAuthorizationTypeRepo: ReleaseAuthorizationTypeRepo,
    releaseAuthorizationRepo: ReleaseAuthorizationRepo,
    releaseTypeAuthorizationPeopleRepo: ReleaseTypeAuthorizationPeopleRepo,

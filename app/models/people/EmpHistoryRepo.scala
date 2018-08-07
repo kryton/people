@@ -54,7 +54,7 @@ class EmpHistoryRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
   }
 
   def insert(empH: EmphistoryRow): Future[Tables.EmphistoryRow] = {
-    val newEmpH = empH.copy( login = empH.login.toLowerCase)
+    val newEmpH = empH.copy( login = Some(empH.login.getOrElse("?").toLowerCase))
 
     db.run( Emphistory.insertOrUpdate(newEmpH) ).map ( x => newEmpH )
   }
@@ -90,7 +90,7 @@ class EmpHistoryRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
   }
 
   def update(login: String, eh:EmphistoryRow) = {
-    db.run(Emphistory.filter(_.login === login.toLowerCase).update( eh.copy(login = login.toLowerCase))) map { _ > 0 }
+    db.run(Emphistory.filter(_.login === login.toLowerCase).update( eh.copy(login = Some(login.toLowerCase)))) map { _ > 0 }
   }
 
   def delete(login: String) =

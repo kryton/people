@@ -42,7 +42,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ProductTrackController @Inject()
   (
    protected val dbConfigProvider: DatabaseConfigProvider,
-   @NamedDatabase("projectdb") protected val dbProjectConfigProvider: DatabaseConfigProvider,
+//   @NamedDatabase("offline") protected val dbProjectConfigProvider: DatabaseConfigProvider,
    productTrackRepo: ProductTrackRepo,
    productFeatureRepo: ProductFeatureRepo,
    user: User

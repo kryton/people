@@ -52,7 +52,7 @@ libraryDependencies ++= Seq(
 
 slickGenerate := {
   import java.io.File
-  val dbs = Seq("offline", "project_db")
+  val dbs = Seq("offline") // , "project_db")
   val lines = scala.io.Source.fromFile("conf/db.secret").getLines
   val userName = lines.next()
   val password = lines.next()

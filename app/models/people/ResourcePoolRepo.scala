@@ -33,8 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class ResourcePoolRepo @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
-  import projectdb.Tables._
-  import projectdb.Tables.profile.api._
+  import offline.Tables._
+  import offline.Tables.profile.api._
 
   def find(id:Int ):Future[Option[ResourcepoolRow]] = db.run(Resourcepool.filter(_.id === id).result.headOption)
   def insert(resourcePool: ResourcepoolRow) = db
