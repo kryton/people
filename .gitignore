@@ -2,6 +2,7 @@
 *~
 *.swp
 *.cmd
+~*
 logs
 target
 project/project
