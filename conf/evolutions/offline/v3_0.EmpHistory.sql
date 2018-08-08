@@ -1,0 +1,1 @@
+alter table EmpHistory add primary key EmpHistory_PK (Login)

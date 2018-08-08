@@ -453,7 +453,7 @@ trait Tables {
 
   /** Entity class storing rows of table Emphistory
    *  @param personnumber Database column PersonNumber SqlType(BIGINT)
-   *  @param login Database column Login SqlType(VARCHAR), Length(254,true), Default(None)
+   *  @param login Database column Login SqlType(VARCHAR), PrimaryKey, Length(254,true)
    *  @param firstname Database column Firstname SqlType(VARCHAR), Length(254,true)
    *  @param nickname Database column NickName SqlType(VARCHAR), Length(254,true), Default(None)
    *  @param lastname Database column LastName SqlType(VARCHAR), Length(254,true)
@@ -463,22 +463,22 @@ trait Tables {
    *  @param employeetype Database column EmployeeType SqlType(VARCHAR), Length(254,true), Default(None)
    *  @param hirerehiredate Database column HireRehireDate SqlType(DATE), Default(None)
    *  @param lastseen Database column LastSeen SqlType(DATE), Default(None) */
-  case class EmphistoryRow(personnumber: Long, login: Option[String] = None, firstname: String, nickname: Option[String] = None, lastname: String, managerid: Option[String] = None, costcenter: Long, officeid: Long, employeetype: Option[String] = None, hirerehiredate: Option[java.sql.Date] = None, lastseen: Option[java.sql.Date] = None)
+  case class EmphistoryRow(personnumber: Long, login: String, firstname: String, nickname: Option[String] = None, lastname: String, managerid: Option[String] = None, costcenter: Long, officeid: Long, employeetype: Option[String] = None, hirerehiredate: Option[java.sql.Date] = None, lastseen: Option[java.sql.Date] = None)
   /** GetResult implicit for fetching EmphistoryRow objects using plain SQL queries */
-  implicit def GetResultEmphistoryRow(implicit e0: GR[Long], e1: GR[Option[String]], e2: GR[String], e3: GR[Option[java.sql.Date]]): GR[EmphistoryRow] = GR{
+  implicit def GetResultEmphistoryRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[Option[java.sql.Date]]): GR[EmphistoryRow] = GR{
     prs => import prs._
-    EmphistoryRow.tupled((<<[Long], <<?[String], <<[String], <<?[String], <<[String], <<?[String], <<[Long], <<[Long], <<?[String], <<?[java.sql.Date], <<?[java.sql.Date]))
+    EmphistoryRow.tupled((<<[Long], <<[String], <<[String], <<?[String], <<[String], <<?[String], <<[Long], <<[Long], <<?[String], <<?[java.sql.Date], <<?[java.sql.Date]))
   }
   /** Table description of table EmpHistory. Objects of this class serve as prototypes for rows in queries. */
   class Emphistory(_tableTag: Tag) extends profile.api.Table[EmphistoryRow](_tableTag, Some("offline"), "EmpHistory") {
     def * = (personnumber, login, firstname, nickname, lastname, managerid, costcenter, officeid, employeetype, hirerehiredate, lastseen) <> (EmphistoryRow.tupled, EmphistoryRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(personnumber), login, Rep.Some(firstname), nickname, Rep.Some(lastname), managerid, Rep.Some(costcenter), Rep.Some(officeid), employeetype, hirerehiredate, lastseen).shaped.<>({r=>import r._; _1.map(_=> EmphistoryRow.tupled((_1.get, _2, _3.get, _4, _5.get, _6, _7.get, _8.get, _9, _10, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(personnumber), Rep.Some(login), Rep.Some(firstname), nickname, Rep.Some(lastname), managerid, Rep.Some(costcenter), Rep.Some(officeid), employeetype, hirerehiredate, lastseen).shaped.<>({r=>import r._; _1.map(_=> EmphistoryRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6, _7.get, _8.get, _9, _10, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column PersonNumber SqlType(BIGINT) */
     val personnumber: Rep[Long] = column[Long]("PersonNumber")
-    /** Database column Login SqlType(VARCHAR), Length(254,true), Default(None) */
-    val login: Rep[Option[String]] = column[Option[String]]("Login", O.Length(254,varying=true), O.Default(None))
+    /** Database column Login SqlType(VARCHAR), PrimaryKey, Length(254,true) */
+    val login: Rep[String] = column[String]("Login", O.PrimaryKey, O.Length(254,varying=true))
     /** Database column Firstname SqlType(VARCHAR), Length(254,true) */
     val firstname: Rep[String] = column[String]("Firstname", O.Length(254,varying=true))
     /** Database column NickName SqlType(VARCHAR), Length(254,true), Default(None) */
@@ -500,9 +500,6 @@ trait Tables {
 
     /** Foreign key referencing Office (database name EmpHistory_Office_FK) */
     lazy val officeFk = foreignKey("EmpHistory_Office_FK", officeid, Office)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
-
-    /** Uniqueness Index over (login) (database name EmpHistory_login) */
-    val index1 = index("EmpHistory_login", login, unique=true)
   }
   /** Collection-like TableQuery object for table Emphistory */
   lazy val Emphistory = new TableQuery(tag => new Emphistory(tag))

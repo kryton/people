@@ -280,7 +280,7 @@ object WDImport {
                   employeetype = empRecord.employeeType)
 
                 empHistoryRepo.findOrCreate(empRecord.login.get, EmphistoryRow(empRecord.personNumber,
-                  Some(empRecord.login.getOrElse("?")),
+                  empRecord.login.getOrElse("?"),
                   empRecord.firstName, empRecord.nickName, empRecord.lastName, mgrLogin, empRecord.costCenter,
                   empRel.officeid.getOrElse(0), empRecord.employeeType, Some(empRecord.hireRehireDate.getOrElse(today)), Some(today))).map { ignore =>
                   Some(empRel)
