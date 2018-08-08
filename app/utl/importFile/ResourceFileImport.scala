@@ -60,13 +60,8 @@ object ResourceFileImport {
     Future(importFile(new File(file)))
   }
 
-  def importFile(fileRef: File)(implicit executionContext: ExecutionContext): Either[String,Seq[ResourceFileRow]] = {
-
-    val wb: Workbook = WorkbookFactory.create(new FileInputStream(fileRef))
-    val sheet: Sheet = wb.getSheet("ALL")
-    val rows: Int = sheet.getPhysicalNumberOfRows
-    val headerRow: Row = sheet.getRow(3)
-    val headerCells: Map[String, Int] = ((0 to 21 /* 'U' */) map { c: Int =>
+  def getHeaderCells (headerRow: Row, maxCols:Int) : Map[String,Int] = {
+    ((0 to maxCols /* 'U' */) map { c: Int =>
       val cell = headerRow.getCell(c)
       if (cell != null) {
         val str = cell.getStringCellValue
@@ -79,6 +74,66 @@ object ResourceFileImport {
         " " -> c
       }
     }).toMap
+  }
+
+  def getCellValue( cell:Cell): String = {
+    if (cell == null) {
+      ""
+    } else {
+      cell.getCellTypeEnum match {
+        case CellType.NUMERIC => cell.getNumericCellValue.toString
+        case CellType.BOOLEAN => if (cell.getBooleanCellValue) {
+          "Y"
+        } else {
+          "N"
+        }
+        case CellType.BLANK => ""
+        case CellType.STRING => cell.getStringCellValue
+        case _ => ""
+      }
+    }
+  }
+
+  def convertToResourceFileRow(rowNum:Int,
+                               row:Row,
+                               numColumns:Int,
+                               fieldnames: Vector[String],
+                               headerCells: Map[String, Int] ): Option[ResourceFileRow] = {
+    if (row != null) {
+      val cellValues: Map[String, String] = (0 until numColumns).map { column =>
+        val posn = fieldnames(column)
+        val cellNumber = headerCells(posn)
+        // val cell: Cell = row.getCell(cellNumber)
+        val value = getCellValue(row.getCell(cellNumber))
+        posn -> value.trim
+      }.toMap
+
+      val serviceArea = cellValues("Service Team")
+      val portfolioGroup = cellValues("Portfolio Group")
+      val teamName = cellValues("Sub Team Name")
+      val employee = cellValues("Employee ID").replaceAll("\\.[0-9]+$", "")
+
+      val resourceFileRow = ResourceFileRow(rowNum,
+        portfolioGroup = portfolioGroup,
+        serviceArea = serviceArea,
+        teamName = teamName,
+        employee = employee
+      )
+      Some(resourceFileRow)
+    }
+    else {
+      Logger.error(s"Resource File Import - Row $row is null ?")
+      None
+    }
+  }
+
+  def importFile(fileRef: File)(implicit executionContext: ExecutionContext): Either[String,Seq[ResourceFileRow]] = {
+
+    val wb: Workbook = WorkbookFactory.create(new FileInputStream(fileRef))
+    val sheet: Sheet = wb.getSheet("ALL")
+    val rows: Int = sheet.getPhysicalNumberOfRows
+    val headerRow: Row = sheet.getRow(3)
+    val headerCells: Map[String, Int] = getHeaderCells(headerRow, maxCols = 21)
 
     val fieldnames = Vector("Service Team", "Sub Team Name","Portfolio Group", "Employee ID")
 
@@ -90,50 +145,8 @@ object ResourceFileImport {
     } else {
       val cellHeaders: Map[Int, String] = headerCells.map { x => x._2 -> x._1 }
       val resourceFileRows: Seq[ResourceFileRow] = (3 until rows).flatMap { r =>
-        val row: Row = sheet.getRow(r)
-        if (row != null) {
-          val cellValues: Map[String, String] = (0 until numColumns).map { column =>
-            val posn = fieldnames(column)
-            val cellNumber = headerCells(posn)
-            val cell: Cell = row.getCell(cellNumber)
-            val value = if (cell == null) {
-              ""
-            } else {
-              cell.getCellTypeEnum match {
-                case CellType.NUMERIC => cell.getNumericCellValue.toString
-                case CellType.BOOLEAN => if (cell.getBooleanCellValue) {
-                  "Y"
-                } else {
-                  "N"
-                }
-                case CellType.BLANK => ""
-                case CellType.STRING => cell.getStringCellValue
-                case _ => ""
-              }
-            }
-            posn -> value.trim
-          }.toMap
+        convertToResourceFileRow(r, sheet.getRow(r), numColumns, fieldnames, headerCells )
 
-          val serviceArea = cellValues("Service Team")
-          val portfolioGroup = cellValues("Portfolio Group")
-          val teamName = cellValues("Sub Team Name")
-          val employee = cellValues("Employee ID").replaceAll("\\.[0-9]+$","")
-
-
-
-          val resourceFileRow = ResourceFileRow(r,
-            portfolioGroup = portfolioGroup,
-            serviceArea = serviceArea,
-            teamName= teamName,
-            employee = employee
-          )
-
-          Some(resourceFileRow)
-        }
-        else {
-          Logger.error(s"Resource File Import - Row $row is null ?")
-          None
-        }
       }
       wb.close()
 
@@ -145,4 +158,5 @@ object ResourceFileImport {
     }
   }
 }
+
 case class ResourceFileRow(row:Int,  portfolioGroup:String, serviceArea:String, teamName:String, employee:String)

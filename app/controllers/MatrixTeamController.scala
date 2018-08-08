@@ -24,14 +24,13 @@ import models.people.EmpRelationsRowUtils._
 import models.people._
 import models.product.ProductTrackRepo
 import offline.Tables
-import offline.Tables.{EmprelationsRow, MatrixteamRow, MatrixteammemberRow}
+import offline.Tables.{MatrixteamRow, MatrixteammemberRow}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.libs.Files
 import play.api.mvc._
-import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
-import utl.importFile.{CostCenterImport, ResourceFileImport}
+import utl.importFile.{ResourceFileImport, ResourceFileRow}
 import utl.{LDAP, Page, User}
 
 import scala.collection.immutable
@@ -84,7 +83,11 @@ class MatrixTeamController @Inject()
         val empsF = matrixTeamMemberRepo.findLoginByMatrixTeam(mt.id)
         (for {
           emps <- empsF
-          teams <- empsF.map{ empS => Future.sequence( empS.map{ emp => teamDescriptionRepo.findTeamForLogin( emp.login).map{ x => emp.login -> x}}) }.flatMap(identity)
+          teams <- empsF.map { empS =>
+            Future.sequence(empS.map { emp =>
+              teamDescriptionRepo.findTeamForLogin(emp.login).map { x => emp.login -> x }
+            })
+          }.flatMap(identity)
           parent <- matrixTeamRepo.findParent(ID)
           children <- matrixTeamRepo.findChildren(ID)
         } yield (emps,teams, parent, children))
@@ -98,7 +101,7 @@ class MatrixTeamController @Inject()
   }
 
 
-  def importFile = LDAPAuthAction {
+  def importFile: LDAPAuthAction[AnyContent] = LDAPAuthAction {
     Action.async { implicit request =>
       user.isAdmin(LDAPAuth.getUser()).map {
         case true =>
@@ -110,6 +113,39 @@ class MatrixTeamController @Inject()
   }
   case class MatrixTeamMemberImportRow( teamName: String, login:String, parent:Option[String])
 
+  def bulkImportTeams(seq: Seq[ResourceFileRow]):
+    (Future[Iterable[MatrixteamRow]],Map[(String, Option[String]), immutable.Iterable[MatrixTeamMemberImportRow]])  = {
+    val portfolio = seq.groupBy(p => p.portfolioGroup).flatMap( x => x._2.map{ y =>
+      MatrixTeamMemberImportRow(x._1,  y.employee, None)})
+    val serviceTeam = seq.groupBy(p => p.serviceArea).flatMap(x => x._2.map { y =>
+      MatrixTeamMemberImportRow(x._1, y.employee, Some(y.portfolioGroup))
+    })
+    val teams = seq.groupBy(p => p.teamName).flatMap( x => x._2.map{ y =>
+      MatrixTeamMemberImportRow(x._1,  y.employee, Some(y.serviceArea))
+    })
+
+    val combinedTeams: Map[(String, Option[String]), immutable.Iterable[MatrixTeamMemberImportRow]] = {
+      (portfolio ++ serviceTeam ++ teams).groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty)
+    }
+
+    val inserted = matrixTeamRepo.bulkInsertUpdate(
+      portfolio.groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty).keys
+    ).map { portFolioRecs =>
+      val st = matrixTeamRepo.bulkInsertUpdate(
+        serviceTeam.groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty).keys
+      ).map { serviceTeamRecs =>
+        val teamsGroups = teams.groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty).keys
+        matrixTeamRepo.bulkInsertUpdate(teamsGroups).map { t =>
+          serviceTeamRecs ++ t
+        }
+      }
+      st.flatMap(identity).map{ p =>
+        portFolioRecs ++ p
+      }
+    }.flatMap(identity)
+    (inserted, combinedTeams)
+  }
+
   def doImport(): Action[MultipartFormData[Files.TemporaryFile]] = Action.async(parse.multipartFormData) { implicit request =>
     user.isAdmin(LDAPAuth.getUser()).map {
       case true =>
@@ -118,38 +154,8 @@ class MatrixTeamController @Inject()
           val path: Path = picture.ref.path
           ResourceFileImport.importFile(path).map {
             case Left(errorMsg) => Future.successful(Ok(errorMsg))
-            case Right(seq) =>
-              val portfolio = seq.groupBy(p => p.portfolioGroup).flatMap( x => x._2.map{ y =>
-                MatrixTeamMemberImportRow(x._1,  y.employee, None)})
-              val serviceTeam = seq.groupBy(p => p.serviceArea).flatMap(x => x._2.map { y =>
-                MatrixTeamMemberImportRow(x._1, y.employee, Some(y.portfolioGroup))
-              })
-              val teams = seq.groupBy(p => p.teamName).flatMap( x => x._2.map{ y =>
-                MatrixTeamMemberImportRow(x._1,  y.employee, Some(y.serviceArea))
-              })
-
-              val combinedTeams: Map[(String, Option[String]), immutable.Iterable[MatrixTeamMemberImportRow]] = {
-                (portfolio ++ serviceTeam ++ teams).groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty)
-              }
-              // ordering is important here.. we want the top of the heirarchy updated/created first
-              // so children find their parents.
-
-              val insertedTeams: Future[Iterable[MatrixteamRow]] =  matrixTeamRepo.bulkInsertUpdate(
-                portfolio.groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty).keys
-              ).map { portFolioRecs =>
-                val st = matrixTeamRepo.bulkInsertUpdate(
-                  serviceTeam.groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty).keys
-                ).map { serviceTeamRecs =>
-                  matrixTeamRepo.bulkInsertUpdate(
-                    teams.groupBy(x => (x.teamName, x.parent)).filterNot(_._1._1.trim.isEmpty).keys
-                  ).map { t =>
-                    serviceTeamRecs ++ t
-                  }
-                }
-                st.flatMap(identity).map{ p =>
-                  portFolioRecs ++ p
-                }
-              }.flatMap(identity)
+            case Right(seq: Seq[ResourceFileRow]) =>
+              val (insertedTeams,combinedTeams) = bulkImportTeams(seq)
 
               insertedTeams.map{ records =>
                  val mapTeams = records.map{ x => x.name.toLowerCase -> x}.toMap
