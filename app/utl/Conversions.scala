@@ -22,7 +22,7 @@ import java.util.Calendar
 
 import org.joda.time.{DateTime, Days}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
-import play.Logger
+import play.api.Logging
 
 import scala.annotation.tailrec
 
@@ -30,7 +30,7 @@ import scala.annotation.tailrec
   * Created by iholsman on 4/15/2017.
   * All Rights reserved
   */
-object Conversions {
+object Conversions extends Logging {
 
   val fmt: DateTimeFormatter = DateTimeFormat.forPattern("E MM/dd/yy")
 
@@ -62,7 +62,7 @@ object Conversions {
         Some(new java.sql.Date( dt.getMillis ))
       } catch {
         case e: Throwable =>
-          Logger.error(s"toDate - $value $e")
+          logger.error(s"toDate - $value $e")
           None
       }
     }
@@ -78,7 +78,7 @@ object Conversions {
        Some( value.replaceAll(",","").toDouble)
       } catch {
         case e: Throwable =>
-          Logger.error(s"toDouble - $value $e")
+          logger.error(s"toDouble - $value $e")
           None
       }
     }
@@ -96,7 +96,7 @@ object Conversions {
       }
     } catch {
       case x:Throwable =>
-        Logger.error(s"toInt($value) $x")
+        logger.error(s"toInt($value) $x")
         None
     }
   }
@@ -105,10 +105,9 @@ object Conversions {
     try {
       Some(s.trim.toLong)
     } catch {
-      case e: Exception => {
-        println(s"TOLONG:$s - ${e.getMessage}")
+      case e: Exception =>
+        logger.info(s"TOLONG:$s - ${e.getMessage}")
         None
-      }
     }
   }
   def toLong( s:String, default:Long):Long = {
@@ -141,7 +140,7 @@ object Conversions {
           case r(days: String) =>
             toDouble(days, default)
           case _ =>
-            Logger.info(s"parseDays Regex Failed $inString")
+            logger.info(s"parseDays Regex Failed $inString")
             default
         }
       } else {
@@ -162,7 +161,7 @@ object Conversions {
           case r(days: String) =>
             toDouble(days,default)
           case _ =>
-            Logger.info(s"parsePercent -Regex Failed $inString")
+            logger.info(s"parsePercent -Regex Failed $inString")
             default
         }
       } else {
@@ -196,7 +195,6 @@ object Conversions {
     s match {
       case None =>
         val q: Int = (cal.get(Calendar.MONTH) + 1) / 3
-        //    println( s"q$q")
         cal.set(Calendar.MONTH, q * 3)
         Some(new java.sql.Date(cal.getTime.getTime))
       case Some(dQ) =>

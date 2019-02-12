@@ -26,7 +26,7 @@ import models.people.{CostCenterRepo, EmpHistoryRepo, OfficeRepo, PositionTypeRe
 import models.product.ResourceTeamRepo
 import org.apache.poi.ss.usermodel.CellType._
 import org.apache.poi.ss.usermodel._
-import play.api.Logger
+import play.api.Logging
 import offline.Tables
 import offline.Tables.ResourcepoolRow
 import utl.Conversions
@@ -39,11 +39,11 @@ import scala.io.{BufferedSource, Codec}
   * Created by iholsman on 4/15/2017.
   * All Rights reserved
   */
-object ProjectXLSImport {
+object ProjectXLSImport extends Logging{
   def importFile(path: Path)(implicit
                              executionContext: ExecutionContext,
                              resourceTeamRepo: ResourceTeamRepo):Future[ Either[String,List[FeatureImport]]] = {
-    implicit val codec = Codec("UTF-8")
+    implicit val codec: Codec = Codec("UTF-8")
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
@@ -54,7 +54,7 @@ object ProjectXLSImport {
   def importFile(file: URI)(implicit
                             executionContext: ExecutionContext,
                             resourceTeamRepo: ResourceTeamRepo):Future[ Either[String,List[FeatureImport]]] = {
-    implicit val codec = Codec("UTF-8")
+    implicit val codec: Codec = Codec("UTF-8")
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
     importFile(new File(file))
@@ -67,7 +67,7 @@ object ProjectXLSImport {
         rt._1.msprojectname.trim.toLowerCase -> rt
       }.toMap
 
-    }.map { (resourceMap: Map[String, (Tables.ResourceteamRow,Option[ResourcepoolRow])]) =>
+    }.map { resourceMap: Map[String, (Tables.ResourceteamRow,Option[ResourcepoolRow])] =>
       val wb: Workbook = WorkbookFactory.create(new FileInputStream(fileRef))
       val sheet: Sheet = wb.getSheetAt(0)
       val rows: Int = sheet.getPhysicalNumberOfRows
@@ -194,7 +194,7 @@ object ProjectXLSImport {
             Some(projectImportRecord)
           }
           else {
-            Logger.error(s"ProjectXLSImport - Row $row is null ?")
+            logger.error(s"ProjectXLSImport - Row $row is null ?")
             None
           }
         }

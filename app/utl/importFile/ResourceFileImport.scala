@@ -26,7 +26,7 @@ import models.people.{CostCenterRepo, FunctionalCenterRepo, ProfitCenterRepo}
 import models.product.ResourceTeamRepo
 import offline.Tables.CostcenterRow
 import org.apache.poi.ss.usermodel._
-import play.api.Logger
+import play.api.Logging
 import offline.Tables
 import offline.Tables.ResourcepoolRow
 import utl.Conversions
@@ -41,10 +41,10 @@ import scala.io.{BufferedSource, Codec}
   *   *
   * All Rights reserved
   */
-object ResourceFileImport {
+object ResourceFileImport extends Logging {
   def importFile(path: Path)(implicit executionContext: ExecutionContext
                              ):Future[ Either[String,Seq[ResourceFileRow]]] = {
-    implicit val codec = Codec("UTF-8")
+    implicit val codec: Codec = Codec("UTF-8")
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
@@ -54,7 +54,7 @@ object ResourceFileImport {
 
   def importFile(file: URI)(implicit   executionContext: ExecutionContext
                            ):Future[ Either[String,Seq[ResourceFileRow]]] = {
-    implicit val codec = Codec("UTF-8")
+    implicit val codec: Codec = Codec("UTF-8")
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
     Future(importFile(new File(file)))
@@ -122,7 +122,7 @@ object ResourceFileImport {
       Some(resourceFileRow)
     }
     else {
-      Logger.error(s"Resource File Import - Row $row is null ?")
+      logger.error(s"Resource File Import - Row $row is null ?")
       None
     }
   }

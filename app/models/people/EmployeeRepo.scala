@@ -18,12 +18,12 @@
 package models.people
 
 import java.net.URLDecoder
-import javax.inject.Inject
 
+import javax.inject.Inject
 import com.unboundid.ldap.sdk.SearchResultEntry
 import offline.Tables
 import offline.Tables.OfficeRow
-import play.api.Logger
+import play.api.{Logging}
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import slick.dbio.{DBIOAction, Effect}
@@ -41,7 +41,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case class EmployeeTreeNode( emp: Tables.EmprelationsRow,  directs: Set[EmployeeTreeNode])
 
-class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends Logging {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
   import offline.Tables._
@@ -167,16 +167,16 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
     val updates: Future[Set[EmprelationsRow]] = oldList.map { oldLogins => newLogins.union(oldLogins).flatMap { login => loginData.get(login)} }
 
     val tF: Future[Iterator[Int]] = terminations.map{set =>
-    //  Logger.info(s"Terms ${set.size}")
-     // set.foreach(x =>  Logger.info(s"Term $x"))
+    //  logger.info(s"Terms ${set.size}")
+     // set.foreach(x =>  logger.info(s"Term $x"))
       delete( set)}.map(x => Future.sequence(x)).flatMap(identity)
     val uF: Future[Seq[Int]] = updates.map{set =>
-      //Logger.info(s"Matches ${set.size}")
+      // logger.info(s"Matches ${set.size}")
       insertOrUpdate(set)
     }.flatMap(identity)
     val iF: Future[Seq[Int]] =  newHires.map{set =>
-      //Logger.info(s"New Hires ${set.size}")
-     // set.foreach(x =>  Logger.info(s"New ${x.login}"))
+      // logger.info(s"New Hires ${set.size}")
+     // set.foreach(x =>  logger.info(s"New ${x.login}"))
       insertOrUpdate(set)
     }.flatMap(identity)
     val resultF = for {
@@ -188,8 +188,8 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
     } yield (i, u, t, ix, tx )
 
     resultF.map { x =>
-      Logger.info(s"Insert F ${x._1.size}")
-      Logger.info(s"Delete F ${x._3.size}")
+      logger.info(s"Insert F ${x._1.size}")
+      logger.info(s"Delete F ${x._3.size}")
       (x._1, x._2.sum, x._3)
     }
 
@@ -197,10 +197,10 @@ class EmployeeRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPr
   }
 
 
-  def insert(er: EmprelationsRow) ={
+  def insert(er: EmprelationsRow): Future[EmprelationsRow] ={
     val erRec = er.copy( login = er.login.toLowerCase )
     db.run(Emprelations += erRec)
-    .map(login => erRec )
+    .map(ignore => erRec )
   }
 
   def insert(ers: Set[EmprelationsRow], batchSize:Int = 100): Iterator[Future[Option[Int]]] ={

@@ -30,12 +30,12 @@ import scala.concurrent.{ExecutionContext, Future}
   * Created by iholsman on 4/4/2017.
   * All Rights reserved
   */
-
+import play.api.Logging
 @Singleton
-class ErrorHandler @Inject()( environment: Environment)(implicit executionContext: ExecutionContext) extends HttpErrorHandler {
+class ErrorHandler @Inject()( environment: Environment)(implicit executionContext: ExecutionContext) extends HttpErrorHandler with Logging {
   val default = DefaultHttpErrorHandler
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
-    Logger.error(s"ErrorHandler ${environment.mode} $statusCode $message")
+    logger.error(s"ErrorHandler ${environment.mode} $statusCode $message")
     default.onClientError(request, statusCode, message)
 
   }

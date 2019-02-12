@@ -35,7 +35,7 @@ import play.api.libs.json.{JsObject, Json, Writes}
 import play.api.mvc._
 import play.db.NamedDatabase
 import utl.{EmpLayerStats, LDAP, User}
-
+import play.api.Logging
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.JdbcProfile
 import utl.importFile.{SAPImport, WDImport}
@@ -76,7 +76,7 @@ class PersonController @Inject()
     webJarsUtil: org.webjars.play.WebJarsUtil,
     assets: AssetsFinder,
     ldap: LDAP
-  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport {
+  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport with Logging {
 
   //protected val sapImportDir: String = ConfigFactory.load().getString("offline.SAPImportDir")
   protected val sapImportDir: String = config.get[String]("offline.SAPImportDir")
@@ -340,7 +340,7 @@ class PersonController @Inject()
           val canonical = file.getCanonicalPath
           /*
           if (!FileIO.isInSecureDir(file.toPath) && !System.getProperty("os.name").startsWith("Windows")) {
-            Logger.error(s"Insecure directory $canonical")
+            logger.error(s"Insecure directory $canonical")
             Future.successful(Redirect(routes.PersonController.importFileDir()).flashing( "error" -> "unable to read file"))
           } else {
           */
@@ -361,7 +361,7 @@ class PersonController @Inject()
                 }
             }.flatMap(identity).flatMap(identity)
           } else {
-            Logger.error(s"Unable to import file $canonical $filename")
+            logger.error(s"Unable to import file $canonical $filename")
             Future.successful(Redirect(routes.PersonController.importFileDir()).flashing(
               "error" -> "unable to read file"))
           }

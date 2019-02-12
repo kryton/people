@@ -18,9 +18,9 @@
 package controllers
 
 import javax.inject.Inject
-
 import com.typesafe.config.ConfigFactory
 import play.Logger
+import play.api.Logging
 import play.api.libs.typedmap.TypedKey
 import play.api.mvc._
 import play.shaded.ahc.org.asynchttpclient.netty.handler.intercept.Unauthorized401Interceptor
@@ -32,7 +32,7 @@ object LDAPAuthAttrs {
   val UserName: TypedKey[String] = TypedKey("userName")
 }
 
-case class OLDLDAPAuthAction[A] (action: Action[A])  extends Action[A] {
+case class OLDLDAPAuthAction[A] (action: Action[A])  extends Action[A] with Logging {
   lazy val unauthResult: Result = Results.Unauthorized.withHeaders(("WWW-Authenticate", "Basic realm=\"use your Digital River Login please\""))
 
   def apply(request: Request[A]): Future[Result] = {
@@ -45,10 +45,10 @@ case class OLDLDAPAuthAction[A] (action: Action[A])  extends Action[A] {
             if (res) {
               return action( request.withAttrs( request.attrs.updated(LDAPAuthAttrs.UserName,user) ))
             } else {
-              Logger.error("XXX LDAP user/password fail")
+              logger.error("XXX LDAP user/password fail")
             }
           } else {
-            Logger.error("XXXXX AUTH IS CURRENTLY DISABLED!")
+            logger.error("XXXXX AUTH IS CURRENTLY DISABLED!")
             return action( request.withAttrs( request.attrs.updated(LDAPAuthAttrs.UserName,user) ))
           }
 
@@ -76,7 +76,7 @@ case class LDAPAuthAction[A] (action: Action[A])  extends Action[A] {
   override def executionContext: ExecutionContext = action.executionContext
 }
 
-case class LDAPAuthPermission[A] (permission:String)(action: Action[A])  extends Action[A] {
+case class LDAPAuthPermission[A] (permission:String)(action: Action[A])  extends Action[A] with Logging {
   lazy val unauthResult: Result = Results.Unauthorized.withHeaders(("WWW-Authenticate", "Basic realm=\"use your Digital River Login please\""))
 
   def apply(request: Request[A]): Future[Result] = {
@@ -84,7 +84,7 @@ case class LDAPAuthPermission[A] (permission:String)(action: Action[A])  extends
       case Some(user) => if ( LDAPAuth.hasPermission(permission)(request)) {
         action(request)
       } else {
-        Logger.warn(s"User:$user - missing permission $permission ${request.uri}")
+        logger.warn(s"User:$user - missing permission $permission ${request.uri}")
         Future.successful(Results.Unauthorized(views.html.page_403("You don't have permission for that")))
       }
 

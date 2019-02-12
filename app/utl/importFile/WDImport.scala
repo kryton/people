@@ -32,7 +32,7 @@ import utl.Conversions
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.{BufferedSource, Codec}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Created by iholsman on 26/09/2014.
@@ -50,13 +50,12 @@ object WDImport {
 
       } catch {
 
-        case e: Exception => {
+        case e: Exception =>
           try {
             Some(new java.sql.Date(simpleDateFormat2.parse(s).getTime))
           } catch {
             case f: Exception =>   println (s"Date:$s - ${f.getMessage}");            None
           }
-        }
       }
     }
   //  println(s"SAPImport: $s $result")
@@ -141,7 +140,7 @@ object WDImport {
     val csvSettings: CsvParserSettings = new CsvParserSettings
     val csvParser:CsvParser =new  CsvParser(csvSettings)
     val tst = buffer.bufferedReader()
-    val empBits =  csvParser.parseAll(buffer.bufferedReader()).toList
+    val empBits =  csvParser.parseAll(buffer.bufferedReader()).asScala.toList
     //val employees:List[QuickBookImport] = buffer.getLines().flatMap {
     val employees:List[QuickBookImport] = empBits.flatMap {
       bits =>

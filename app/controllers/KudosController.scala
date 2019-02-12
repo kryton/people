@@ -21,8 +21,8 @@ import java.nio.charset.StandardCharsets
 import java.sql.Date
 import java.time.{LocalDateTime, LocalTime, Period, ZoneOffset}
 import java.util.Base64
-import javax.inject._
 
+import javax.inject._
 import com.typesafe.config.ConfigFactory
 import forms.{AwardForm, KudosExt, LoginForm}
 import models.people._
@@ -32,7 +32,7 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import models.people.EmpRelationsRowUtils._
 import org.abstractj.kalium.crypto.Random
 import play.api.data.Form
-import play.api.{Configuration, Environment, Logger, Mode}
+import play.api._
 import play.api.i18n.I18nSupport
 import play.api.libs.Crypto
 import play.api.libs.json._
@@ -71,7 +71,7 @@ class KudosController @Inject()
     webJarsUtil: org.webjars.play.WebJarsUtil,
     assets: AssetsFinder,
     ldap:LDAP
-  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport {
+  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport with Logging {
 
   protected val returnURL: String = ConfigFactory.load().getString("kudos.returnURL")
   protected val mailReceipient: Boolean = ConfigFactory.load().getBoolean("kudos.emailRecipient")
@@ -96,6 +96,20 @@ class KudosController @Inject()
     val secretHex = Base64.getEncoder.encode(secretHexConfig.getBytes())
 
     new org.abstractj.kalium.crypto.SecretBox(secretHex)
+  }
+
+
+  implicit val KudosExtWrites = new Writes[KudosExt] {
+    def writes(k: KudosExt): JsObject = Json.obj(
+      "fromLogin" -> k.fromLogin,
+      "fromPerson" -> k.fromPerson,
+      "headshotFrom" -> k.headShotFrom,
+      "toLogin" -> k.toLogin,
+      "toPerson" -> k.toPerson,
+      "headshotTo" -> k.headShotTo,
+      "dateAdded" -> k.dateAdded,
+      "feedback" -> k.feedback
+    )
   }
 
 
@@ -223,7 +237,7 @@ class KudosController @Inject()
   }
 
   def genKudos(toEncyrpt: String) = Action.async { implicit request =>
-    Logger.error("Warning. genKudos should not be run in production. please leave this route commented")
+    logger.error("Warning. genKudos should not be run in production. please leave this route commented")
     if (environment.mode == Mode.Prod) {
       Future.successful(InternalServerError("This should not be run in production"))
     } else {
@@ -362,7 +376,7 @@ class KudosController @Inject()
                 case None => Future.successful(NotFound("Couldn't find the original message"))
               }.flatMap(identity)
             } else {
-              Logger.info(s"Debug: $decrypted - $inMilli")
+              logger.info(s"Debug: $decrypted - $inMilli")
               Future.successful(BadRequest("Invalid message. Link has expired"))
             }
           } else {
@@ -656,7 +670,7 @@ class KudosController @Inject()
   def awardApproveList(page: Int): Action[AnyContent] = LDAPAuthPermission("AuthorizeAwards") {
     Action.async { implicit request =>
       (for {
-      //need <- awardNominationToRepo.awaitingAwardApproval()
+        //need <- awardNominationToRepo.awaitingAwardApproval()
         need <- awardNominationToRepo.awaitingAwardApproval().map { seq =>
           Future.sequence(seq.map { line =>
             (for {
@@ -679,6 +693,7 @@ class KudosController @Inject()
     }
   }
 
+
   implicit val DateWrites = new Writes[java.sql.Date] {
     def writes(d: java.sql.Date): JsValue = Json.toJson(
       d.toString
@@ -686,16 +701,4 @@ class KudosController @Inject()
   }
 
 
-  implicit val KudosExtWrites = new Writes[KudosExt] {
-    def writes(k: KudosExt): JsObject = Json.obj(
-      "fromLogin" -> k.fromLogin,
-      "fromPerson" -> k.fromPerson,
-      "headshotFrom" -> k.headShotFrom,
-      "toLogin" -> k.toLogin,
-      "toPerson" -> k.toPerson,
-      "headshotTo" -> k.headShotTo,
-      "dateAdded" -> k.dateAdded,
-      "feedback" -> k.feedback
-    )
-  }
 }

@@ -19,14 +19,14 @@ package models.product
 
 import java.sql.Date
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
+import javax.inject.Inject
 import models.people.{MatrixTeamMemberRepo, OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import offline.Tables
 import offline.Tables.EmprelationsRow
-import play.api.Logger
+import play.api.Logging
 import slick.basic.DatabaseConfig
 import slick.jdbc.{JdbcBackend, JdbcProfile}
 
@@ -37,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ResourceTeamRepo @Inject()( /* @NamedDatabase("offline") */  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ResourceTeamRepo @Inject()( /* @NamedDatabase("offline") */  protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends Logging {
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db: JdbcBackend#DatabaseDef = dbConfig.db
   import offline.Tables._
@@ -52,7 +52,7 @@ class ResourceTeamRepo @Inject()( /* @NamedDatabase("offline") */  protected val
     db.run( Resourceteam.filter(_.msprojectname === msProjectName).result.headOption).map{
       case Some(rt) => Future.successful(rt)
       case None =>
-        Logger.info(s"Inserting Resource Team - $msProjectName")
+        logger.info(s"Inserting Resource Team - $msProjectName")
         insert( ResourceteamRow(id=0, msprojectname = msProjectName, name = msProjectName))
     }.flatMap(identity)
   }
@@ -125,7 +125,7 @@ class ResourceTeamRepo @Inject()( /* @NamedDatabase("offline") */  protected val
                       tally = 1)
                   }
                 })
-                val tally: Future[Seq[TeamSummary]] = line.map { (seq: Seq[TeamSummary]) =>
+                val tally: Future[Seq[TeamSummary]] = line.map { seq: Seq[TeamSummary] =>
                   seq.groupBy(p => p).map { sumLine =>
                     val newTally = sumLine._2.map(_.tally).sum
                     sumLine._1.copy(tally = newTally)

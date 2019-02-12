@@ -66,7 +66,7 @@ class HomeController @Inject()
     webJarsUtil: org.webjars.play.WebJarsUtil,
     assets: AssetsFinder,
     ldap:LDAP
-  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
+  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport with Logging {
 
 
 
@@ -77,7 +77,7 @@ class HomeController @Inject()
     val cal: Calendar = Calendar.getInstance()
     cal.setTime(now)
     val week  = cal.get( Calendar.WEEK_OF_YEAR )
-   // Logger.info(s"Week = $week")
+   // logger.info(s"Week = $week")
     val empF = request.session.get("userId") match {
       case Some(userid) => employeeRepo.findByLogin(userid)
       case None => Future.successful(None)
@@ -98,14 +98,14 @@ class HomeController @Inject()
   }
   def loginInSubmit: Action[AnyContent] = Action.async { implicit request =>
     Future {
-     // Logger.info("loginSubmit1")
+     // logger.info("loginSubmit1")
       LoginForm.form.bindFromRequest.fold(
         form => {
-          Logger.info("loginSubmit2 - BadRequest")
+          logger.info("loginSubmit2 - BadRequest")
           Future.successful(BadRequest(views.html.login("Login", form)))
         },
         data => {
-       //   Logger.info("loginSubmit3")
+       //   logger.info("loginSubmit3")
         val enableAuth = ConfigFactory.load().getBoolean("auth.enable")
         val credentials = data.username
         if (enableAuth) {
@@ -115,11 +115,11 @@ class HomeController @Inject()
                 Redirect(routes.HomeController.index()).withSession(session:_*)//.addingToSession(session:_*)
             }
           } else {
-           // Logger.info(s"LoginSubmit ${data.username} Bad Password")
+           // logger.info(s"LoginSubmit ${data.username} Bad Password")
             Future.successful(Redirect(routes.HomeController.login()).flashing("error" -> "invalid.credentials"))
           }
         } else {
-          Logger.info(s"LoginSubmit ${data.username} NoAuth")
+          logger.info(s"LoginSubmit ${data.username} NoAuth")
           user.getUserSession(data.username).map {
             session =>
               Redirect(routes.HomeController.index()).withSession(session:_*)//.addingToSession(session:_*)

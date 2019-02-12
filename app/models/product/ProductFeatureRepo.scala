@@ -21,7 +21,7 @@ import java.sql.Date
 import javax.inject.Inject
 
 import offline.Tables.Emprelations
-import play.api.Logger
+import play.api.Logging
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import offline.Tables
@@ -36,7 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ProductFeatureRepo @Inject()(/* @NamedDatabase("offline") */ protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ProductFeatureRepo @Inject()(/* @NamedDatabase("offline") */ protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends Logging {
   val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
   val db: JdbcBackend#DatabaseDef = dbConfig.db
   import offline.Tables._
@@ -112,7 +112,7 @@ class ProductFeatureRepo @Inject()(/* @NamedDatabase("offline") */ protected val
                   managedClientRepo: ManagedClientRepo,
                   projectRepo: ProjectRepo,
                   projectDependencyRepo: ProjectDependencyRepo
-                ): Future[(Seq[ProductfeatureRow])] = {
+                ): Future[Seq[ProductfeatureRow]] = {
     val maxPri = features.map( _.priority).max +1
     val oldMSFL = db.run( Productfeature.filterNot(_.msprojectname.isEmpty).result )
 
@@ -255,7 +255,7 @@ class ProductFeatureRepo @Inject()(/* @NamedDatabase("offline") */ protected val
           m <- deleteMClientForFeature(deleteId)
           f <- deleteFFlagForFeature(deleteId)
         } yield ( r, t, m,f)).map { y =>
-          Logger.info( s"Deleting Feature ID $deleteId")
+          logger.info( s"Deleting Feature ID $deleteId")
           delete(deleteId).map( x=> x)
         }
       }

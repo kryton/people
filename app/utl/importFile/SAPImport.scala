@@ -26,7 +26,7 @@ import java.util.Calendar
 
 import models.people.{CostCenterRepo, EmpHistoryRepo, OfficeRepo, PositionTypeRepo}
 import offline.Tables.{EmphistoryRow, EmprelationsRow}
-import play.api.Logger
+import play.api.Logging
 import utl.Conversions
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +37,7 @@ import scala.io.{BufferedSource, Codec, Source}
  * Created by iholsman on 26/09/2014.
  * All Rights reserved
  */
-object SAPImport {
+object SAPImport extends Logging {
 
 
   private def toDateO(s: String): Option[java.sql.Date] = {
@@ -122,19 +122,19 @@ object SAPImport {
                           positionTypeRepo: PositionTypeRepo,
                           executionContext: ExecutionContext): Future[Seq[EmprelationsRow]] = {
 
-    val employees:List[QuickBookImport] = buffer.getLines().map {
+    val employees:List[QuickBookImport] = buffer.getLines().flatMap {
       line =>
         if (!line.startsWith("Pers No|")) {
           val bits: Array[String] = line.split("\\|", -1) //.drop(1)
-          val nickName =  trimMatchS(bits(2))
+          val nickName = trimMatchS(bits(2))
           val mgrNumber = trimMatchL(bits(15))
           val mgr = trimMatchS(bits(16))
           val mgrID = trimMatchS(bits(17)) match {
-            case Some(x) => Some( x.toLowerCase )
+            case Some(x) => Some(x.toLowerCase)
             case None => None
           }
           val empID = trimMatchS(bits(21)) match {
-            case Some(x) => Some ( x.toLowerCase )
+            case Some(x) => Some(x.toLowerCase)
             case None => None
           }
           val exec = trimMatchS(bits(18))
@@ -145,24 +145,24 @@ object SAPImport {
           val officeCity = trimMatchS(bits(25))
           val officeStreet = trimMatchS(bits(26))
           val officePOBox = trimMatchS(bits(27))
-          val officeRegion =trimMatchS( bits(28))
-          val officeZipCode= trimMatchS(bits(29))
+          val officeRegion = trimMatchS(bits(28))
+          val officeZipCode = trimMatchS(bits(29))
           val officeCountry = trimMatchS(bits(30))
 
-          val record = QuickBookImport(Conversions.toLong(bits(0),-1), bits(1).trim, nickName, bits(3).trim, bits(4),
-            Conversions.toInt(bits(5),0) /*CompanyCode */ ,
-            bits(6), Conversions.toLong(bits(7),0) /* costCenter */ , bits(8), bits(9), bits(10),
-            bits(11), /*skip EmpSubgroup */ bits(13) /* position */, bits(14).trim /* agency */,
+          val record = QuickBookImport(Conversions.toLong(bits(0), -1), bits(1).trim, nickName, bits(3).trim, bits(4),
+            Conversions.toInt(bits(5), 0) /*CompanyCode */ ,
+            bits(6), Conversions.toLong(bits(7), 0) /* costCenter */ , bits(8), bits(9), bits(10),
+            bits(11), /*skip EmpSubgroup */ bits(13) /* position */ , bits(14).trim /* agency */ ,
             mgrNumber, mgrID, mgr, exec,
-            this.toDateO(bits(19)), termDate /*TerminationDate*/,
+            this.toDateO(bits(19)), termDate /*TerminationDate*/ ,
             empID,
-            workstation,workstation2,
-            employeeType, officeCity,officeStreet,officePOBox, officeRegion, officeZipCode, officeCountry)
+            workstation, workstation2,
+            employeeType, officeCity, officeStreet, officePOBox, officeRegion, officeZipCode, officeCountry)
           Some(record)
         } else {
           None
         }
-    }.flatten.toList
+    }.toList
 
     val byId = employees.map(x => x.personNumber -> x).toMap
 
@@ -176,7 +176,7 @@ object SAPImport {
 
     val v2 = genTree(v)
 
-    val today =  new java.sql.Date(Calendar.getInstance().getTime().getTime())
+    val today =  new java.sql.Date(Calendar.getInstance().getTime.getTime)
 
     val empRels:Future[Seq[Option[EmprelationsRow]]] = Future.sequence {
       v2.map {
@@ -200,9 +200,7 @@ object SAPImport {
                 c <- ccRowF
                 o <- officeF
               } yield (c, o)).map { z =>
-                if ( empRecord.login.get.equalsIgnoreCase("mhalls")) {
-                  Logger.info("Here")
-                }
+               
                 val empRel: EmprelationsRow = EmprelationsRow(empRecord.personNumber,
                   empRecord.login.get.toLowerCase,
                   empRecord.firstName,

@@ -18,20 +18,20 @@
 package utl
 
 import java.security.cert.X509Certificate
+
 import javax.inject.Singleton
 import javax.net.ssl.{TrustManager, X509TrustManager}
-
 import com.typesafe.config.ConfigFactory
 import com.unboundid.ldap.sdk._
 import com.unboundid.ldap.sdk.extensions.StartTLSExtendedRequest
 import com.unboundid.util.ssl.SSLUtil
-import play.Logger
+import play.api.Logging
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 case class LDAPServer(domain: String, servers: List[String], port: Int, baseDN: DN,
                       user: String, pass: String, ignoreList: List[DN],
-                      terminatedDN: String) {
+                      terminatedDN: String) extends Logging {
 
   val ldapServerSet = new RoundRobinServerSet(servers.toArray[java.lang.String], servers.map(_ => port).toArray[Int])
   val bindRequest: BindRequest = new SimpleBindRequest(user, pass)
@@ -39,7 +39,7 @@ case class LDAPServer(domain: String, servers: List[String], port: Int, baseDN: 
     Some(new LDAPConnectionPool(ldapServerSet, bindRequest, servers.size * 2))
   } catch {
     case e: LDAPException =>
-      Logger.error("Unable to connect to LDAP. LDAP Functionality disabled", e)
+      logger.error("Unable to connect to LDAP. LDAP Functionality disabled", e)
       None
   }
 
@@ -64,11 +64,11 @@ case class LDAPServer(domain: String, servers: List[String], port: Int, baseDN: 
             Some(result)
           } catch {
             case lse: LDAPSearchException =>
-              Logger.error("LDAP:getByDistinguishedName Exception", lse)
+              logger.error("LDAP:getByDistinguishedName Exception", lse)
               pool.releaseConnection(connection)
               None
             case ex: LDAPException =>
-              Logger.error("LDAP:getByDistinguishedName Exception", ex)
+              logger.error("LDAP:getByDistinguishedName Exception", ex)
               pool.releaseDefunctConnection(connection)
               None
           }
@@ -96,9 +96,9 @@ case class LDAPServer(domain: String, servers: List[String], port: Int, baseDN: 
     } catch {
       case e: LDAPException =>
         if (!e.getResultCode.eq(ResultCode.INVALID_CREDENTIALS)) {
-          Logger.error(s"trying to authenticate user $userDn", e)
+          logger.error(s"trying to authenticate user $userDn", e)
         } else {
-          Logger.info(s"trying to authenticate user $userDn", e)
+          logger.info(s"trying to authenticate user $userDn", e)
         }
         false
     }
@@ -127,7 +127,7 @@ case class LDAPServer(domain: String, servers: List[String], port: Int, baseDN: 
 
           val searchResult: SearchResult = connection.search(searchRequest)
           pool.releaseConnection(connection)
-          searchResult.getSearchEntries.toList
+          searchResult.getSearchEntries.asScala.toList
             .filter({ a =>
             val dnName = new DN(a.getAttributeValue("distinguishedName"))
             !this.ignoreList.exists { ou => ou.isAncestorOf(dnName, true) }
@@ -135,17 +135,17 @@ case class LDAPServer(domain: String, servers: List[String], port: Int, baseDN: 
           ).filter(r => !r.getAttributeValue("distinguishedName").contains(terminatedDN))
         } catch {
           case lse: LDAPSearchException =>
-            Logger.error("Search:Search Exception", lse)
+            logger.error("Search:Search Exception", lse)
             pool.releaseConnection(connection)
             new Array[SearchResultEntry](0).toList
           case ex: LDAPException =>
-            Logger.error("Search:LDAP Exception", ex)
+            logger.error("Search:LDAP Exception", ex)
             pool.releaseDefunctConnection(connection)
             new Array[SearchResultEntry](0).toList
         }
     }
   }
- val trustAllCerts =  Array[TrustManager]{
+ val trustAllCerts: Array[TrustManager] =  Array[TrustManager]{
     new X509TrustManager() {
 
      override def getAcceptedIssuers: Array[X509Certificate] =
@@ -161,19 +161,19 @@ case class LDAPServer(domain: String, servers: List[String], port: Int, baseDN: 
 }
 
 @Singleton
-class LDAP {
-  val mainDN = ConfigFactory.load().getString("ldap.mainDomain")
+class LDAP extends Logging {
+  val mainDN: String = ConfigFactory.load().getString("ldap.mainDomain")
   val serverMap: Map[String, LDAPServer] = {
-    Logger.info("Rebuilding LDAP connections")
+    logger.info("Rebuilding LDAP connections")
     val port = ConfigFactory.load().getInt("ldap.port")
-    val servers = ConfigFactory.load().getConfigList("ldap.servers") map {
+    val servers = ConfigFactory.load().getConfigList("ldap.servers").asScala map {
       p => LDAPServer(p.getString("domain"),
-        p.getStringList("servers").toList,
+        p.getStringList("servers").asScala.toList,
         port,
         new DN(p.getString("dn")),
         p.getString("user"),
         p.getString("pass"),
-        p.getStringList("OUIgnore").map(x => new DN(x)).toList,
+        p.getStringList("OUIgnore").asScala.map(x => new DN(x)).toList,
         p.getString("terminatedGroup")
       )
 
@@ -187,7 +187,7 @@ class LDAP {
       val server: LDAPServer = availableServers.head._2
       server
     } else {
-      Logger.error("LDAP:Couldn't find a match for :" + dn)
+      logger.error("LDAP:Couldn't find a match for :" + dn)
       val server = serverMap(mainDN)
       server
     }
@@ -221,7 +221,7 @@ class LDAP {
       case Some(x) => val dn = x.getDN
         val authServer: LDAPServer = server(new DN(dn))
         authServer.authenticate(dn, password)
-      case None => Logger.error(s"User $accountName not found")
+      case None => logger.error(s"User $accountName not found")
         false
     }
    // false
@@ -351,7 +351,7 @@ class LDAP {
       search(Filter.createANDFilter(
         Filter.createEqualityFilter("samAccountType", LDAP.accountTypePerson),
         Filter.createNOTFilter(Filter.createEqualityFilter("msExchHideFromAddressLists", "TRUE")),
-        Filter.createORFilter(searchOpts)
+        Filter.createORFilter(searchOpts.asJava)
       )
       ).sortBy(r => (if (r.getAttributeValue("sn") == null) {
         "Z"
@@ -399,7 +399,7 @@ object LDAP {
   val accountTypeMailGroup = "268435457"
   val accountTypeOtherGroup = "268435456"
   val accountTypeAliasObject = "536870912"
-  val listTypes = Map(LDAP.accountTypeMailGroup -> "Mailing Lists",
+  val listTypes: Map[String, String] = Map(LDAP.accountTypeMailGroup -> "Mailing Lists",
     LDAP.accountTypeOtherGroup -> "Roles",
     LDAP.accountTypeAliasObject -> "Aliases"
   )

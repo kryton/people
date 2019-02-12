@@ -74,7 +74,18 @@ class OKRController @Inject()
     * a path of `/`.
     */
 
-
+  implicit val okrObjectiveExtWrites = new Writes[OKRObjectiveExt] {
+    def writes( k : OKRObjectiveExt ): JsObject = Json.obj(
+      "login" -> k.login,
+      "person" -> k.person,
+      "dateAdded"-> k.dateAdded,
+      "objective" -> k.objective,
+      "score" -> k.score,
+      "quarter" -> Conversions.quarterS(k.quarter),
+      "completed" -> k.completed,
+      "retired" -> k.retired
+    )
+  }
 
   def login( login:String, quarter:Option[String]): Action[AnyContent] = Action.async { implicit request =>
     val quarterDate = Conversions.quarterD(quarter)
@@ -468,18 +479,7 @@ class OKRController @Inject()
       d.toString
     )
   }
-  implicit val okrObjectiveExtWrites = new Writes[OKRObjectiveExt] {
-    def writes( k : OKRObjectiveExt ): JsObject = Json.obj(
-      "login" -> k.login,
-      "person" -> k.person,
-      "dateAdded"-> k.dateAdded,
-      "objective" -> k.objective,
-      "score" -> k.score,
-      "quarter" -> Conversions.quarterS(k.quarter),
-      "completed" -> k.completed,
-      "retired" -> k.retired
-    )
-  }
+
 
 }
 

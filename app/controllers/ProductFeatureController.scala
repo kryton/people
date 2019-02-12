@@ -21,13 +21,13 @@ import java.io.FileOutputStream
 import java.nio.file.Path
 import java.sql.Date
 import java.time.format.DateTimeFormatter
-import javax.inject._
 
+import javax.inject._
 import com.typesafe.config.ConfigFactory
 import models.people.{MatrixTeamMemberRepo, OfficeRepo, PositionTypeRepo, TeamDescriptionRepo}
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.{Row, Sheet, Workbook}
-import play.api.Logger
+import play.api.{Logger, Logging}
 
 //import models.people.{EmployeeRepo}
 import models.product._
@@ -78,7 +78,7 @@ class ProductFeatureController @Inject()
     webJarsUtil: org.webjars.play.WebJarsUtil,
     assets: AssetsFinder,
     ldap:LDAP
-  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport{
+  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport with Logging {
 
   def search( page:Int, search:Option[String]): Action[AnyContent] = Action.async { implicit request =>
     val pageSize = 20
@@ -597,7 +597,7 @@ class ProductFeatureController @Inject()
                           }
                       } catch {
                         case e:NumberFormatException => Future.successful(NotAcceptable("Invalid Number"))
-                        case e:Exception => Logger.error(e.getLocalizedMessage)
+                        case e:Exception => logger.error(e.getLocalizedMessage)
                           Future.successful(NotAcceptable(e.getLocalizedMessage))
                       }
                   }

@@ -18,13 +18,12 @@
 package utl
 
 import javax.inject.Inject
-
 import com.typesafe.config.ConfigFactory
-import com.unboundid.ldap.sdk.SearchResultEntry
-import controllers.routes
+//import com.unboundid.ldap.sdk.SearchResultEntry
+//import controllers.routes
 import models.auth.{PermissionRepo, UserPrefRepo, UserRepo}
 import models.people.EmployeeRepo
-import play.api.Logger
+import play.api.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,14 +35,14 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo,
                      userRepo:UserRepo,
                      permissionRepo: PermissionRepo,
                      userPrefRepo:UserPrefRepo,
-                     executionContext: ExecutionContext ) {
-  import scala.collection.JavaConversions._
-  val specialLogo: Set[String] = ConfigFactory.load().getStringList("offline.speciallogo").toList.map(x => x.toLowerCase).toSet
-  val catLover: Set[String] = ConfigFactory.load().getStringList("offline.cats").toList.map(x => x.toLowerCase).toSet
-  val admins: Set[String] = ConfigFactory.load().getStringList("scenario.admins").toList.map(x => x.toLowerCase).toSet
-  val adminsHierarchy: Set[String] = ConfigFactory.load().getStringList("scenario.admins_hierarchy").toList.map(x => x.toLowerCase).toSet
-  val kudosAdmins: Set[String] = ConfigFactory.load().getStringList("kudos.admins").toList.map(x => x.toLowerCase).toSet
-  val aceAwardAdmins: Set[String] = ConfigFactory.load().getStringList("aceaward.admins").toList.map(x => x.toLowerCase).toSet
+                     executionContext: ExecutionContext ) extends Logging{
+  import scala.collection.JavaConverters._
+  val specialLogo: Set[String] = ConfigFactory.load().getStringList("offline.speciallogo").asScala.toList.map(x => x.toLowerCase).toSet
+  val catLover: Set[String] = ConfigFactory.load().getStringList("offline.cats").asScala.toList.map(x => x.toLowerCase).toSet
+  val admins: Set[String] = ConfigFactory.load().getStringList("scenario.admins").asScala.toList.map(x => x.toLowerCase).toSet
+  val adminsHierarchy: Set[String] = ConfigFactory.load().getStringList("scenario.admins_hierarchy").asScala.toList.map(x => x.toLowerCase).toSet
+  val kudosAdmins: Set[String] = ConfigFactory.load().getStringList("kudos.admins").asScala.toList.map(x => x.toLowerCase).toSet
+  val aceAwardAdmins: Set[String] = ConfigFactory.load().getStringList("aceaward.admins").asScala.toList.map(x => x.toLowerCase).toSet
 
   def isOwnerOrAdmin(owner: String, userO:Option[String]): Future[Boolean] = {
     userO match {
@@ -135,7 +134,7 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo,
   // XXX still in development
   def inDistGroup(user:String, group:String)(implicit ldap:LDAP): Boolean = {
 
-    Logger.warn("Warning. this feature is untested, and doesn't work for shared mailboxes")
+    logger.warn("Warning. this feature is untested, and doesn't work for shared mailboxes")
     ldap.getPersonByAccount(user).headOption match {
       case Some(person) =>
         val groups: List[String] = person.getAttributeValues("memberof").toList
@@ -170,7 +169,7 @@ class User @Inject()(implicit employeeRepo:EmployeeRepo,
        //   Logger.info(s"isAdmin - true - $login")
           Future.successful(true)
         } else {
-          Logger.debug(s"isAdmin - false - $login")
+          logger.debug(s"isAdmin - false - $login")
           loginInAdminHierarchy(login.toLowerCase)
         }
       case None => Future.successful(false)

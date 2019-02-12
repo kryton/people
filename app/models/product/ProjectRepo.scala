@@ -18,9 +18,9 @@
 package models.product
 
 import java.sql.Date
-import javax.inject.Inject
 
-import play.api.Logger
+import javax.inject.Inject
+import play.api.Logging
 import play.api.db.slick.DatabaseConfigProvider
 import play.db.NamedDatabase
 import offline.Tables
@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 
-class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends Logging{
   val dbConfig = dbConfigProvider.get[JdbcProfile]
   val db = dbConfig.db
   import offline.Tables._
@@ -107,7 +107,7 @@ class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConf
     val interestingProjects: Seq[ProjectImport] = projects.filter( _.resource.nonEmpty)
     val fBf: Future[(Iterable[Option[ResourceteamprojectRow]], Seq[Seq[Option[Tables.ProjectdependencyRow]]])] = findByFeature(featureId).map{ existing =>
       if (featureId == 539) {
-        Logger.info("DEBUG-Project-repopulate")
+        logger.info("DEBUG-Project-repopulate")
       }
       val existMap = existing.filter( _.msprojectname.nonEmpty ).map{ p =>  p.msprojectname.getOrElse("").toLowerCase -> p }.toMap
       val newMap: Map[String, ProjectImport] = interestingProjects.map{ p => p.task.toLowerCase+"/"+p.resource.toLowerCase -> p}.toMap
@@ -156,7 +156,7 @@ class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConf
           deleteResourcesForProject(projT._2.id).map{ ignore =>
             newMap.get(projT._1) match {
               case None =>
-                Logger.error("Logic Error. Should match (ProjectRepo/Resource")
+                logger.error("Logic Error. Should match (ProjectRepo/Resource")
                 Future.successful(None)
               case Some(imp) => imp.resourceTeam match {
                 case Some(rtp) => val rt= ResourceteamprojectRow(id=0,
@@ -168,7 +168,7 @@ class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConf
                 )
                    insert(rt) .map{ x => Some(x)}
                 case None =>
-                  Logger.error("Logic Error. Should have a resource team assigned at this stage??")
+                  logger.error("Logic Error. Should have a resource team assigned at this stage??")
                   Future.successful(None)
               }
             }
@@ -182,7 +182,7 @@ class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConf
           val key = s"${proj.task.toLowerCase}/${proj.resource.toLowerCase}"
           val projID = fullMap.get(key) match {
             case None =>
-              Logger.error(s"Logic Error. ProjectRepo - shouldn't have no match Key=$key")
+              logger.error(s"Logic Error. ProjectRepo - shouldn't have no match Key=$key")
               0
             case Some(pp) => pp.id
           }
@@ -195,11 +195,11 @@ class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConf
                     projectDependencyRepo.insert(ProjectdependencyRow(0,projID, projRow.id, dependencytype = predRow._2))
                       .map( res => Some(res) )
                   case None =>
-                    Logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key")
+                    logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key")
                     Future.successful(None)
                 }
                 case None =>
-                  Logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key x2")
+                  logger.error(s"Logic Error.Project Repo Dependency not found Row=$predRow key=$key x2")
                   Future.successful(None)
               }
             })
@@ -208,7 +208,7 @@ class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConf
         (for{
           r <- resourceF
           p <- projectDependencyF
-        } yield(r,p)).map { (ignore: (Iterable[Option[ResourceteamprojectRow]], Seq[Seq[Option[ProjectdependencyRow]]])) =>
+        } yield(r,p)).map { ignore: (Iterable[Option[ResourceteamprojectRow]], Seq[Seq[Option[ProjectdependencyRow]]]) =>
           ignore
         }
 
@@ -239,7 +239,7 @@ class ProjectRepo @Inject()( /*@NamedDatabase("offline") */ protected val dbConf
           .joinLeft(Resourcepool).on(_._2.resourcepoolid === _.id)
         .result
       ).map{  res =>
-        res.map{ (line: (((ProjectRow,ResourceteamprojectRow), ResourceteamRow), Option[ResourcepoolRow])) =>
+        res.map{ line: (((ProjectRow,ResourceteamprojectRow), ResourceteamRow), Option[ResourcepoolRow]) =>
           val x : (ProjectRow, ResourceteamprojectRow, (ResourceteamRow, Option[ResourcepoolRow])) = (line._1._1._1, line._1._1._2, (line._1._2, line._2))
           x
         }.groupBy( _._1)

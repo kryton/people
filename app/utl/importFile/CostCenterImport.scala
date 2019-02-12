@@ -26,7 +26,7 @@ import models.people.{CostCenterRepo, FunctionalCenterRepo, ProfitCenterRepo}
 import models.product.ResourceTeamRepo
 import offline.Tables.CostcenterRow
 import org.apache.poi.ss.usermodel._
-import play.api.Logger
+import play.api.Logging
 import offline.Tables
 import offline.Tables.ResourcepoolRow
 import utl.Conversions
@@ -39,10 +39,10 @@ import scala.io.{BufferedSource, Codec}
   * Created by iholsman on 4/15/2017.
   * All Rights reserved
   */
-object CostCenterImport {
+object CostCenterImport extends Logging {
   def importFile(path: Path)(implicit executionContext: ExecutionContext
                              ):Future[ Either[String,Seq[CostCenterImportRow]]] = {
-    implicit val codec = Codec("UTF-8")
+    implicit val codec: Codec = Codec("UTF-8")
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
@@ -52,7 +52,7 @@ object CostCenterImport {
 
   def importFile(file: URI)(implicit   executionContext: ExecutionContext
                            ):Future[ Either[String,Seq[CostCenterImportRow]]] = {
-    implicit val codec = Codec("UTF-8")
+    implicit val codec: Codec = Codec("UTF-8")
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
     Future(importFile(new File(file)))
@@ -118,13 +118,13 @@ object CostCenterImport {
           }.toMap
           val functionalAreaID =  Conversions.toLong(cellValues.getOrElse("Functional Area", "0"), 0)
           if (functionalAreaID == 0 ) {
-            Logger.error("ERROR FunctionalID = 0")
+            logger.error("ERROR FunctionalID = 0")
             val longV = Conversions.toLong(cellValues.getOrElse("Functional Area", "0"), 0)
           }
 
           val profitCenterID =  Conversions.toLong(cellValues.getOrElse("Profit Center Number", "0"), 0)
           if (profitCenterID == 0 ) {
-            Logger.error("ERROR profitCenterID = 0")
+            logger.error("ERROR profitCenterID = 0")
             val longV = Conversions.toLong(cellValues.getOrElse("Profit Center Number", "0"), 0)
           }
 
@@ -143,7 +143,7 @@ object CostCenterImport {
           Some(costCenterImportRow)
         }
         else {
-          Logger.error(s"CostCenter Import - Row $row is null ?")
+          logger.error(s"CostCenter Import - Row $row is null ?")
           None
         }
       }

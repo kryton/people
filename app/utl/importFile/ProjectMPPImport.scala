@@ -25,7 +25,7 @@ import java.util.Date
 import models.product.ResourceTeamRepo
 import net.sf.mpxj.mpp.MPPReader
 import net.sf.mpxj.{ProjectFile, Relation, ResourceAssignment, Task}
-import play.api.Logger
+import play.api.Logging
 import offline.Tables
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,8 +34,8 @@ import scala.io.{BufferedSource, Codec}
   * Created by iholsman on 4/29/2017.
   * All Rights reserved
   */
-object ProjectMPPImport {
-  val fieldNames = Set("Program", "CID", "CID Inventory File Name", "Dev Estimate", "Anchor", "Buffered Estimate")
+object ProjectMPPImport extends Logging {
+  val fieldNames: Set[String] = Set("Program", "CID", "CID Inventory File Name", "Dev Estimate", "Anchor", "Buffered Estimate")
 
   //importFileMPP("/tmp/roadmap-2017-04-29.mpp")
 
@@ -50,7 +50,7 @@ object ProjectMPPImport {
   def importFile(path: Path)(implicit
                              executionContext: ExecutionContext,
                              resourceTeamRepo: ResourceTeamRepo):Future[ Either[String,List[FeatureImport]]] = {
-    implicit val codec = Codec("UTF-8")
+    implicit val codec: Codec = Codec("UTF-8")
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
 
@@ -144,7 +144,7 @@ object ProjectMPPImport {
   def dumpProject(task:Task, featureName:String,resourceMap:Map[String, (Tables.ResourceteamRow, Option[Tables.ResourcepoolRow])]):Option[ProjectImport] = {
     val projects = task.getChildTasks
     if (projects.size()>0) {
-      Logger.error(s"Invalid - we only do 2 level projects. ${task.getName}")
+      logger.error(s"Invalid - we only do 2 level projects. ${task.getName}")
     }
  //   val resources: util.List[ResourceAssignment] = task.getResourceAssignments
     val predecessors: util.List[Relation] = task.getPredecessors
@@ -192,7 +192,7 @@ object ProjectMPPImport {
       case None => None
     }
     if ( !constraintType.equalsIgnoreCase("ASAP")) {
-      Logger.error(s"Task #${task.getID} - ${task.getName} has a constraint $constraintType - $constraintDate")
+      logger.error(s"Task #${task.getID} - ${task.getName} has a constraint $constraintType - $constraintDate")
     }
 
 
@@ -200,7 +200,7 @@ object ProjectMPPImport {
 
     val resourceNames = getResources(task.getResourceAssignments)
     if ( resourceNames.size>1) {
-      Logger.error(s"Task #${task.getID} - ${task.getName} has more than 1 resource Assigned. that isn't supported. ")
+      logger.error(s"Task #${task.getID} - ${task.getName} has more than 1 resource Assigned. that isn't supported. ")
     }
     val devE = eTasks.get("Dev Estimate").flatten.getOrElse("0.0").toDouble
     val bufE = eTasks.get("Buffered Estimate").flatten.getOrElse("0.0").toDouble

@@ -20,15 +20,15 @@ package controllers
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Paths
+
 import javax.imageio.ImageIO
 import javax.inject.{Inject, Singleton}
-
 import com.sksamuel.scrimage.{Image, WriteContext}
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.typesafe.config.ConfigFactory
 import forms.headShotUpload
 import models.people.EmployeeRepo
-import play.api.Logger
+import play.api.{Logger, Logging}
 import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.data.Forms._
@@ -53,7 +53,7 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
                                     webJarAssets: org.webjars.play.WebJarAssets,
                                     webJarsUtil: org.webjars.play.WebJarsUtil,
                                     assets: AssetsFinder)
-  extends AbstractController(cc)  with HasDatabaseConfigProvider[JdbcProfile]{
+  extends AbstractController(cc)  with HasDatabaseConfigProvider[JdbcProfile] with Logging {
 
   protected val imageDir: String = ConfigFactory.load().getString("image.directory")
   protected val cacheDir: String = ConfigFactory.load().getString("image.cache")
@@ -121,7 +121,7 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
               case Some(res) =>
                 val image =genImage(res).get
                 Future {
-                  Logger.debug(s"Genning Image  $login -> $res -- $cacheDir/${login}.jpg")
+                  logger.debug(s"Genning Image  $login -> $res -- $cacheDir/${login}.jpg")
                   image.write(new File(s"$cacheDir/${login}-${System.currentTimeMillis()}.jpg"))
                 }
                 Right(image.bytes)
@@ -163,7 +163,7 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
     val catsPrank: Boolean  = request.session.get("cats") match {
       case Some(s) => if ( s.contentEquals("true")) {
         if ( catPercentage > random.nextDouble() ) {
-          Logger.info("We have a Cat Lover!")
+          logger.info("We have a Cat Lover!")
           true
         } else {
           false
@@ -179,13 +179,12 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
        val cats: List[File] = d.listFiles().filter(_.isFile).filter(p => p.getName.endsWith(".jpg")).toList
         if ( cats.nonEmpty) {
           val index = random.nextInt(cats.size)
-          //Logger.info(cats(index).getAbsolutePath)
           Future.successful(Ok(makeSquare(cats(index).getAbsolutePath).get.bytes).as("image/jpeg"))
         } else {
           Future.successful(Ok(makeSquare("app/assets/images/noFace.jpg").get.bytes).as("image/jpeg"))
         }
       } else {
-        Logger.warn("No Cat Directory?")
+        logger.warn("No Cat Directory?")
         Future.successful(Ok(makeSquare("app/assets/images/noFace.jpg").get.bytes).as("image/jpeg"))
       }
     }
@@ -195,7 +194,7 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
       } else {
         true
       }
-      //Logger.info(s"HeadShot NotCurrent $notCurrent - currentOnly = $currentOnly ")
+      //logger.info(s"HeadShot NotCurrent $notCurrent - currentOnly = $currentOnly ")
       findAndCacheHeadShot(login, currentOnly).map {
         case Left(oS) => oS match {
           case Some(path) =>
@@ -246,7 +245,7 @@ class HeadshotController @Inject() (protected val dbConfigProvider: DatabaseConf
               case _:Throwable =>
             }
 
-            picture.ref.moveTo(new File(tempFile), replace = true)
+            picture.ref.moveFileTo(new File(tempFile), replace = true)
             val sizedImage = sizeImage(tempFile).get
             sizedImage.write(s"$userUploadDir/${login.toLowerCase}-${System.currentTimeMillis()}.jpg")
             try {

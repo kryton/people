@@ -18,9 +18,8 @@
 package controllers
 
 import javax.inject._
-
 import models.product._
-import play.api.Logger
+import play.api.{Logger, Logging}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
@@ -56,7 +55,7 @@ class ReleaseController @Inject()
     webJarsUtil: org.webjars.play.WebJarsUtil,
     assets: AssetsFinder,
     ldap: LDAP
-  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport {
+  ) extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] with I18nSupport with Logging {
 
 
   def release(id:Int) = Action.async{ implicit request =>
@@ -95,7 +94,7 @@ class ReleaseController @Inject()
     Action.async { implicit request =>
       forms.ReleaseAuthPeopleForm.form.bindFromRequest.fold(
         form => {
-          Logger.info(form.errors.map{ f => f.toString}.mkString(","))
+          logger.info(form.errors.map{ f => f.toString}.mkString(","))
           Future.successful(Redirect(routes.ReleaseController.releaseTypeSearch()))
         },
         data => {

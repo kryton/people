@@ -8,14 +8,35 @@ organization := "com.zilbo"
 
 version := "1.1-SNAPSHOT"
 
-val slickVersion = "3.2.3"
+val slickVersion = "3.3.0"
 
 resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.12"
-lazy val slickGenerate = taskKey[Seq[File]]("slick code generation from an existing database")
+scalaVersion := "2.12.8"
+// lazy val slickGenerate = taskKey[Seq[File]]("slick code generation from an existing database")
+
+lazy val slick = TaskKey[Seq[File]]("gen-tables")
+lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
+  val outputDir = (dir / "slick").getPath // place generated files in sbt's managed sources folder
+  val dbName = "offline"
+  val lines = scala.io.Source.fromFile("conf/db.secret").getLines
+  val userName = lines.next()
+  val password = lines.next()
+  val hostnameport = lines.next()
+  val jdbcDriver = "com.mysql.jdbc.Driver" // replace if not MySQL
+  val slickDriver = "slick.jdbc.MySQLProfile" // replace if not MySQL
+  val resultRelativeDir = "app/db" // directory to create output scala slick definitions at
+
+  val url = s"jdbc:mysql://$hostnameport/$dbName" // adapt as necessary to your system
+
+  val pkg = "demo"
+  toError(r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg), s.log))
+ // r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg), s.log).failed(sys error _.getMessage)
+  val fname = outputDir + s"/app/db/$dbName/Tables.scala"
+  Seq(file(fname))
+}
 
 libraryDependencies ++= Seq(
   filters,
@@ -23,8 +44,8 @@ libraryDependencies ++= Seq(
   guice,
   // jdbc,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
-  "com.typesafe.play" %% "play-slick" % "3.0.1",
-  //"com.typesafe.play" %% "play-slick-evolutions" % "3.0.1",
+  "com.typesafe.play" %% "play-slick" % "4.0.0",
+  //"com.typesafe.play" %% "play-slick-evolutions" % "4.0.0",
   "com.typesafe.slick" %% "slick" % slickVersion,
   "com.typesafe.slick" %% "slick-codegen" % slickVersion,
   "com.unboundid" % "unboundid-ldapsdk" % "3.2.1",
@@ -38,8 +59,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-mailer" % "6.0.0",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.0",
   "mysql" % "mysql-connector-java" % "5.1.41",
-//  "org.webjars" % "webjars-locator-core" % "0.35",
-  "org.webjars" %% "webjars-play" % "2.6.3",
+  "org.webjars" %% "webjars-play" % "2.7.0",
   "com.github.nscala-time" %% "nscala-time" % "2.20.0",
   "org.abstractj.kalium" % "kalium" % "0.4.0",
   "org.webjars" % "x-editable-bootstrap3" % "1.5.1-1",
@@ -50,9 +70,12 @@ libraryDependencies ++= Seq(
 
 )
 
+
+/*
 slickGenerate := {
+
   import java.io.File
-  val dbs = Seq("offline") // , "project_db")
+  val dbName = "offline"
   val lines = scala.io.Source.fromFile("conf/db.secret").getLines
   val userName = lines.next()
   val password = lines.next()
@@ -60,21 +83,23 @@ slickGenerate := {
   val jdbcDriver = "com.mysql.jdbc.Driver" // replace if not MySQL
   val slickDriver = "slick.jdbc.MySQLProfile" // replace if not MySQL
   val resultRelativeDir = "app/db" // directory to create output scala slick definitions at
-  dbs.map { dbName =>
-    val url = s"jdbc:mysql://$hostnameport/$dbName" // adapt as necessary to your system
+
+  val url = s"jdbc:mysql://$hostnameport/$dbName" // adapt as necessary to your system
   val targetPackageName = dbName.replaceAll("_", "") // package name to give it
 
-    (runner in Compile).value.run("slick.codegen.SourceCodeGenerator", (dependencyClasspath in Compile).value.files, Array
-    (slickDriver, jdbcDriver, url, resultRelativeDir, targetPackageName, userName, password), streams.value.log)
-    //println(s"Result: file://${baseDirectory.value}/$resultFilePath" )
 
-    val resultFilePath = s"$resultRelativeDir/$targetPackageName/Tables.scala" // override the name if you li
-    println(s"Slick Generated - $resultFilePath")
-    file(resultFilePath)
-  }
+  (runner in Compile).value.run("slick.codegen.SourceCodeGenerator", (dependencyClasspath in Compile).value.files, Array
+  (slickDriver, jdbcDriver, url, resultRelativeDir, targetPackageName, userName, password), streams.value.log)
+  //println(s"Result: file://${baseDirectory.value}/$resultFilePath" )
+
+  val resultFilePath = s"$resultRelativeDir/$targetPackageName/Tables.scala" // override the name if you li
+  println(s"Slick Generated - $resultFilePath")
+  file(resultFilePath)
+
   Seq.empty
   //Seq(file(resultFilePath))
 }
+*/
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.zilbo.controllers._"
 
