@@ -62,7 +62,7 @@ class EmpHistoryRepo @Inject()(@NamedDatabase("default")  protected val dbConfig
   def latest( size:Int): Future[Seq[(EmphistoryRow, EmprelationsRow)]] = {
     val qry = Emphistory
       .join(Emprelations).on( _.login === _.login)
-      .sortBy(_._1.hirerehiredate desc)
+      .sortBy(_._1.hirerehiredate.desc)
     db.run( qry.result ).map( x=> x.slice(0, size))
   }
 

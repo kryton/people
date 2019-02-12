@@ -24,6 +24,11 @@ import scala.concurrent.{ExecutionContext, Future}
   * All Rights reserved
   */
 object Helpers {
-  def mergeFutureSets[X](fl: Future[Set[X]]*)(implicit executionContext: ExecutionContext): Future[Set[X]] =
-    Future.fold(fl)(Set.empty[X])(_ ++ _)
+  def mergeFutureSets[X](fl:Future[Set[X]], fl2: Future[Set[X]])(implicit executionContext: ExecutionContext): Future[Set[X]] = {
+      for {
+        f1 <- fl
+        f2 <- fl2
+      } yield f1 ++ f2
+  }
+    //Future.foldLeft(fl)(Set.empty[X])(_ ++ _)
 }

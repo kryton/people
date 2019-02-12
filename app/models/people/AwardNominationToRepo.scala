@@ -76,7 +76,7 @@ class AwardNominationToRepo @Inject()(@NamedDatabase("default")  protected val d
       .filter(p => p.rejected === false || p.rejected === isAdmin)
       .filter(p => p.hrapproved === ACCEPTED || isHRp == true)
       .filter(p=> p.awarded === ACCEPTED || isAwardComitteep == true)
-      .sortBy(_.dateadded desc).result)
+      .sortBy(_.dateadded.desc).result)
   }
 
   def awaitingHRApproval(): Future[Seq[(AwardnominationtoRow, EmprelationsRow, EmprelationsRow)]] = {
@@ -142,7 +142,7 @@ class AwardNominationToRepo @Inject()(@NamedDatabase("default")  protected val d
       .filter(p => p.hrapproved === ACCEPTED || isHRp == true)
       .filter(p=> p.awarded === ACCEPTED ||isAwardComitteep == true)
       .join(Emprelations).on( _.toperson === _.login)
-      .joinLeft(Emprelations).on(_._1.fromperson === _.login).sortBy(_._1._1.dateadded desc)
+      .joinLeft(Emprelations).on(_._1.fromperson === _.login).sortBy(_._1._1.dateadded.desc)
     db.run( qry.result ).map( x=> x.slice(0, size)).map( seq => seq.map( x=> ( x._1._1,x._1._2,x._2)))
   }
 

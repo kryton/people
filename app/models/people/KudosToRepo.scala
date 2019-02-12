@@ -46,11 +46,11 @@ class KudosToRepo @Inject()(@NamedDatabase("default")  protected val dbConfigPro
   def findFrom(login:String):Future[Seq[KudostoRow]] = db.run(Kudosto.filter(_.fromperson === login.toLowerCase).filter(_.rejected === false).result)
   def findTo(login:String):Future[Seq[KudostoRow]] = db.run(Kudosto.filter(_.toperson === login.toLowerCase).filter(_.rejected === false).result)
 
-  def all = db.run(Kudosto.filter(_.rejected === false).sortBy( _.dateadded desc).result)
+  def all = db.run(Kudosto.filter(_.rejected === false).sortBy( _.dateadded.desc).result)
   def latest( size:Int): Future[Seq[(KudostoRow, EmprelationsRow, Option[EmprelationsRow])]] = {
     val qry = Kudosto.filter(_.rejected === false)
       .join(Emprelations).on( _.toperson === _.login)
-      .joinLeft(Emprelations).on(_._1.fromperson === _.login).sortBy(_._1._1.dateadded desc)
+      .joinLeft(Emprelations).on(_._1.fromperson === _.login).sortBy(_._1._1.dateadded.desc)
     db.run( qry.result ).map( x=> x.slice(0, size)).map( seq => seq.map( x=> ( x._1._1,x._1._2,x._2)))
   }
 

@@ -200,7 +200,7 @@ object SAPImport extends Logging {
                 c <- ccRowF
                 o <- officeF
               } yield (c, o)).map { z =>
-               
+
                 val empRel: EmprelationsRow = EmprelationsRow(empRecord.personNumber,
                   empRecord.login.get.toLowerCase,
                   empRecord.firstName,
